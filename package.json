@@ -1,0 +1,19 @@
+{
+  "name": "globalping-chat-bots",
+  "private": true,
+  "packageManager": "pnpm@7.8.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ayuhito <declininglotus@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@ayuhito/eslint-config": "^0.2.4",
+    "@types/node": "^18.6.3",
+    "eslint": "^8.21.0",
+    "prettier": "^2.7.1",
+    "tsx": "^3.8.0",
+    "typescript": "^4.7.4",
+    "vitest": "^0.20.3"
+  }
+}

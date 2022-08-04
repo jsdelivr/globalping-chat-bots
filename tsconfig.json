@@ -1,0 +1,8 @@
+{
+	"exclude": ["node_modules"],
+	"references": [
+		{ "path": "packages/bot-utils" },
+		{ "path": "packages/discord" },
+		{ "path": "packages/slack" }
+	]
+}
