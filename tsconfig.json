@@ -1,4 +1,5 @@
 {
+	"files": [],
 	"exclude": ["node_modules"],
 	"references": [
 		{ "path": "packages/bot-utils" },

@@ -2,7 +2,10 @@ require("@ayuhito/eslint-config/patch");
 
 module.exports = {
 	extends: ["@ayuhito/eslint-config/profile/node"],
-	parserOptions: { tsconfigRootDir: __dirname },
+	parserOptions: {
+		EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
+		project: "packages/*/tsconfig.json",
+	},
 	rules: {
 		"no-console": "off",
 	},

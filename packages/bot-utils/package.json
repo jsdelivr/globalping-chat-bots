@@ -1,13 +1,29 @@
 {
-  "name": "@globalping/bot-utils",
-  "private": true,
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "Ayuhito <declininglotus@gmail.com>",
-  "license": "MIT"
+	"name": "@globalping/bot-utils",
+	"private": true,
+	"version": "1.0.0",
+	"description": "",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		"types": "./dist/index.d.ts",
+		"require": "./dist/index.js",
+		"import": "./dist/index.mjs"
+	},
+	"scripts": {
+		"build": "pkgroll --target=node14",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "Ayuhito <declininglotus@gmail.com>",
+	"license": "MIT",
+	"dependencies": {
+		"got": "^12.3.0",
+		"minimist": "^1.2.6"
+	},
+	"devDependencies": {
+		"@types/minimist": "^1.2.2",
+		"pkgroll": "^1.4.0"
+	}
 }
