@@ -1,5 +1,5 @@
 {
-	"include": ["**/*.ts", "**/*.json", "../bot-utils/src/utils.ts"],
+	"include": ["**/*.ts", "**/*.json"],
 	"exclude": ["node_modules"],
 	"compilerOptions": {
 		/* Projects */

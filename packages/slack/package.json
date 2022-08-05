@@ -5,12 +5,13 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "tsx ./src/app.ts",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"watch": "tsx watch ./src/app.ts"
 	},
 	"author": "Ayuhito <declininglotus@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
 		"@slack/bolt": "^3.12.1",
-		"dotenv": "^16.0.1"
+		"dotenv": "^16.0.1",
+		"@globalping/bot-utils": "workspace:*"
 	}
 }

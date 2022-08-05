@@ -24,22 +24,27 @@ importers:
 
   packages/bot-utils:
     specifiers:
-      '@types/minimist': ^1.2.2
+      '@types/yargs-parser': ^21.0.0
       got: ^12.3.0
-      minimist: ^1.2.6
       pkgroll: ^1.4.0
+      yargs-parser: ^21.1.1
     dependencies:
       got: 12.3.0
-      minimist: 1.2.6
+      yargs-parser: 21.1.1
     devDependencies:
-      '@types/minimist': 1.2.2
+      '@types/yargs-parser': 21.0.0
       pkgroll: 1.4.0
+
+  packages/discord:
+    specifiers: {}
 
   packages/slack:
     specifiers:
+      '@globalping/bot-utils': workspace:*
       '@slack/bolt': ^3.12.1
       dotenv: ^16.0.1
     dependencies:
+      '@globalping/bot-utils': link:../bot-utils
       '@slack/bolt': 3.12.1
       dotenv: 16.0.1
 
@@ -549,10 +554,6 @@ packages:
     resolution: {integrity: sha512-fccbsHKqFDXClBZTDLA43zl0+TbxyIwyzIzwwhvoJvhNjOErCdeX2xJbURimv2EbSVUGav001PaCJg4mZxMl4w==}
     dev: false
 
-  /@types/minimist/1.2.2:
-    resolution: {integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==}
-    dev: true
-
   /@types/ms/0.7.31:
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
     dev: false
@@ -618,6 +619,10 @@ packages:
     dependencies:
       '@types/node': 18.6.3
     dev: false
+
+  /@types/yargs-parser/21.0.0:
+    resolution: {integrity: sha512-iO9ZQHkZxHn4mSakYV0vFHAVDyEOIJQrV2uZ06HxEPcx+mt8swXoZHIbaaJ2crJYFfErySgktuTZ3BeLz+XmFA==}
+    dev: true
 
   /@typescript-eslint/eslint-plugin/5.32.0_iosr3hrei2tubxveewluhu5lhy:
     resolution: {integrity: sha512-CHLuz5Uz7bHP2WgVlvoZGhf0BvFakBJKAD/43Ty0emn4wXWv5k01ND0C0fHcl/Im8Td2y/7h44E9pca9qAu2ew==}
@@ -4422,6 +4427,11 @@ packages:
 
   /yargs-parser/21.1.0:
     resolution: {integrity: sha512-xzm2t63xTV/f7+bGMSRzLhUNk1ajv/tDoaD5OeGyC3cFo2fl7My9Z4hS3q2VdQ7JaLvTxErO8Jp5pRIFGMD/zg==}
+    engines: {node: '>=12'}
+    dev: false
+
+  /yargs-parser/21.1.1:
+    resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
     dev: false
 
