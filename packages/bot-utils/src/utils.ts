@@ -34,7 +34,3 @@ export const parseArgs = (argv: string | string[]) => {
 	return parsed;
 };
 
-export const validateArgs = (args: Arguments) => {
-
-
-};

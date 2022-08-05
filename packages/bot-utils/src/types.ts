@@ -98,8 +98,13 @@ export interface HttpMeasurement extends SharedMeasurement {
 		query?: string
 		method?: HttpMethod
 		host?: string
-		headers?: Record<string, string>
+		headers?: Record<string, string | string[] | undefined>
 	}
 }
 
 export type PostMeasurement = PingMeasurement | TraceMeasurement | DnsMeasurement | MtrMeasurement | HttpMeasurement;
+
+export interface PostMeasurementResponse {
+	id: string
+	probesCount: number
+}
