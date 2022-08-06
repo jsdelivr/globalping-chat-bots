@@ -1,4 +1,4 @@
-import { parseArgs } from '@globalping/bot-utils/src/index'; // Temp import
+import { getMeasurement, parseArgs, postMeasurement } from '@globalping/bot-utils/src/index'; // Temp import
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
@@ -14,8 +14,11 @@ const app = new App({
 app.command('/globalping', async ({ command, ack, respond }) => {
 	// Acknowledge command request
 	await ack();
+	const args = parseArgs(command.text);
+	const { id } = await postMeasurement(args);
+	const res = await getMeasurement(id);
 
-	await respond(`${JSON.stringify(parseArgs(command.text.split(' ')))}`);
+	await respond(`${JSON.stringify(res)}`);
 });
 
 // eslint-disable-next-line unicorn/prefer-top-level-await

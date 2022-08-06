@@ -36,6 +36,7 @@ export const ALLOWED_HTTP_METHODS = ['GET', 'HEAD'] as const;
 export type HttpMethod = typeof ALLOWED_HTTP_METHODS[number];
 export const isHttpMethod = (type: string): type is HttpMethod => ALLOWED_HTTP_METHODS.includes(type as HttpMethod);
 
+// Post Types
 interface Locations {
 	continent?: string;
 	region?: string;
@@ -47,7 +48,7 @@ interface Locations {
 	magic?: string;
 }
 
-export interface SharedMeasurement {
+interface SharedMeasurement {
 	target: string
 	limit: number
 	locations: Locations[]
@@ -108,3 +109,98 @@ export interface PostMeasurementResponse {
 	id: string
 	probesCount: number
 }
+
+// Get Types
+
+interface SharedResults {
+	probe: {
+		continent: string
+		region: string
+		country: string
+		state: string | null
+		city: string
+		asn: number
+		longitude: number
+		latitude: number
+		network: string
+		resolvers: string[]
+	}
+	rawOutput: string
+}
+
+// Ping
+interface PingTimings {
+	ttl: number
+	rtt: number
+}
+export interface PingResult extends SharedResults {
+	resolvedAddress: string
+	resolvedHostname: string
+	stats: {
+		loss: number
+		min: number
+		avg: number
+		max: number
+	}
+	timing: PingTimings[]
+}
+
+// Trace
+interface TraceTimings {
+	rtt: number
+}
+interface TraceHops {
+	resolvedAddress: string
+	resolvedHostname: string
+	timings: TraceTimings[]
+}
+export interface TraceResult extends SharedResults {
+	resolvedAddress: string
+	resolvedHostname: string
+	hops: TraceHops[]
+}
+
+// DNS
+interface DnsTimings {
+	total: number
+}
+
+interface DnsAnswers {
+	name: string
+	type: DnsType
+	ttl: number
+	class: string
+	value: string
+}
+
+export interface DnsResultAnswer {
+	answers: DnsAnswers[]
+	resolver: string
+	timings: DnsTimings
+}
+export interface DnsResultBase extends SharedResults {
+	result: DnsResultAnswer
+}
+export interface DnsResultTrace extends SharedResults {
+	result: {
+		hops: DnsResultAnswer[]
+	}
+}
+
+export type DnsResult<Trace> = Trace extends boolean ? DnsResultTrace : DnsResultBase;
+
+
+interface SharedMeasurementResponse {
+	id: string
+	type: QueryType
+	status: 'in-progress' | 'finished'
+	createdAt: string
+	updatedAt: string
+}
+
+export interface PingMeasurementResponse extends SharedMeasurementResponse {
+	type: 'ping'
+	results: PingResult[]
+}
+
+export type MeasurementResponse = PingMeasurementResponse
