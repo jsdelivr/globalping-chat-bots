@@ -1,13 +1,20 @@
 import type { Arguments } from 'yargs-parser';
 import parser from 'yargs-parser';
 
-import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED_HTTP_PROTOCOLS, ALLOWED_MTR_PROTOCOLS, ALLOWED_TRACE_PROTOCOLS, isDnsProtocol, isDnsType, isHttpMethod, isHttpProtocol, isMtrProtocol, isTraceProtocol, PostMeasurement } from './types';
+import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED_HTTP_PROTOCOLS, ALLOWED_MTR_PROTOCOLS, ALLOWED_QUERY_TYPES, ALLOWED_TRACE_PROTOCOLS, isDnsProtocol, isDnsType, isHttpMethod, isHttpProtocol, isMtrProtocol, isTraceProtocol, PostMeasurement } from './types';
 
-const throwArgError = (invalid: string, type: string, expected: string | string[]) => {
+const throwArgError = (invalid: string | undefined, type: string, expected: string | string[]) => {
+	if (invalid === undefined)
+		return invalid;
+
 	throw new TypeError(`Invalid argument ${invalid} for ${type}! Expected ${expected}.`);
 };
 
-const validateArgs = (args: Arguments): PostMeasurement => {
+interface ArgError {
+	error: string
+}
+
+const validateArgs = (args: Arguments): PostMeasurement | ArgError => {
 	const cmd = args._[0];
 	const target = String(args._[1]);
 	const limit = args.limit ?? 1;
@@ -19,89 +26,94 @@ const validateArgs = (args: Arguments): PostMeasurement => {
 	const resolver = String(args.resolver);
 	const trace = Boolean(args.trace);
 
-	if (cmd === 'ping')
-		return {
-			type: 'ping',
-			target,
-			limit,
-			locations,
-			measurementOptions: {
-				...packets && { packets },
-			}
-		};
+	try {
+		if (cmd === 'ping')
+			return {
+				type: 'ping',
+				target,
+				limit,
+				locations,
+				measurementOptions: {
+					...packets && { packets },
+				}
+			};
 
-	if (cmd === 'traceroute') {
-		const protocol = isTraceProtocol(args.protocol) ? args.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_TRACE_PROTOCOLS]);
-		return {
-			type: 'traceroute',
-			target,
-			limit,
-			locations,
-			measurementOptions: {
-				...protocol && { protocol },
+		if (cmd === 'traceroute') {
+			const protocol = isTraceProtocol(args.protocol) ? args.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_TRACE_PROTOCOLS]);
+			return {
+				type: 'traceroute',
+				target,
+				limit,
+				locations,
+				measurementOptions: {
+					...protocol && { protocol },
+					...port && { port },
+				}
+			};
+		}
+
+		if (cmd === 'dns') {
+			const dnsType = isDnsType(args.query) ? args.query : throwArgError(args.query, 'query', [...ALLOWED_DNS_TYPES]);
+			const protocol = isDnsProtocol(args.protocol) ? args.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_DNS_PROTOCOLS]);
+			return {
+				type: 'dns',
+				target,
+				limit,
+				locations,
+				measurementOptions: {
+					...dnsType && { query: { type: dnsType } },
+					...protocol && { protocol },
+					...port && { port },
+					...resolver && { resolver },
+					...trace && { trace },
+				}
+			};
+		}
+
+		if (cmd === 'mtr') {
+			const protocol = isMtrProtocol(args.protocol) ? args.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_MTR_PROTOCOLS]);
+			return {
+				type: 'mtr',
+				target,
+				limit,
+				locations,
+				measurementOptions: {
+					...protocol && { protocol },
+					...port && { port },
+					...packets && { packets },
+				}
+			};
+		}
+
+		if (cmd === 'http') {
+			const protocol = isHttpProtocol(args.protocol) ? args.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS]);
+			const method = isHttpMethod(args.method) ? args.method : throwArgError(args.method, 'method', [...ALLOWED_HTTP_METHODS]);
+			return {
+				type: 'http',
+				target,
+				limit,
+				locations,
 				...port && { port },
-			}
-		};
-	}
-
-	if (cmd === 'dns') {
-		const dnsType = isDnsType(args.query) ? args.query : throwArgError(args.query, 'query', [...ALLOWED_DNS_TYPES]);
-		const protocol = isDnsProtocol(args.protocol) ? args.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_DNS_PROTOCOLS]);
-		return {
-			type: 'dns',
-			target,
-			limit,
-			locations,
-			measurementOptions: {
-				query: {
-					...dnsType && { type: dnsType },
-				},
 				...protocol && { protocol },
-				...port && { port },
-				...resolver && { resolver },
-				...trace && { trace },
-			}
-		};
-	}
+				request: {
+					...args.path && { path: args.path },
+					...args.query && { query: args.query },
+					...method && { method },
+					...args.host && { host: args.host },
+				}
+			};
+		}
 
-	if (cmd === 'mtr') {
-		const protocol = isMtrProtocol(args.protocol) ? args.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_MTR_PROTOCOLS]);
+		throwArgError(String(cmd), 'command', [...ALLOWED_QUERY_TYPES]);
+	} catch (error) {
 		return {
-			type: 'mtr',
-			target,
-			limit,
-			locations,
-			measurementOptions: {
-				...protocol && { protocol },
-				...port && { port },
-				...packets && { packets },
-			}
+			error: String(error),
 		};
 	}
-
-	if (cmd === 'http') {
-		const protocol = isHttpProtocol(args.protocol) ? args.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS]);
-		const method = isHttpMethod(args.method) ? args.method : throwArgError(args.method, 'method', [...ALLOWED_HTTP_METHODS]);
-		return {
-			type: 'http',
-			target,
-			limit,
-			locations,
-			...port && { port },
-			...protocol && { protocol },
-			request: {
-				...args.path && { path: args.path },
-				...args.query && { query: args.query },
-				...method && { method },
-				...args.host && { host: args.host },
-			}
-		};
-	}
-
-	throw new Error('Invalid arguments!');
+	return { error: 'Unknown error.' };
 };
 
-export const parseArgs = (argv: string | string[]) => {
+export const parseArgs = (argv: string | string[]): PostMeasurement | ArgError => {
 	let args = argv;
 	if (typeof args === 'string')
 		args = args.split(' ');

@@ -1,4 +1,4 @@
-import { getMeasurement, parseArgs, postMeasurement } from '@globalping/bot-utils/src/index'; // Temp import
+import { getMeasurement, parseArgs, postMeasurement } from '@globalping/bot-utils/src/index';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
@@ -11,14 +11,48 @@ const app = new App({
 	logLevel: LogLevel.DEBUG,
 });
 
-app.command('/globalping', async ({ command, ack, respond }) => {
+app.command('/globalping', async ({ payload, command, ack, say }) => {
 	// Acknowledge command request
 	await ack();
 	const args = parseArgs(command.text);
-	const { id } = await postMeasurement(args);
-	const res = await getMeasurement(id);
-
-	await respond(`${JSON.stringify(res)}`);
+	if ('error' in args) {
+		await say({
+			'blocks': [
+				{
+					'type': 'section',
+					'text': {
+						'type': 'mrkdwn',
+						'text': `*Error*\n\`\`\`${args.error}\`\`\``,
+					}
+				}
+			]
+		});;
+	} else {
+		const { id } = await postMeasurement(args);
+		const res = await getMeasurement(id);
+		const username = payload.user_name;
+		await say({
+			'blocks': [
+				{
+					'type': 'section',
+					'text': {
+						'type': 'mrkdwn',
+						'text': `@${username}, here are the results for \`${command.text}\`\n${res.results[0].probe.city}`
+					}
+				},
+				{
+					'type': 'divider'
+				},
+				{
+					'type': 'section',
+					'text': {
+						'type': 'mrkdwn',
+						'text': `\`\`\`${res.results[0].rawOutput}\`\`\``
+					}
+				}
+			]
+		});
+	}
 });
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
