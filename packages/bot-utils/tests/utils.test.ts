@@ -9,23 +9,18 @@ describe('Utils', () => {
 			const result = parseArgs(args);
 
 			expect(result).toEqual({
-				_: ['http', 'google.com'],
-				from: ['New', 'York'],
-				header: [
-					'Content-Encoding:',
-					'gzip',
-					'Content-Type:',
-					'text/html;',
-					'charset=utf-8',
-				],
-				host: ['google.com'],
-				limit: [2],
-				method: ['get'],
-				path: ['/'],
-				port: [80],
-				protocol: ['https'],
-				query: ['?a=abc'],
-				resolver: ['0.0.0.0']
+				type: 'http',
+				target: 'google.com',
+				limit: 2,
+				locations: [{ magic: 'new york' }],
+				port: 80,
+				protocol: 'HTTPS',
+				request: {
+					path: '/',
+					query: '?a=abc',
+					method: 'GET',
+					host: 'google.com'
+				}
 			});
 		});
 
@@ -34,23 +29,18 @@ describe('Utils', () => {
 			const result = parseArgs(args.split(' '));
 
 			expect(result).toEqual({
-				_: ['http', 'https://google.com:80/test?a=abc'],
-				from: ['New', 'York'],
-				header: [
-					'Content-Encoding:',
-					'gzip',
-					'Content-Type:',
-					'text/html;',
-					'charset=utf-8',
-				],
-				host: ['google.com'],
-				limit: [2],
-				method: ['get'],
-				path: ['/test'],
-				port: [80],
-				protocol: ['https'],
-				query: ['?a=abc'],
-				resolver: ['0.0.0.0']
+				type: 'http',
+				target: 'https://google.com:80/test?a=abc',
+				limit: 2,
+				locations: [{ magic: 'new york' }],
+				port: 80,
+				protocol: 'HTTPS',
+				request: {
+					path: '/test',
+					query: '?a=abc',
+					method: 'GET',
+					host: 'google.com'
+				}
 			});
 		});
 	});
