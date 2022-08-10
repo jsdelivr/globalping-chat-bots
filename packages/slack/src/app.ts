@@ -37,7 +37,7 @@ app.command('/globalping', async ({ payload, command, ack, say }) => {
 					'type': 'section',
 					'text': {
 						'type': 'mrkdwn',
-						'text': `@${username}, here are the results for \`${command.text}\`\n${res.results[0].probe.city}`
+						'text': `@${username}, here are the results for \`${command.text}\`\n${res[0].results[0].probe.city}`
 					}
 				},
 				{
@@ -47,7 +47,7 @@ app.command('/globalping', async ({ payload, command, ack, say }) => {
 					'type': 'section',
 					'text': {
 						'type': 'mrkdwn',
-						'text': `\`\`\`${res.results[0].rawOutput}\`\`\``
+						'text': `\`\`\`${res[0].results[0].rawOutput}\`\`\``
 					}
 				}
 			]

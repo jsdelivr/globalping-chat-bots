@@ -8,12 +8,12 @@ const fetchMeasurement = async (id: string): Promise<MeasurementResponse> => {
 	return JSON.parse(res.body);
 };
 
-export const getMeasurement = async (id: string): Promise<MeasurementResponse> => {
-	let data = await fetchMeasurement(id);
-	while (data.status === 'in-progress') {
+export const getMeasurement = async (id: string): Promise<MeasurementResponse[]> => {
+	const data = [await fetchMeasurement(id)];
+	while (data[data.length - 1].status === 'in-progress') {
 		// eslint-disable-next-line no-promise-executor-return
 		await new Promise(resolve => setTimeout(resolve, 100));
-		data = await fetchMeasurement(id);
+		data.push(await fetchMeasurement(id));
 	}
 	return data;
 };
