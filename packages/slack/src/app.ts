@@ -47,7 +47,7 @@ app.command('/globalping', async ({ payload, command, ack, say }) => {
 					'type': 'section',
 					'text': {
 						'type': 'mrkdwn',
-						'text': `\`\`\`${res[0].results[0].rawOutput}\`\`\``
+						'text': `\`\`\`${res[res.length - 1].results[0].result.rawOutput}\`\`\``
 					}
 				}
 			]

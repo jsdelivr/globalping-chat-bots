@@ -125,7 +125,9 @@ interface SharedResults {
 		network: string
 		resolvers: string[]
 	}
-	rawOutput: string
+	result: {
+		rawOutput: string
+	}
 }
 
 // Ping
