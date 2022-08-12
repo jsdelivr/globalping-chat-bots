@@ -10,7 +10,7 @@ export const expandResults = (response: MeasurementResponse) => {
 			'type': 'section',
 			'text': {
 				'type': 'plain_text',
-				'text': `${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `${result.probe.state}, ` : ''}${result.probe.city}, ASN:${result.probe.asn}`,
+				'text': `${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}`,
 			}
 		}, {
 			'type': 'section',

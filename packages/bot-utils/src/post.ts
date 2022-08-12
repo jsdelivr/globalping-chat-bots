@@ -8,11 +8,12 @@ export const postMeasurement = async (opts: PostMeasurement): Promise<PostMeasur
 			'Content-Type': 'application/json',
 		},
 		json: opts,
-	});
+	}).catch(error => { throw new Error(error); });
 
 	if (res.statusCode === 202) {
 		return JSON.parse(res.body);
 	}
 
-	throw new Error(res.body);
+	console.log(res.body);
+	throw new Error(JSON.parse(res.body));
 };

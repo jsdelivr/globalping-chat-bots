@@ -30,7 +30,6 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 				}
 			]
 		});
-
 		const { id } = await postMeasurement(args);
 		console.log(id);
 		const res = await getMeasurement(id);
@@ -57,7 +56,7 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 					'type': 'section',
 					'text': {
 						'type': 'mrkdwn',
-						'text': `*Error*\n\`\`\`${error}\`\`\``,
+						'text': `\`\`\`${error}\`\`\``,
 					}
 				}
 			]
