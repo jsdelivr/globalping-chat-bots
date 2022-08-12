@@ -2,6 +2,7 @@ import { getMeasurement, parseArgs, postMeasurement } from '@globalping/bot-util
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
+import { expandResults } from './utils';
 
 dotenv.config();
 
@@ -11,43 +12,52 @@ const app = new App({
 	logLevel: LogLevel.DEBUG,
 });
 
-app.command('/globalping', async ({ payload, command, ack, say }) => {
+app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	// Acknowledge command request
 	await ack();
-	const args = parseArgs(command.text);
-	if ('error' in args) {
-		await say({
+	try {
+		const args = parseArgs(command.text);
+		await respond({
+			'response_type': 'ephemeral',
+			'text': 'Processing request...',
 			'blocks': [
 				{
 					'type': 'section',
 					'text': {
 						'type': 'mrkdwn',
-						'text': `*Error*\n\`\`\`${args.error}\`\`\``,
+						'text': '```Processing request...```',
 					}
 				}
 			]
-		});;
-	} else {
+		});
+
 		const { id } = await postMeasurement(args);
+		console.log(id);
 		const res = await getMeasurement(id);
 		const username = payload.user_name;
-		await say({
+		await respond({
+			'response_type': 'in_channel',
+			'text': `@${username}, here are the results for "${command.text}", ${res.results[0].probe.city}`,
 			'blocks': [
 				{
 					'type': 'section',
 					'text': {
 						'type': 'mrkdwn',
-						'text': `@${username}, here are the results for \`${command.text}\`\n${res[0].results[0].probe.city}`
+						'text': `@${username}, here are the results for \`${command.text}\``
 					}
 				},
-				{
-					'type': 'divider'
-				},
+				...expandResults(res)
+			]
+		});
+	} catch (error) {
+		await respond({
+			'response_type': 'ephemeral',
+			'blocks': [
 				{
 					'type': 'section',
 					'text': {
 						'type': 'mrkdwn',
-						'text': `\`\`\`${res[res.length - 1].results[0].result.rawOutput}\`\`\``
+						'text': `*Error*\n\`\`\`${error}\`\`\``,
 					}
 				}
 			]
