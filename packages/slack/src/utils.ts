@@ -12,11 +12,15 @@ export const expandResults = (response: MeasurementResponse) => {
 				'type': 'plain_text',
 				'text': `${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}`,
 			}
-		}, {
+		});
+
+		// Slack has a limit of 3000 characters per block - truncate if necessary
+		const output = result.result.rawOutput.length > 2950 ? `\`\`\`${result.result.rawOutput.slice(0, 2950)}\n...\`\`\`` : `\`\`\`${result.result.rawOutput}\`\`\``;
+		blocks.push({
 			'type': 'section',
 			'text': {
 				'type': 'mrkdwn',
-				'text': `\`\`\`${result.result.rawOutput}\`\`\``
+				'text': output
 
 			}
 		});

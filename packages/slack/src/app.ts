@@ -14,29 +14,28 @@ const app = new App({
 
 app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	// Acknowledge command request
-	await ack();
+	await ack({
+		'response_type': 'ephemeral',
+		'text': 'Processing request...',
+		'blocks': [
+			{
+				'type': 'section',
+				'text': {
+					'type': 'mrkdwn',
+					'text': '```Processing request...```',
+				}
+			}
+		]
+	});
 	try {
 		const args = parseArgs(command.text);
-		await respond({
-			'response_type': 'ephemeral',
-			'text': 'Processing request...',
-			'blocks': [
-				{
-					'type': 'section',
-					'text': {
-						'type': 'mrkdwn',
-						'text': '```Processing request...```',
-					}
-				}
-			]
-		});
 		const { id } = await postMeasurement(args);
 		console.log(id);
 		const res = await getMeasurement(id);
 		const username = payload.user_name;
 		await respond({
 			'response_type': 'in_channel',
-			'text': `@${username}, here are the results for "${command.text}", ${res.results[0].probe.city}`,
+			'text': `@${username}, here are the results for "${command.text}"`,
 			'blocks': [
 				{
 					'type': 'section',
