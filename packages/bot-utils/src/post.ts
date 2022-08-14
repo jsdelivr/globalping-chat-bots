@@ -14,6 +14,5 @@ export const postMeasurement = async (opts: PostMeasurement): Promise<PostMeasur
 		return JSON.parse(res.body);
 	}
 
-	console.log(res.body);
 	throw new Error(JSON.parse(res.body));
 };

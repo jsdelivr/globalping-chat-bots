@@ -15,7 +15,7 @@ export const expandResults = (response: MeasurementResponse) => {
 		});
 
 		// Slack has a limit of 3000 characters per block - truncate if necessary
-		const output = result.result.rawOutput.length > 2950 ? `\`\`\`${result.result.rawOutput.slice(0, 2950)}\n...\`\`\`` : `\`\`\`${result.result.rawOutput}\`\`\``;
+		const output = result.result.rawOutput.length > 2950 ? `\`\`\`${result.result.rawOutput.slice(0, 2950)}\n... (truncated)\`\`\`` : `\`\`\`${result.result.rawOutput}\`\`\``;
 		blocks.push({
 			'type': 'section',
 			'text': {

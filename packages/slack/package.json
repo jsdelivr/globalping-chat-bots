@@ -10,8 +10,9 @@
 	"author": "Ayuhito <declininglotus@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
+		"@globalping/bot-utils": "workspace:*",
 		"@slack/bolt": "^3.12.1",
 		"dotenv": "^16.0.1",
-		"@globalping/bot-utils": "workspace:*"
+		"got": "^12.3.0"
 	}
 }

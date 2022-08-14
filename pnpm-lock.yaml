@@ -43,10 +43,12 @@ importers:
       '@globalping/bot-utils': workspace:*
       '@slack/bolt': ^3.12.1
       dotenv: ^16.0.1
+      got: ^12.3.0
     dependencies:
       '@globalping/bot-utils': link:../bot-utils
       '@slack/bolt': 3.12.1
       dotenv: 16.0.1
+      got: 12.3.0
 
 packages:
 

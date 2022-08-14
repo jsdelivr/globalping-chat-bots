@@ -94,12 +94,14 @@ export interface HttpMeasurement extends SharedMeasurement {
 	type: 'http'
 	port?: number
 	protocol?: HttpProtocol
-	request?: {
-		path?: string
-		query?: string
-		method?: HttpMethod
-		host?: string
-		headers?: Record<string, string | string[] | undefined>
+	measurementOptions?: {
+		request?: {
+			path?: string
+			query?: string
+			method?: HttpMethod
+			host?: string
+			headers?: Record<string, string | string[] | undefined>
+		}
 	}
 }
 

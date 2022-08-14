@@ -1,6 +1,7 @@
 import { getMeasurement, parseArgs, postMeasurement } from '@globalping/bot-utils/src/index';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
+import { HTTPError } from 'got';
 
 import { expandResults } from './utils';
 
@@ -48,6 +49,10 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 			]
 		});
 	} catch (error) {
+		let msg = error;
+		if (error instanceof HTTPError)
+			msg = `${error}\n${error.response.body}`;
+
 		await respond({
 			'response_type': 'ephemeral',
 			'blocks': [
@@ -55,7 +60,7 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 					'type': 'section',
 					'text': {
 						'type': 'mrkdwn',
-						'text': `\`\`\`${error}\`\`\``,
+						'text': `\`\`\`${msg}\`\`\``,
 					}
 				}
 			]

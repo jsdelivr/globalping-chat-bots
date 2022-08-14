@@ -40,7 +40,7 @@ interface Flags {
 }
 
 const throwArgError = (invalid: string | undefined, type: string, expected: string | string[]) => {
-	throw new TypeError(`Invalid argument "${invalid}" for "${type}"! Expected "${expected}".`);
+	throw new TypeError(`Invalid argument "${invalid}" for "${type}"!\nExpected "${expected}".`);
 };
 
 const checkFlags = (args: Record<string, string[]>, cmd: string): Flags => {
@@ -174,12 +174,14 @@ const validateArgs = (args: Arguments): PostMeasurement => {
 			locations,
 			...flags.port && { port: flags.port },
 			...flags.protocol && { protocol: isHttpProtocol(flags.protocol) ? flags.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS]) },
-			request: {
-				...flags.path && { path: flags.path },
-				...flags.query && { query: flags.query },
-				...flags.method && { method: isHttpMethod(flags.method) ? flags.method : throwArgError(args.method, 'method', [...ALLOWED_HTTP_METHODS]) },
-				...flags.host && { host: flags.host },
-				...flags.headers && { headers: flags.headers },
+			measurementOptions: {
+				request: {
+					...flags.path && { path: flags.path },
+					...flags.query && { query: flags.query },
+					...flags.method && { method: isHttpMethod(flags.method) ? flags.method : throwArgError(args.method, 'method', [...ALLOWED_HTTP_METHODS]) },
+					...flags.host && { host: flags.host },
+					...flags.headers && { headers: flags.headers },
+				}
 			}
 		};
 
@@ -188,13 +190,15 @@ const validateArgs = (args: Arguments): PostMeasurement => {
 };
 
 export const parseArgs = (argv: string | string[]): PostMeasurement => {
-
 	let args = argv;
 	if (typeof args === 'string')
 		args = args.split(' ');
 
-	if (args.indexOf('from') === 2)
+	if (args.indexOf('from') === 2) {
 		args[2] = '--from';
+	} else {
+		throw new Error('Invalid command format!');
+	}
 
 	const parsed = parser(args, {
 		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header'],
