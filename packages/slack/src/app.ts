@@ -31,7 +31,6 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	try {
 		const args = parseArgs(command.text);
 		const { id } = await postMeasurement(args);
-		console.log(id);
 		const res = await getMeasurement(id);
 		const username = payload.user_name;
 		await respond({
@@ -50,6 +49,7 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 		});
 	} catch (error) {
 		let msg = error;
+		// Got does not expose the returned error message from the API by default
 		if (error instanceof HTTPError)
 			msg = `${error}\n${error.response.body}`;
 
