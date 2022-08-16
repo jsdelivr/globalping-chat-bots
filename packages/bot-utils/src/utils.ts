@@ -1,9 +1,8 @@
-import type { Arguments } from 'yargs-parser';
 import parser from 'yargs-parser';
 
-import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED_HTTP_PROTOCOLS, ALLOWED_MTR_PROTOCOLS, ALLOWED_QUERY_TYPES, ALLOWED_TRACE_PROTOCOLS, DnsProtocol, DnsType, HttpMethod, HttpProtocol, isDnsProtocol, isDnsType, isHttpMethod, isHttpProtocol, isMtrProtocol, isQueryType, isTraceProtocol, MtrProtocol, PostMeasurement, TraceProtocol } from './types';
+import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED_HTTP_PROTOCOLS, ALLOWED_MTR_PROTOCOLS, ALLOWED_QUERY_TYPES, ALLOWED_TRACE_PROTOCOLS, DnsProtocol, DnsType, HttpMethod, HttpProtocol, isDnsProtocol, isDnsType, isHttpMethod, isHttpProtocol, isMtrProtocol, isQueryType, isTraceProtocol, MtrProtocol, PostMeasurement, QueryType, TraceProtocol } from './types';
 
-const ALLOWED_BASE_FLAGS = ['from', 'limit'] as const;
+const ALLOWED_BASE_FLAGS = ['target', 'from', 'limit'] as const;
 const ALLOWED_PING_FLAGS = ['packets', ...ALLOWED_BASE_FLAGS] as const;
 type PingFlags = typeof ALLOWED_PING_FLAGS[number];
 const isPingFlag = (flag: string): flag is PingFlags => ALLOWED_PING_FLAGS.includes(flag as PingFlags);
@@ -24,7 +23,9 @@ const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'method', 'path', 'query', 'host
 type HttpFlags = typeof ALLOWED_HTTP_FLAGS[number];
 const isHttpFlag = (flag: string): flag is HttpFlags => ALLOWED_HTTP_FLAGS.includes(flag as HttpFlags);
 
-interface Flags {
+export interface Flags {
+	cmd: QueryType | string
+	target: string
 	from: string
 	limit: number
 	packets?: number
@@ -39,19 +40,14 @@ interface Flags {
 	headers?: { [header: string]: string }
 }
 
-const throwArgError = (invalid: string | undefined, type: string, expected: string | string[]) => {
+export const throwArgError = (invalid: string | undefined, type: string, expected: string | string[]) => {
 	throw new TypeError(`Invalid argument "${invalid}" for "${type}"!\nExpected "${expected}".`);
 };
 
-const checkFlags = (args: Record<string, string[]>, cmd: string): Flags => {
-	if (!isQueryType(cmd))
-		throwArgError(cmd, 'command', [...ALLOWED_QUERY_TYPES]);
-
-	// Remove default args from flag verification
-	delete args._;
-	delete args['--'];
-
-	const flags = Object.keys(args);
+const checkFlags = (args: Record<string, string>): void => {
+	const skipFlags = new Set(['cmd', '--', '_']);
+	const flags = Object.keys(args).filter(item => !skipFlags.has(item));
+	const cmd = isQueryType(args.cmd) ? args.cmd : throwArgError(args.cmd, 'command', [...ALLOWED_QUERY_TYPES]);
 
 	if (cmd === 'ping') {
 		for (const flag of flags) {
@@ -81,124 +77,25 @@ const checkFlags = (args: Record<string, string[]>, cmd: string): Flags => {
 		}
 	}
 
-	if (cmd === 'http') {
+	if (args.cmd === 'http') {
 		for (const flag of flags) {
 			if (!isHttpFlag(flag))
 				throwArgError(flag, 'http', [...ALLOWED_HTTP_FLAGS]);
 		}
 	}
-	return {
-		from: String(args.from.join(' ')).toLowerCase(),
-		limit: args.limit ? Number(args.limit) : 1,
-		packets: args.packets ? Number(args.packets[0]) : undefined,
-		protocol: args.protocol ? String(args.protocol[0]).toUpperCase() : undefined,
-		port: args.port ? Number(args.port[0]) : undefined,
-		resolver: args.resolver ? String(args.resolver[0]) : undefined,
-		trace: args.trace ? true : undefined,
-		query: args.query ? String(args.query[0]) : undefined, // Case choice has to be done at cmd level
-		method: args.method ? String(args.method[0]).toUpperCase() : undefined,
-		path: args.path ? String(args.path[0]) : undefined,
-		host: args.host ? String(args.host[0]) : undefined,
-		// Converts headers such as Content-Type: Test to { 'Content-Type': 'Test' }
-		// TODO Finish header parsing
-		/* headers: args.header ? Object.fromEntries(args.header.map((header: string) => {
-			const kv = header.split(':');
-			return [kv[0], kv[1]];
-		})) : undefined, */
-	};
 };
 
-const validateArgs = (args: Arguments): PostMeasurement => {
-	const cmd = String(args._[0]).toLowerCase();
-	const target = String(args._[1]);
-	const flags = checkFlags(args, cmd);
-	const locations = [{ magic: flags.from }];
-
-	if (cmd === 'ping')
-		return {
-			type: 'ping',
-			target,
-			limit: flags.limit,
-			locations,
-			measurementOptions: {
-				...flags.packets && { packets: flags.packets },
-			}
-		};
-
-	if (cmd === 'traceroute')
-		return {
-			type: 'traceroute',
-			target,
-			limit: flags.limit,
-			locations,
-			measurementOptions: {
-				...flags.protocol && { protocol: isTraceProtocol(flags.protocol) ? flags.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_TRACE_PROTOCOLS]) },
-				...flags.port && { port: flags.port },
-			}
-		};
-
-	if (cmd === 'dns')
-		return {
-			type: 'dns',
-			target,
-			limit: flags.limit,
-			locations,
-			measurementOptions: {
-				...flags.query && { query: { type: isDnsType(flags.query) ? flags.query : throwArgError(args.query, 'query', [...ALLOWED_DNS_TYPES]) } },
-				...flags.protocol && { protocol: isDnsProtocol(flags.protocol) ? flags.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_DNS_PROTOCOLS]) },
-				...flags.port && { port: flags.port },
-				...flags.resolver && { resolver: flags.resolver },
-				...flags.trace && { trace: flags.trace },
-			}
-		};
-
-	if (cmd === 'mtr') {
-		return {
-			type: 'mtr',
-			target,
-			limit: flags.limit,
-			locations,
-			measurementOptions: {
-				...flags.protocol && { protocol: isMtrProtocol(flags.protocol) ? flags.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_MTR_PROTOCOLS]) },
-				...flags.port && { port: flags.port },
-				...flags.packets && { packets: flags.packets },
-			}
-		};
-	}
-
-	if (cmd === 'http')
-		return {
-			type: 'http',
-			target,
-			limit: flags.limit,
-			locations,
-			...flags.port && { port: flags.port },
-			...flags.protocol && { protocol: isHttpProtocol(flags.protocol) ? flags.protocol : throwArgError(args.protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS]) },
-			measurementOptions: {
-				request: {
-					...flags.path && { path: flags.path },
-					...flags.query && { query: flags.query },
-					...flags.method && { method: isHttpMethod(flags.method) ? flags.method : throwArgError(args.method, 'method', [...ALLOWED_HTTP_METHODS]) },
-					...flags.host && { host: flags.host },
-					...flags.headers && { headers: flags.headers },
-				}
-			}
-		};
-
-	throwArgError(String(cmd), 'command', [...ALLOWED_QUERY_TYPES]);
-	throw new Error('Unknown error.');
-};
-
-export const parseArgs = (argv: string | string[]): PostMeasurement => {
+export const argsToFlags = (argv: string | string[]): Flags => {
 	let args = argv;
 	if (typeof args === 'string')
 		args = args.split(' ');
 
-	if (args.indexOf('from') === 2) {
+	if (args.indexOf('from') === 2 || args.indexOf('--from') === 2) {
 		args[2] = '--from';
 	} else {
 		throw new Error('Invalid command format!');
 	}
+
 
 	const parsed = parser(args, {
 		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header'],
@@ -207,7 +104,11 @@ export const parseArgs = (argv: string | string[]): PostMeasurement => {
 		}
 	});
 
-	if (parsed._[0] === 'http') {
+	// Add to parsed for checkFlags later
+	parsed.cmd = String(parsed._[0]).toLowerCase();
+
+	// Try to infer parameters from URL
+	if (parsed.cmd === 'http') {
 		try {
 			const url = new URL(parsed._[1] as string);
 
@@ -221,7 +122,104 @@ export const parseArgs = (argv: string | string[]): PostMeasurement => {
 			// Do nothing
 		}
 	}
+	// Throw on any invalid flags
+	checkFlags(parsed);
 
-	return validateArgs(parsed);
+	const flags: Flags = {
+		cmd: parsed.cmd,
+		target: String(parsed._[1]),
+		from: String(parsed.from.join(' ')).toLowerCase(),
+		limit: parsed.limit ? Number(parsed.limit) : 1,
+		...parsed.packets && { packets: Number(parsed.packets[0]) },
+		...parsed.protocol && { protocol: String(parsed.protocol[0]).toUpperCase() },
+		...parsed.port && { port: Number(parsed.port[0]) },
+		...parsed.resolver && { resolver: String(parsed.resolver[0]) },
+		...parsed.trace && { trace: true },
+		...parsed.query && { query: String(parsed.query[0]) }, // Case choice has to be done at cmd level
+		...parsed.method && { method: String(parsed.method[0]).toUpperCase() },
+		...parsed.path && { path: String(parsed.path[0]) },
+		...parsed.host && { host: String(parsed.host[0]) },
+		// TODO headers
+	};
+
+	return flags;
 };
 
+export const parseFlags = (args: Flags): PostMeasurement => {
+	const { cmd, target, from, limit, packets, protocol, port, query, resolver, trace, path, method, host, headers } = args;
+	const locations = [{ magic: from }];
+
+	if (cmd === 'ping')
+		return {
+			type: 'ping',
+			target,
+			limit,
+			locations,
+			measurementOptions: {
+				...packets && { packets },
+			}
+		};
+
+	if (cmd === 'traceroute')
+		return {
+			type: 'traceroute',
+			target,
+			limit,
+			locations,
+			measurementOptions: {
+				...protocol && { protocol: isTraceProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_TRACE_PROTOCOLS]) },
+				...port && { port },
+			}
+		};
+
+	if (cmd === 'dns')
+		return {
+			type: 'dns',
+			target,
+			limit,
+			locations,
+			measurementOptions: {
+				...query && { query: { type: isDnsType(query) ? query : throwArgError(query, 'query', [...ALLOWED_DNS_TYPES]) } },
+				...protocol && { protocol: isDnsProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_DNS_PROTOCOLS]) },
+				...port && { port },
+				...resolver && { resolver },
+				...trace && { trace },
+			}
+		};
+
+	if (cmd === 'mtr') {
+		return {
+			type: 'mtr',
+			target,
+			limit,
+			locations,
+			measurementOptions: {
+				...protocol && { protocol: isMtrProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_MTR_PROTOCOLS]) },
+				...port && { port },
+				...packets && { packets },
+			}
+		};
+	}
+
+	if (cmd === 'http')
+		return {
+			type: 'http',
+			target,
+			limit,
+			locations,
+			...port && { port },
+			...protocol && { protocol: isHttpProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS]) },
+			measurementOptions: {
+				request: {
+					...path && { path },
+					...query && { query },
+					...method && { method: isHttpMethod(method) ? method : throwArgError(method, 'method', [...ALLOWED_HTTP_METHODS]) },
+					...host && { host },
+					...headers && { headers },
+				}
+			}
+		};
+
+	throwArgError(String(cmd), 'command', [...ALLOWED_QUERY_TYPES]);
+	throw new Error('Unknown error.');
+};

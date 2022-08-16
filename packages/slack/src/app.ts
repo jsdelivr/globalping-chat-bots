@@ -1,4 +1,4 @@
-import { getMeasurement, parseArgs, postMeasurement } from '@globalping/bot-utils/src/index';
+import { argsToFlags, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils/src/index';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 import { HTTPError } from 'got';
@@ -29,7 +29,7 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 		]
 	});
 	try {
-		const args = parseArgs(command.text);
+		const args = parseFlags(argsToFlags(command.text));
 		const { id } = await postMeasurement(args);
 		const res = await getMeasurement(id);
 		const username = payload.user_name;
