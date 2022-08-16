@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-if (!process.env.DISCORD_TOKEN || !process.env.APP_ID)
+if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_APP_ID)
 	throw new Error('DISCORD_TOKEN and APP_ID env variables must be set');
 
 const choiceMap = (arr: string[]) => arr.map(item => ({ name: item, value: item }));
@@ -64,6 +64,6 @@ const commands = [
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
-rest.put(Routes.applicationCommands(process.env.APP_ID), { body: commands })
+rest.put(Routes.applicationCommands(process.env.DISCORD_APP_ID), { body: commands })
 	.then(() => console.log('Successfully registered application commands.'))
 	.catch(console.error);

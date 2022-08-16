@@ -7,7 +7,7 @@ import { expandResults, getFlags } from './utils';
 
 dotenv.config();
 
-if (!process.env.DISCORD_TOKEN || !process.env.APP_ID)
+if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_APP_ID)
 	throw new Error('DISCORD_TOKEN and APP_ID env variables must be set');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
