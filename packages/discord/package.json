@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
-		"dev": "tsx src/app.ts",
+		"dev": "tsx src/app.ts | pino-pretty -i pid,hostname -t 'yyyy-mm-dd HH:MM:ss'",
 		"watch": "tsx watch src/app.ts",
 		"deploy-commands": "tsx src/deploy-commands.ts"
 	},
@@ -14,6 +14,8 @@
 		"@discordjs/rest": "^1.0.1",
 		"@globalping/bot-utils": "workspace:*",
 		"discord.js": "^14.2.0",
-		"dotenv": "^16.0.1"
+		"dotenv": "^16.0.1",
+		"pino": "^8.4.1",
+		"pino-pretty": "^9.0.0"
 	}
 }

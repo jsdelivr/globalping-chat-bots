@@ -1,14 +1,15 @@
-import { Flags, throwArgError } from '@globalping/bot-utils';
-import { ChatInputCommandInteraction } from 'discord.js';
+/* eslint-disable no-await-in-loop */
+import { Flags, MeasurementResponse, throwArgError } from '@globalping/bot-utils';
+import { ChatInputCommandInteraction, codeBlock } from 'discord.js';
 
-export const getOptions = (interaction: ChatInputCommandInteraction): Flags => ({
+export const getFlags = (interaction: ChatInputCommandInteraction): Flags => ({
 	cmd: interaction.options.getSubcommand(),
 	target: interaction.options.getString('target') ?? throwArgError(undefined, 'target', ['jsdelivr.com']),
 	from: interaction.options.getString('from') ?? throwArgError(undefined, 'from', ['New York']),
-	limit: interaction.options.getInteger('limit') ?? 1,
-	packets: interaction.options.getInteger('packets') ?? undefined,
+	limit: interaction.options.getNumber('limit') ?? 1,
+	packets: interaction.options.getNumber('packets') ?? undefined,
 	protocol: interaction.options.getString('protocol') ?? undefined,
-	port: interaction.options.getInteger('port') ?? undefined,
+	port: interaction.options.getNumber('port') ?? undefined,
 	resolver: interaction.options.getString('resolver') ?? undefined,
 	trace: interaction.options.getBoolean('trace') ?? undefined,
 	query: interaction.options.getString('query') ?? undefined,
@@ -17,3 +18,13 @@ export const getOptions = (interaction: ChatInputCommandInteraction): Flags => (
 	host: interaction.options.getString('host') ?? undefined
 	// TODO headers
 });
+
+export const expandResults = async (response: MeasurementResponse, interaction: ChatInputCommandInteraction) => {
+	const { results } = response;
+	for (const result of results) {
+		await interaction.followUp({ content: `${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}`, fetchReply: false });
+		// Discord has a limit of 2000 characters per block - truncate if necessary
+		const output = result.result.rawOutput.length > 1950 ? `${result.result.rawOutput.slice(0, 1950)}\n... (truncated)` : `${result.result.rawOutput}`;
+		await interaction.followUp({ content: codeBlock('shell', output), fetchReply: false });
+	};
+};
