@@ -4,8 +4,8 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
-		"start": "tsx ./src/app.ts",
-		"watch": "tsx watch ./src/app.ts"
+		"start": "tsx src/app.ts",
+		"watch": "tsx watch src/app.ts"
 	},
 	"author": "Ayuhito <declininglotus@gmail.com>",
 	"license": "MIT",

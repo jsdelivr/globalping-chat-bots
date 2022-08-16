@@ -3,18 +3,19 @@
 	"private": true,
 	"packageManager": "pnpm@7.8.0",
 	"scripts": {
+		"start": "pnpm --filter slack-bot --filter discord-bot start",
 		"test": "vitest"
 	},
 	"author": "Ayuhito <declininglotus@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
 		"@ayuhito/eslint-config": "^0.2.4",
-		"@types/node": "^18.6.3",
-		"eslint": "^8.21.0",
+		"@types/node": "^18.7.5",
+		"eslint": "^8.22.0",
 		"msw": "^0.44.2",
 		"prettier": "^2.7.1",
-		"tsx": "^3.8.0",
+		"tsx": "^3.8.2",
 		"typescript": "^4.7.4",
-		"vitest": "^0.20.3"
+		"vitest": "^0.22.0"
 	}
 }

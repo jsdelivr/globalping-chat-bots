@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "tsx src/app.ts | pino-pretty -i pid,hostname -t 'yyyy-mm-dd HH:MM:ss'",
 		"watch": "tsx watch src/app.ts",
-		"deploy-commands": "tsx src/deploy-commands.ts"
+		"deploy-commands": "tsx src/deploy-commands.ts",
+		"start": "tsx src/app.ts"
 	},
 	"author": "Ayuhito <declininglotus@gmail.com>",
 	"license": "MIT",
