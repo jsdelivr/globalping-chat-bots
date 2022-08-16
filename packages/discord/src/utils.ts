@@ -22,9 +22,9 @@ export const getFlags = (interaction: ChatInputCommandInteraction): Flags => ({
 export const expandResults = async (response: MeasurementResponse, interaction: ChatInputCommandInteraction) => {
 	const { results } = response;
 	for (const result of results) {
-		await interaction.followUp({ content: `${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}`, fetchReply: false });
+		await interaction.channel?.send({ content: `${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}` });
 		// Discord has a limit of 2000 characters per block - truncate if necessary
 		const output = result.result.rawOutput.length > 1950 ? `${result.result.rawOutput.slice(0, 1950)}\n... (truncated)` : `${result.result.rawOutput}`;
-		await interaction.followUp({ content: codeBlock('shell', output), fetchReply: false });
+		await interaction.channel?.send({ content: codeBlock('shell', output) });
 	};
 };
