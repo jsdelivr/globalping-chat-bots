@@ -1,5 +1,5 @@
 import { argsToFlags, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils/src/index';
-import { App, LogLevel } from '@slack/bolt';
+import { App, FileInstallationStore, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 import { HTTPError } from 'got';
 
@@ -7,11 +7,26 @@ import { expandResults } from './utils';
 
 dotenv.config();
 
-const app = new App({
-	token: process.env.SLACK_BOT_TOKEN,
-	signingSecret: process.env.SLACK_SIGNING_SECRET,
-	logLevel: LogLevel.DEBUG,
-});
+let app: App;
+// eslint-disable-next-line unicorn/prefer-ternary
+if (process.env.NODE_ENV === 'production') {
+	app = new App({
+		logLevel: LogLevel.INFO,
+		token: process.env.SLACK_BOT_TOKEN,
+		signingSecret: process.env.SLACK_SIGNING_SECRET,
+		clientId: process.env.SLACK_CLIENT_ID,
+		clientSecret: process.env.SLACK_CLIENT_SECRET,
+		stateSecret: process.env.SLACK_STATE_SECRET,
+		scopes: ['chat:write', 'chat:write.public', 'commands'],
+		installationStore: new FileInstallationStore(), // Can switch to SQLite or NoSQL db in future
+	});
+} else {
+	app = new App({
+		token: process.env.SLACK_BOT_TOKEN,
+		signingSecret: process.env.SLACK_SIGNING_SECRET,
+		logLevel: LogLevel.DEBUG
+	});
+}
 
 app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	// Acknowledge command request
@@ -72,6 +87,12 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 (async () => {
 	// Start your app
 	await app.start(Number(process.env.PORT) || 3000);
-
-	console.log('⚡️ Bolt app is running!');
+	if (process.env.NODE_ENV === 'production') {
+		console.log('⚡️ Bolt app is running! [PRODUCTION]');
+	} else {
+		console.log('⚡️ Bolt app is running! [DEVELOPMENT]');
+	}
 })();
+
+
+

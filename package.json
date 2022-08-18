@@ -7,6 +7,9 @@
 		"test": "vitest"
 	},
 	"author": "Ayuhito <declininglotus@gmail.com>",
+	"engines": {
+		"node": ">=16.6.0"
+	},
 	"license": "MIT",
 	"dependencies": {
 		"@ayuhito/eslint-config": "^0.2.4",

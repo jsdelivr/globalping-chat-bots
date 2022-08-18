@@ -8,14 +8,20 @@ import { expandResults, getFlags } from './utils';
 dotenv.config();
 
 if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_APP_ID)
-	throw new Error('DISCORD_TOKEN and APP_ID env variables must be set');
+	throw new Error('DISCORD_TOKEN and DISCORD_APP_ID env variables must be set');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-client.on('ready', () => logger.info('The bot is online'));
-client.on('debug', m => logger.debug(m));
-client.on('warn', m => logger.warn(m));
-client.on('error', m => logger.error(m));
+if (process.env.NODE_ENV === 'production') {
+	client.on('ready', () => logger.info('The bot is online'));
+	client.on('warn', m => logger.warn(m));
+	client.on('error', m => logger.error(m));
+} else {
+	client.on('ready', () => logger.info('The bot is online'));
+	client.on('debug', m => logger.debug(m));
+	client.on('warn', m => logger.warn(m));
+	client.on('error', m => logger.error(m));
+}
 
 
 client.on('interactionCreate', async interaction => {

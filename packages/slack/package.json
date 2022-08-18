@@ -4,7 +4,8 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
-		"start": "tsx src/app.ts",
+		"start": "NODE_ENV=production tsx src/app.ts",
+		"dev": "tsx src/app.ts",
 		"watch": "tsx watch src/app.ts"
 	},
 	"author": "Ayuhito <declininglotus@gmail.com>",
