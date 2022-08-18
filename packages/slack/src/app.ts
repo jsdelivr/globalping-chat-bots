@@ -7,9 +7,14 @@ import { expandResults } from './utils';
 
 dotenv.config();
 
+if (!process.env.SLACK_BOT_TOKEN && !process.env.SLACK_SIGNING_SECRET)
+	throw new Error('SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET environment variable must be set');
+
 let app: App;
 // eslint-disable-next-line unicorn/prefer-ternary
 if (process.env.NODE_ENV === 'production') {
+	if (!process.env.SLACK_CLIENT_ID || !process.env.SLACK_CLIENT_SECRET || !process.env.SLACK_STATE_SECRET)
+		throw new Error('SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production');
 	app = new App({
 		logLevel: LogLevel.INFO,
 		token: process.env.SLACK_BOT_TOKEN,
