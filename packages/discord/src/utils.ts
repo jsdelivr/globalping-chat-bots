@@ -19,6 +19,12 @@ export const getFlags = (interaction: ChatInputCommandInteraction): Flags => ({
 	// TODO headers
 });
 
+export const expandFlags = (flags: Flags): string => {
+	const entries = Object.entries(flags);
+	const skipFlag = new Set(['cmd', 'target', 'from']);
+	return entries.filter(([key]) => !skipFlag.has(key)).map(([key, value]) => `--${key} ${value}`).join(' ');
+};
+
 export const expandResults = async (response: MeasurementResponse, interaction: ChatInputCommandInteraction) => {
 	const { results } = response;
 	for (const result of results) {

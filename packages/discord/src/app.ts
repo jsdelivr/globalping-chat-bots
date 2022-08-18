@@ -3,7 +3,7 @@ import { Client, codeBlock, GatewayIntentBits, inlineCode, userMention } from 'd
 import * as dotenv from 'dotenv';
 
 import { logger } from './logger';
-import { expandResults, getFlags } from './utils';
+import { expandFlags, expandResults, getFlags } from './utils';
 
 dotenv.config();
 
@@ -36,7 +36,8 @@ client.on('interactionCreate', async interaction => {
 			const measurement = parseFlags(flags);
 			const { id } = await postMeasurement(measurement);
 			const res = await getMeasurement(id);
-			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(`${flags.cmd} ${flags.target} from ${flags.from}`)}`);
+			const txtFlags = expandFlags(flags).length === 0 ? ` ${expandFlags(flags)}` : '';
+			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(`${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`)}`);
 			await expandResults(res, interaction);
 		} catch (error) {
 			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request`);
