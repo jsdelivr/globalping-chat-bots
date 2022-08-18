@@ -4,20 +4,33 @@ Slack bot using the Bolt.js framework.
 
 ## Setup
 
-1. Refer to the Bolt.js documentation to [create an app](https://slack.dev/bolt-js/tutorial/getting-started#create-an-app) and [setting up tokens](https://slack.dev/bolt-js/tutorial/getting-started#tokens-and-installing-apps) to create the neccessary [Slack App configuration](https://api.slack.com/apps). Make sure to enable Slash command functionality.
-2. You will want to enable the following **Bot Token Scopes** under the **OAuth & Permissions** tab in the Slack API page for your application: `chat:write`, `chat:write.public`, `commands`.
-3. Setup Globalping command by navigating to the **Slash Commands** tab in your app configuration and create new command `/globalping` with the request URL `https://<yourdomain.com>/slack/events`.
+Refer to the Bolt.js documentation to [create an app](https://slack.dev/bolt-js/tutorial/getting-started#create-an-app) and [setting up tokens](https://slack.dev/bolt-js/tutorial/getting-started#tokens-and-installing-apps) to create the neccessary [Slack App configuration](https://api.slack.com/apps). Make sure to enable Slash command functionality.
+
+You will want to enable the following **Bot Token Scopes** under the **OAuth & Permissions** tab in the Slack API page for your application:
+
+1. `chat:write`
+2. `chat:write.public`
+3. `commands`.
+
+Finally, setup Globalping command by navigating to the **Slash Commands** tab in your app configuration and create new command `/globalping` with the request URL `https://<yourdomain.com>/slack/events`.
 
 ### Development
 
 For development, you will need to install [`ngrok`](https://ngrok.com/) to proxy your local instance to a public URL that your `\globalping` command can interact with.
 
-You will only need the following environment variables: `SLACK_SIGNING_SECRET`, `SLACK_BOT_TOKEN` (xoxb) and save it to a `.env` file. This can be found in your [app configuration](https://api.slack.com/apps).
+You will only need the following environment variables:
+
+```
+SLACK_SIGNING_SECRET=
+SLACK_BOT_TOKEN=xoxb-
+```
+
+For development, you can save these variables in an `.env` file. These variables can be found in your [app configuration](https://api.slack.com/apps).
 
 1. Run `ngrok http 3000`
 2. Copy the public URL and replace your `/globalping` request URL with `https://<subdomain>.ngrok.io/slack/events`.
 
-## Production
+### Production
 
 You will need additional secret tokens when deploying to production for proper OAuth setup. You will need the following env variables:
 

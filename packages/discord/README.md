@@ -4,11 +4,23 @@ Discord bot using the Discord.js framework.
 
 ## Setup
 
-1. Follow the steps specified in the [Discord.js guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot) to setup your own [bot application](https://discord.com/developers/applications).
-2. Ensure you have the Application ID and Bot Token which can be found in the General Information and Bot tabs of the Discord Developer Portal respectively. This will map to your environment variables `DISCORD_APP_ID` and `DISCORD_TOKEN`.
-3. Run `pnpm deploy-commands` only once after registering your Discord application. This registers the `/globalping` command to Discord globally. You do not need to rerun this command unless changes are made to `src/deploy-commands.ts`.
-4. Once ready, head over to your [app configuration](https://discord.com/developers/applications) and generate an invite URL under the **OAuth2** tab. You will only need to select the `applications.commands` and `bot` permission.
-5. The `bot` permission will open another tab of permissions, where you only need to enable the following permissions:
+Follow the steps specified in the [Discord.js guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot) to setup your own [bot application](https://discord.com/developers/applications).
+
+Ensure you have the **Application ID** and **Bot Token** which can be found in the General Information and Bot tabs of the [Discord Developer Portal](https://discord.com/developers/applications) respectively.
+
+You should have the following environment variables:
+
+```
+DISCORD_APP_ID=
+DISCORD_TOKEN=
+```
+
+Run `pnpm deploy-commands` only once after registering your Discord application. This registers the `/globalping` command to Discord globally. You do not need to rerun this command unless changes are made to `src/deploy-commands.ts`.
+
+Once ready, head over to your [app configuration](https://discord.com/developers/applications) and generate an invite URL under the **OAuth2** tab.
+
+1. Select the `applications.commands` and `bot` permission.
+2. The `bot` permission will open another tab of permissions, where you only need to enable the following permissions:
    1. Read Messages/View Channels
    2. Send Messages
    3. Create Public Threads
