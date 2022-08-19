@@ -17,10 +17,10 @@ if (process.env.NODE_ENV === 'production') {
 	client.on('warn', m => logger.warn(m));
 	client.on('error', m => logger.error(m));
 } else {
-	client.on('ready', () => logger.info('The bot is online'));
-	client.on('debug', m => logger.debug(m));
-	client.on('warn', m => logger.warn(m));
-	client.on('error', m => logger.error(m));
+	client.on('ready', () => console.info('The bot is online'));
+	client.on('debug', m => console.debug(m));
+	client.on('warn', m => console.warn(m));
+	client.on('error', m => console.error(m));
 }
 
 
@@ -36,7 +36,7 @@ client.on('interactionCreate', async interaction => {
 			const measurement = parseFlags(flags);
 			const { id } = await postMeasurement(measurement);
 			const res = await getMeasurement(id);
-			const txtFlags = expandFlags(flags).length === 0 ? ` ${expandFlags(flags)}` : '';
+			const txtFlags = expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
 			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(`${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`)}`);
 			await expandResults(res, interaction);
 		} catch (error) {
