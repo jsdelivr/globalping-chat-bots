@@ -7,17 +7,12 @@ import { expandResults } from './utils';
 
 dotenv.config();
 
-if (!process.env.SLACK_BOT_TOKEN && !process.env.SLACK_SIGNING_SECRET)
-	throw new Error('SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET environment variable must be set');
-
 let app: App;
-// eslint-disable-next-line unicorn/prefer-ternary
 if (process.env.NODE_ENV === 'production') {
-	if (!process.env.SLACK_CLIENT_ID || !process.env.SLACK_CLIENT_SECRET || !process.env.SLACK_STATE_SECRET)
-		throw new Error('SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production');
+	if (!process.env.SLACK_SIGNING_SECRET || !process.env.SLACK_CLIENT_ID || !process.env.SLACK_CLIENT_SECRET || !process.env.SLACK_STATE_SECRET)
+		throw new Error('SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production');
 	app = new App({
 		logLevel: LogLevel.INFO,
-		token: process.env.SLACK_BOT_TOKEN,
 		signingSecret: process.env.SLACK_SIGNING_SECRET,
 		clientId: process.env.SLACK_CLIENT_ID,
 		clientSecret: process.env.SLACK_CLIENT_SECRET,
@@ -26,6 +21,9 @@ if (process.env.NODE_ENV === 'production') {
 		installationStore: new FileInstallationStore(), // Can switch to SQLite or NoSQL db in future
 	});
 } else {
+	if (!process.env.SLACK_BOT_TOKEN && !process.env.SLACK_SIGNING_SECRET)
+		throw new Error('SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET environment variable must be set for development');
+
 	app = new App({
 		token: process.env.SLACK_BOT_TOKEN,
 		signingSecret: process.env.SLACK_SIGNING_SECRET,

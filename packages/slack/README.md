@@ -32,10 +32,9 @@ For development, you can save these variables in an `.env` file. These variables
 
 ### Production
 
-You will need additional secret tokens when deploying to production for proper OAuth setup. You will need the following env variables:
+You will need additional secret tokens when deploying to production for proper OAuth setup. You do not need `SLACK_BOT_TOKEN`. You will need the following env variables:
 
 ```
-SLACK_BOT_TOKEN=
 SLACK_SIGNING_SECRET=
 SLACK_CLIENT_ID=
 SLACK_CLIENT_SECRET=
