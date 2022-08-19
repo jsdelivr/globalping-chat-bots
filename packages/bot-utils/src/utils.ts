@@ -90,10 +90,10 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	if (typeof args === 'string')
 		args = args.split(' ');
 
-	if (args.indexOf('from') === 2 || args.indexOf('--from') === 2) {
+	if ((args.indexOf('from') === 2 || args.indexOf('--from') === 2) && args[3]) {
 		args[2] = '--from';
 	} else {
-		throw new Error('Invalid command format!');
+		throw new Error('Invalid command format! Example: "/globalping jsdelivr.com from world"');
 	}
 
 

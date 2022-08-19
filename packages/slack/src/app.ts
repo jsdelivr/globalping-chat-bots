@@ -33,21 +33,22 @@ if (process.env.NODE_ENV === 'production') {
 
 app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	// Acknowledge command request
-	await ack({
-		'response_type': 'ephemeral',
-		'text': 'Processing request...',
-		'blocks': [
-			{
-				'type': 'section',
-				'text': {
-					'type': 'mrkdwn',
-					'text': '```Processing request...```',
-				}
-			}
-		]
-	});
+	await ack();
 	try {
 		const args = parseFlags(argsToFlags(command.text));
+		await respond({
+			'response_type': 'ephemeral',
+			'text': 'Processing request...',
+			'blocks': [
+				{
+					'type': 'section',
+					'text': {
+						'type': 'mrkdwn',
+						'text': '```Processing request...```',
+					}
+				}
+			]
+		});
 		const { id } = await postMeasurement(args);
 		const res = await getMeasurement(id);
 		const username = payload.user_name;
