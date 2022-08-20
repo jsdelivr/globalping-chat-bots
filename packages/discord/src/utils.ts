@@ -4,8 +4,8 @@ import { ChatInputCommandInteraction, codeBlock } from 'discord.js';
 
 export const getFlags = (interaction: ChatInputCommandInteraction): Flags => ({
 	cmd: interaction.options.getSubcommand(),
-	target: interaction.options.getString('target') ?? throwArgError(undefined, 'target', ['jsdelivr.com']),
-	from: interaction.options.getString('from') ?? throwArgError(undefined, 'from', ['New York']),
+	target: interaction.options.getString('target') ?? throwArgError(undefined, 'target', 'jsdelivr.com'),
+	from: interaction.options.getString('from') ?? throwArgError(undefined, 'from', 'New York'),
 	limit: interaction.options.getNumber('limit') ?? undefined as unknown as number, // Force overwrite main interface
 	packets: interaction.options.getNumber('packets') ?? undefined,
 	protocol: interaction.options.getString('protocol') ?? undefined,

@@ -40,47 +40,47 @@ export interface Flags {
 	headers?: { [header: string]: string }
 }
 
-export const throwArgError = (invalid: string | undefined, type: string, expected: string | string[]) => {
+export const throwArgError = (invalid: string | undefined, type: string, expected: string) => {
 	throw new TypeError(`Invalid argument "${invalid}" for "${type}"!\nExpected "${expected}".`);
 };
 
 const checkFlags = (args: Record<string, string>): void => {
 	const skipFlags = new Set(['cmd', '--', '_']);
 	const flags = Object.keys(args).filter(item => !skipFlags.has(item));
-	const cmd = isQueryType(args.cmd) ? args.cmd : throwArgError(args.cmd, 'command', [...ALLOWED_QUERY_TYPES]);
+	const cmd = isQueryType(args.cmd) ? args.cmd : throwArgError(args.cmd, 'command', [...ALLOWED_QUERY_TYPES].join(', '));
 
 	if (cmd === 'ping') {
 		for (const flag of flags) {
 			if (!isPingFlag(flag))
-				throwArgError(flag, 'ping', [...ALLOWED_PING_FLAGS]);
+				throwArgError(flag, 'ping', [...ALLOWED_PING_FLAGS].join(', '));
 		}
 	}
 
 	if (cmd === 'traceroute') {
 		for (const flag of flags) {
 			if (!isTraceFlag(flag))
-				throwArgError(flag, 'traceroute', [...ALLOWED_TRACE_FLAGS]);
+				throwArgError(flag, 'traceroute', [...ALLOWED_TRACE_FLAGS].join(', '));
 		}
 	}
 
 	if (cmd === 'dns') {
 		for (const flag of flags) {
 			if (!isDnsFlag(flag))
-				throwArgError(flag, 'dns', [...ALLOWED_DNS_FLAGS]);
+				throwArgError(flag, 'dns', [...ALLOWED_DNS_FLAGS].join(', '));
 		}
 	}
 
 	if (cmd === 'mtr') {
 		for (const flag of flags) {
 			if (!isMtrFlag(flag))
-				throwArgError(flag, 'mtr', [...ALLOWED_MTR_FLAGS]);
+				throwArgError(flag, 'mtr', [...ALLOWED_MTR_FLAGS].join(', '));
 		}
 	}
 
 	if (args.cmd === 'http') {
 		for (const flag of flags) {
 			if (!isHttpFlag(flag))
-				throwArgError(flag, 'http', [...ALLOWED_HTTP_FLAGS]);
+				throwArgError(flag, 'http', [...ALLOWED_HTTP_FLAGS].join(', '));
 		}
 	}
 };
@@ -183,7 +183,7 @@ export const parseFlags = (args: Flags): PostMeasurement => {
 			limit,
 			locations,
 			measurementOptions: {
-				...protocol && { protocol: isTraceProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_TRACE_PROTOCOLS]) },
+				...protocol && { protocol: isTraceProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_TRACE_PROTOCOLS].join(', ')) },
 				...port && { port },
 			}
 		};
@@ -195,8 +195,8 @@ export const parseFlags = (args: Flags): PostMeasurement => {
 			limit,
 			locations,
 			measurementOptions: {
-				...query && { query: { type: isDnsType(query) ? query : throwArgError(query, 'query', [...ALLOWED_DNS_TYPES]) } },
-				...protocol && { protocol: isDnsProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_DNS_PROTOCOLS]) },
+				...query && { query: { type: isDnsType(query) ? query : throwArgError(query, 'query', [...ALLOWED_DNS_TYPES].join(', ')) } },
+				...protocol && { protocol: isDnsProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_DNS_PROTOCOLS].join(', ')) },
 				...port && { port },
 				...resolver && { resolver },
 				...trace && { trace },
@@ -210,7 +210,7 @@ export const parseFlags = (args: Flags): PostMeasurement => {
 			limit,
 			locations,
 			measurementOptions: {
-				...protocol && { protocol: isMtrProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_MTR_PROTOCOLS]) },
+				...protocol && { protocol: isMtrProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_MTR_PROTOCOLS].join(', ')) },
 				...port && { port },
 				...packets && { packets },
 			}
@@ -224,18 +224,18 @@ export const parseFlags = (args: Flags): PostMeasurement => {
 			limit,
 			locations,
 			...port && { port },
-			...protocol && { protocol: isHttpProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS]) },
+			...protocol && { protocol: isHttpProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS].join(', ')) },
 			measurementOptions: {
 				request: {
 					...path && { path },
 					...query && { query },
-					...method && { method: isHttpMethod(method) ? method : throwArgError(method, 'method', [...ALLOWED_HTTP_METHODS]) },
+					...method && { method: isHttpMethod(method) ? method : throwArgError(method, 'method', [...ALLOWED_HTTP_METHODS].join(', ')) },
 					...host && { host },
 					...headers && { headers },
 				}
 			}
 		};
 
-	throwArgError(String(cmd), 'command', [...ALLOWED_QUERY_TYPES]);
+	throwArgError(String(cmd), 'command', [...ALLOWED_QUERY_TYPES].join(', '));
 	throw new Error('Unknown error.');
 };

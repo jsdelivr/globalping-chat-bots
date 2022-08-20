@@ -33,7 +33,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect ping flag', () => {
 				const args = 'ping google.com from New York --limit 2 --packets 3 --protocol icmp';
-				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "protocol" for "ping"!\nExpected "packets,target,from,limit".');
+				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "protocol" for "ping"!\nExpected "packets, target, from, limit".');
 			});
 		});
 
@@ -67,7 +67,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect traceroute flag', () => {
 				const args = 'traceroute google.com from New York --limit 2 --protocol tcp --port 80 --packets 3';
-				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "packets" for "traceroute"!\nExpected "protocol,port,target,from,limit".');
+				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "packets" for "traceroute"!\nExpected "protocol, port, target, from, limit".');
 			});
 		});
 
@@ -106,7 +106,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect dns flag', () => {
 				const args = 'dns google.com from New York --limit 2 --query AAAA --protocol tcp --port 80 --test';
-				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "test" for "dns"!\nExpected "query,protocol,port,resolver,trace,target,from,limit".');
+				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "test" for "dns"!\nExpected "query, protocol, port, resolver, trace, target, from, limit".');
 			});
 		});
 
@@ -141,7 +141,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect mtr flag', () => {
 				const args = 'mtr google.com from New York --limit 2 --protocol tcp --port 80 --packets 16 --test';
-				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "test" for "mtr"!\nExpected "protocol,port,packets,target,from,limit".');
+				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "test" for "mtr"!\nExpected "protocol, port, packets, target, from, limit".');
 			});
 		});
 
@@ -214,7 +214,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect http flag', () => {
 				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header Content-Encoding: gzip --header Content-Type: text/html; charset=utf-8 --test';
-				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "test" for "http"!\nExpected "protocol,port,method,path,query,host,header,target,from,limit".');
+				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid argument "test" for "http"!\nExpected "protocol, port, method, path, query, host, header, target, from, limit".');
 			});
 		});
 	});
