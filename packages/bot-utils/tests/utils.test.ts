@@ -161,7 +161,7 @@ describe('Utils', () => {
 			});
 
 			it('should parse http args with flags', () => {
-				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header Content-Encoding: gzip --header Content-Type: text/html; charset=utf-8';
+				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header Content-Type: text/html; charset=utf-8 --header Content-Encoding: gzip';
 				const result = parseFlags(argsToFlags(args));
 
 				expect(result).toEqual({
@@ -176,7 +176,11 @@ describe('Utils', () => {
 							path: '/',
 							query: '?a=abc',
 							method: 'GET',
-							host: 'google.com'
+							host: 'google.com',
+							headers: {
+								'Content-Encoding': 'gzip',
+								'Content-Type': 'text/html; charset=utf-8'
+							}
 						}
 					}
 				});
@@ -198,7 +202,11 @@ describe('Utils', () => {
 							path: '/test',
 							query: '?a=abc',
 							method: 'GET',
-							host: 'google.com'
+							host: 'google.com',
+							headers: {
+								'Content-Encoding': 'gzip',
+								'Content-Type': 'text/html; charset=utf-8'
+							}
 						}
 					}
 				});

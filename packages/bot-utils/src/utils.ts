@@ -93,7 +93,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	if ((args.indexOf('from') === 2 || args.indexOf('--from') === 2) && args[3]) {
 		args[2] = '--from';
 	} else {
-		throw new Error('Invalid command format! Example: "/globalping jsdelivr.com from world"');
+		throw new Error('Invalid command format! Example: "/globalping ping jsdelivr.com from world"');
 	}
 
 
@@ -125,6 +125,22 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	// Throw on any invalid flags
 	checkFlags(parsed);
 
+	type Headers = { [header: string]: string };
+	let headers: Headers | undefined;
+	if (parsed.header) {
+		headers = {};
+
+		let key;
+		for (const item of parsed.header) {
+			// Typical input would be Content-Type: text/html; charset=utf-8
+			// Arr representation is ['Content-Type', 'text/html;', 'charset=utf-8']
+			if (item.endsWith(':'))
+				key = item.slice(0, -1);
+			else
+				headers[key] = headers[key] ? `${headers[key]} ${item}` : item;
+		}
+	}
+
 	const flags: Flags = {
 		cmd: parsed.cmd,
 		target: String(parsed._[1]),
@@ -139,7 +155,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		...parsed.method && { method: String(parsed.method[0]).toUpperCase() },
 		...parsed.path && { path: String(parsed.path[0]) },
 		...parsed.host && { host: String(parsed.host[0]) },
-		// TODO headers
+		...headers && { headers }
 	};
 
 	return flags;
