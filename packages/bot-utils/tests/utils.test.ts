@@ -169,9 +169,9 @@ describe('Utils', () => {
 					target: 'google.com',
 					limit: 2,
 					locations: [{ magic: 'new york' }],
-					port: 80,
-					protocol: 'HTTPS',
 					measurementOptions: {
+						port: 80,
+						protocol: 'HTTPS',
 						request: {
 							path: '/',
 							query: '?a=abc',
@@ -195,9 +195,9 @@ describe('Utils', () => {
 					target: 'https://google.com:80/test?a=abc',
 					limit: 2,
 					locations: [{ magic: 'new york' }],
-					port: 80,
-					protocol: 'HTTPS',
 					measurementOptions: {
+						port: 80,
+						protocol: 'HTTPS',
 						request: {
 							path: '/test',
 							query: '?a=abc',

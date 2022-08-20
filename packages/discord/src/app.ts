@@ -47,7 +47,7 @@ client.on('interactionCreate', async interaction => {
 				msg = `${error}\n${error.response.body}`;
 
 			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request`);
-			await interaction.followUp({ content: codeBlock(msg), fetchReply: false });
+			await interaction.followUp({ content: codeBlock(String(msg)), fetchReply: false });
 		}
 	}
 });

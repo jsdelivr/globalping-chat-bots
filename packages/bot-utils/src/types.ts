@@ -92,9 +92,9 @@ export interface MtrMeasurement extends SharedMeasurement {
 
 export interface HttpMeasurement extends SharedMeasurement {
 	type: 'http'
-	port?: number
-	protocol?: HttpProtocol
 	measurementOptions?: {
+		port?: number
+		protocol?: HttpProtocol
 		request?: {
 			path?: string
 			query?: string

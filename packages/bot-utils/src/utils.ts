@@ -223,9 +223,9 @@ export const parseFlags = (args: Flags): PostMeasurement => {
 			target,
 			limit,
 			locations,
-			...port && { port },
-			...protocol && { protocol: isHttpProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS].join(', ')) },
 			measurementOptions: {
+				...port && { port },
+				...protocol && { protocol: isHttpProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS].join(', ')) },
 				request: {
 					...path && { path },
 					...query && { query },

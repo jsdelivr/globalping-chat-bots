@@ -39,5 +39,5 @@ export const expandResults = async (response: MeasurementResponse, interaction: 
 			await interaction.user.send(msg);
 			await interaction.user.send(output);
 		}
-	};
+	}
 };
