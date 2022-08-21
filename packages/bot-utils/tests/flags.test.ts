@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { argsToFlags, parseFlags } from '../src/utils';
+import { argsToFlags, parseFlags } from '../src/flags';
 
 describe('Utils', () => {
 	describe('parse arguments', () => {

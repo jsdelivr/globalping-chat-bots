@@ -1,7 +1,6 @@
-import { getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils/src/index';
+import { formatAPIError, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import { Client, codeBlock, GatewayIntentBits, inlineCode, userMention } from 'discord.js';
 import * as dotenv from 'dotenv';
-import { HTTPError } from 'got';
 
 import { logger } from './logger';
 import { expandFlags, expandResults, getFlags } from './utils';
@@ -41,13 +40,8 @@ client.on('interactionCreate', async interaction => {
 			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(`${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`)}`);
 			await expandResults(res, interaction);
 		} catch (error) {
-			let msg = error;
-			// Got does not expose the returned error message from the API by default
-			if (error instanceof HTTPError)
-				msg = `${error}\n${error.response.body}`;
-
 			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request`);
-			await interaction.followUp({ content: codeBlock(String(msg)), fetchReply: false });
+			await interaction.followUp({ content: codeBlock(formatAPIError(error)), fetchReply: false });
 		}
 	}
 });
