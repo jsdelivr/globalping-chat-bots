@@ -30,18 +30,20 @@ client.on('interactionCreate', async interaction => {
 	const { commandName, user } = interaction;
 
 	if (commandName === 'globalping') {
+		await interaction.deferReply();
+		const flags = getFlags(interaction);
+		const txtFlags = expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
+		const txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
+
 		try {
-			await interaction.deferReply();
-			const flags = getFlags(interaction);
 			const measurement = parseFlags(flags);
 			const { id } = await postMeasurement(measurement);
 			const res = await getMeasurement(id);
-			const txtFlags = expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
-			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(`${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`)}`);
+			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
 			await expandResults(res, interaction);
 		} catch (error) {
-			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request.`);
-			await interaction.followUp({ content: codeBlock(formatAPIError(error)) });
+			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand)}`);
+			await interaction.reply({ content: codeBlock(formatAPIError(error)) });
 		}
 	}
 });
