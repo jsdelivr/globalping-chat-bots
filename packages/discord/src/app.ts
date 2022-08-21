@@ -40,8 +40,8 @@ client.on('interactionCreate', async interaction => {
 			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(`${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`)}`);
 			await expandResults(res, interaction);
 		} catch (error) {
-			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request`);
-			await interaction.followUp({ content: codeBlock(formatAPIError(error)), fetchReply: false });
+			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request.`);
+			await interaction.followUp({ content: codeBlock(formatAPIError(error)) });
 		}
 	}
 });
