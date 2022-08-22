@@ -1,5 +1,5 @@
 import { argsToFlags, formatAPIError, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils';
-import { App, FileInstallationStore, LogLevel } from '@slack/bolt';
+import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
 import { expandResults } from './utils';
@@ -10,6 +10,7 @@ let app: App;
 if (process.env.NODE_ENV === 'production') {
 	if (!process.env.SLACK_SIGNING_SECRET || !process.env.SLACK_CLIENT_ID || !process.env.SLACK_CLIENT_SECRET || !process.env.SLACK_STATE_SECRET)
 		throw new Error('SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production');
+
 	app = new App({
 		logLevel: LogLevel.INFO,
 		signingSecret: process.env.SLACK_SIGNING_SECRET,
@@ -17,7 +18,9 @@ if (process.env.NODE_ENV === 'production') {
 		clientSecret: process.env.SLACK_CLIENT_SECRET,
 		stateSecret: process.env.SLACK_STATE_SECRET,
 		scopes: ['chat:write', 'chat:write.public', 'commands'],
-		installationStore: new FileInstallationStore(), // Can switch to SQLite or NoSQL db in future
+		installerOptions: {
+			directInstall: true,
+		},
 	});
 } else {
 	if (!process.env.SLACK_BOT_TOKEN && !process.env.SLACK_SIGNING_SECRET)
