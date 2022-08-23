@@ -36,3 +36,5 @@ SLACK_CLIENT_ID=
 SLACK_CLIENT_SECRET=
 SLACK_STATE_SECRET= // You can choose any string as this will be used to encode/decode oauth flows
 ```
+
+Once ready, you can install Slack Apps with `https://<yourdomain.com>/slack/install` and Discord Bots with the generated invite URL setup in the Discord Application Setup README.
