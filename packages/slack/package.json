@@ -6,13 +6,16 @@
 	"scripts": {
 		"start": "NODE_ENV=production tsx src/app.ts",
 		"dev": "tsx src/app.ts",
-		"watch": "tsx watch src/app.ts"
+		"watch": "tsx watch src/app.ts",
+		"setup-db": "tsx scripts/setup-db.ts"
 	},
-	"author": "Ayuhito <declininglotus@gmail.com>",
+	"author": "Ayuhito <hello@ayuhito.com>",
 	"license": "MIT",
 	"dependencies": {
 		"@globalping/bot-utils": "workspace:*",
 		"@slack/bolt": "^3.12.1",
-		"dotenv": "^16.0.1"
+		"dotenv": "^16.0.1",
+		"knex": "^2.3.0",
+		"mysql": "^2.18.1"
 	}
 }
