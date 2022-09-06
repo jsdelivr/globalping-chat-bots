@@ -32,13 +32,15 @@ For development, you can save these variables in an `.env` file. These variables
 
 ### Production
 
+#### Slack
+
 You will need additional secret tokens when deploying to production for proper OAuth setup. You do not need `SLACK_BOT_TOKEN`. You will need the following env variables:
 
 ```
 SLACK_SIGNING_SECRET=
 SLACK_CLIENT_ID=
 SLACK_CLIENT_SECRET=
-SLACK_STATE_SECRET= // You can choose any string as this will be used to encode/decode oauth flows
+SLACK_STATE_SECRET= # You can choose any string as this will be used to encode/decode oauth flows
 ```
 
 This can be found in your [app configuration](https://api.slack.com/apps).
@@ -50,3 +52,18 @@ https://<yourdomain.com>/slack/oauth_redirect
 ```
 
 This will enable the OAuth flow at `https://<yourdomain.com>/slack/install`.
+
+#### Database
+
+You will also need to setup a MySQL/MariaDB database to store OAuth tokens for all Slack installations. Additional env variables:
+
+```
+# MySQL/MariaDB
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_DATABASE=
+```
+
+Note before running the app for the first time, run `pnpm run setup-db` which will generate the table `installations` for you which will be used by the Slack App.

@@ -15,9 +15,6 @@ if (process.env.NODE_ENV === 'production') {
 	if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_DATABASE)
 		throw new Error('DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production');
 
-	if (!(await database.checkTables()))
-		throw new Error('"installations" table does not exist in database! Run "pnpm run setup-db" to create the necessary table.');
-
 	app = new App({
 		logLevel: LogLevel.INFO,
 		signingSecret: process.env.SLACK_SIGNING_SECRET,
@@ -134,6 +131,10 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 (async () => {
+	// Moved here due to top-level await restrictions
+	if (process.env.NODE_ENV === 'production' && !(await database.checkTables()))
+		throw new Error('"installations" table does not exist in database! Run "pnpm run setup-db" to create the necessary table.');
+
 	// Start your app
 	await app.start(Number(process.env.PORT) || 3000);
 	if (process.env.NODE_ENV === 'production') {

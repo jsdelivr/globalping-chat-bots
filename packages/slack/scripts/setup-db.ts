@@ -11,4 +11,15 @@ const createTables = async () => {
 	}
 };
 
-createTables().then(() => console.log('Successfully created table "installations"\nCTRL+C to exit')).catch((error) => console.error(`${error}\nCTRL+C to exit`));
+(async () => {
+	try {
+		await createTables();
+		console.log('Successfully created table "installations"');
+		// eslint-disable-next-line unicorn/no-process-exit
+		process.exit(0);
+	} catch (error) {
+		console.error(error);
+		// eslint-disable-next-line unicorn/no-process-exit
+		process.exit(1);
+	}
+})();
