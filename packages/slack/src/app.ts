@@ -143,6 +143,3 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 		console.log('⚡️ Bolt app is running! [DEVELOPMENT]');
 	}
 })();
-
-
-
