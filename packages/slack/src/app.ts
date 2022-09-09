@@ -1,5 +1,6 @@
 import { argsToFlags, formatAPIError, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
+import { client } from 'discord-bot/src/app';
 import * as dotenv from 'dotenv';
 
 import * as database from './db';
@@ -14,6 +15,10 @@ if (process.env.NODE_ENV === 'production') {
 
 	if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_DATABASE)
 		throw new Error('DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production');
+
+	if (!process.env.DISCORD_TOKEN)
+		throw new Error('DISCORD_TOKEN environment variable is not loaded for health checks.');
+	client.login(process.env.DISCORD_TOKEN);
 
 	app = new App({
 		logLevel: LogLevel.INFO,
@@ -66,6 +71,27 @@ if (process.env.NODE_ENV === 'production') {
 		installerOptions: {
 			directInstall: true,
 		},
+		customRoutes: [
+			{
+				path: '/health',
+				method: ['GET'],
+				handler: async (_req, res) => {
+					try {
+						// Check if db is accessible
+						await database.knex.raw('select 1+1 as result');
+						if (!client.ws.ping) {
+							throw new Error('Discord bot down.');
+						}
+
+						res.writeHead(200);
+						res.end('OK');
+					} catch (error) {
+						res.writeHead(503);
+						res.end(error);
+					}
+				},
+			},
+		],
 	});
 } else {
 	if (!process.env.SLACK_BOT_TOKEN && !process.env.SLACK_SIGNING_SECRET)
