@@ -3,7 +3,7 @@
 	"private": true,
 	"packageManager": "pnpm@7.8.0",
 	"scripts": {
-		"start": "pnpm --filter slack-bot --filter discord-bot start",
+		"start": "pnpm --filter slack-bot --filter discord-bot start --filter misc-server start",
 		"test": "vitest"
 	},
 	"author": "Ayuhito <declininglotus@gmail.com>",
