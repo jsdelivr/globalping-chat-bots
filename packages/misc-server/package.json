@@ -1,10 +1,10 @@
 {
 	"name": "misc-server",
 	"version": "1.0.0",
-	"description": "",
+	"private": true,
 	"main": "index.js",
 	"scripts": {
-		"start": "tsx health.ts"
+		"start": "NODE_ENV=production tsx health.ts"
 	},
 	"keywords": [],
 	"author": "",

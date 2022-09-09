@@ -23,4 +23,5 @@ app.use('/health', router);
 
 const PORT = process.env.PORT || 4111;
 client.login(process.env.DISCORD_TOKEN);
+console.log('Health checkpoints ready');
 app.listen(PORT);

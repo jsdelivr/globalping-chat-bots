@@ -3,10 +3,10 @@
 	"private": true,
 	"packageManager": "pnpm@7.8.0",
 	"scripts": {
-		"start": "pnpm --filter slack-bot --filter discord-bot start --filter misc-server start",
+		"start": "pnpm --filter slack-bot --filter discord-bot --filter misc-server start",
 		"test": "vitest"
 	},
-	"author": "Ayuhito <declininglotus@gmail.com>",
+	"author": "Ayuhito <hello@ayuhito.com>",
 	"engines": {
 		"node": ">=16.6.0"
 	},
