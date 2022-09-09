@@ -18,6 +18,7 @@ if (process.env.NODE_ENV === 'production') {
 
 	if (!process.env.DISCORD_TOKEN)
 		throw new Error('DISCORD_TOKEN environment variable is not loaded for health checks.');
+	// We run a discord instance in the slack express receiver
 	client.login(process.env.DISCORD_TOKEN);
 
 	app = new App({
