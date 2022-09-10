@@ -41,8 +41,7 @@ client.on('interactionCreate', async interaction => {
 			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
 			await expandResults(res, interaction);
 		} catch (error) {
-			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand)}`);
-			await interaction.reply({ content: codeBlock(formatAPIError(error)) });
+			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand)}\n${codeBlock(formatAPIError(error))}`);
 		}
 	}
 });

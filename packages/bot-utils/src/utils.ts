@@ -36,13 +36,13 @@ export const help = {
 		globalping http <target> from <location> [options]
 
 	Arguments:
-		<target>		A public endpoint, such as a hostname or IPv4 address e.g. "https://www.jsdelivr.com"
-		<from>			Magic Location e.g. "ger", "aws", "google+belgium"
+		<target>		A public endpoint, such as a hostname or IPv4 address - e.g. "https://www.jsdelivr.com"
+		<from>			Magic Location - e.g. "ger", "aws", "google+belgium"
 
 		Location Schema: https://github.com/jsdelivr/globalping/blob/master/docs/measurement/schema/location.md
 
 	Options:
-		--limit			Number of probes to use
+		--limit			Number of probes - e.g. 1
 
 	Command specific options can be found with:
 		globalping ping -h | --help
@@ -57,8 +57,41 @@ export const help = {
 	globalping ping <target> from <location> [options]
 
 	Options:
-		--limit			Number of probes
-		--packets		Number of packets`,
+		--limit			Number of probes - e.g. 1
+		--packets		Number of packets - e.g. 4`,
 
 	traceroute: `Usage:
-	globalping traceroute <target`};
+	globalping traceroute <target> from <location> [options]
+
+	Options:
+		--limit			Number of probes - e.g. 1
+		--protocol	Protocol to use - TCP | UDP | ICMP
+		--port 			Port to use - e.g. 33434`,
+
+	dns: `Usage:
+	globalping dns <target> from <location> [options]
+
+	Options:
+		--limit			Number of probes - e.g. 1
+		--query			Query type - A | AAAA | ANY | CNAME | DNSKEY | DS | MX | NS | NSEC | PTR | RRSIG | SOA | TXT | SRV
+		--port			Port to use - e.g. 53
+		--protocol	Protocol to use - UDP | TCP
+		--resolver 	Resolver to use - e.g. 1.1.1.1
+		--trace			Boolean flag to enable trace`,
+
+	mtr: `Usage:
+	globalping mtr <target> from <location> [options]
+
+	Options:
+		--limit			Number of probes - e.g. 1
+		--protocol	Protocol to use - TCP | UDP | ICMP
+		--port 			Port to use - e.g. 33434`,
+
+	http: `Usage:
+	globalping http <target> from <location> [options]
+
+	Options:
+		--limit			Number of probes - e.g. 1
+		--protocol	Protocol to use - HTTP | HTTPS | HTTP2
+		--port 			Port to use - e.g. 80
+		--path`};
