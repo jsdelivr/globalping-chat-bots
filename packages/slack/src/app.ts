@@ -1,4 +1,4 @@
-import { argsToFlags, formatAPIError, getMeasurement, help, logger, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { argsToFlags, formatAPIError, getMeasurement, help, parseFlags, postMeasurement, slackLogger as logger } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
 import { client } from 'discord-bot/src/app';
 import * as dotenv from 'dotenv';
@@ -120,8 +120,6 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	await ack();
 	try {
 		const args = argsToFlags(command.text);
-		// Run flags first to validate args.cmd
-		const flags = parseFlags(args);
 
 		if (args.help) {
 			await respond({
@@ -132,12 +130,13 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 						'type': 'section',
 						'text': {
 							'type': 'mrkdwn',
-							'text': `\`\`\`${help[args.cmd]}\`\`\``,
+							'text': `\`\`\`${help[args.cmd] ?? 'Unknown command'}\`\`\``,
 						}
 					}
 				]
 			});
 		} else {
+			const flags = parseFlags(args);
 			await respond({
 				'response_type': 'ephemeral',
 				'text': 'Processing request...',

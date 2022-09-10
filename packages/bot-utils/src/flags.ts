@@ -43,7 +43,7 @@ export interface Flags {
 }
 
 const checkFlags = (args: Record<string, string>): void => {
-	const skipFlags = new Set(['cmd', '--', '_']);
+	const skipFlags = new Set(['cmd', '--', '_', 'help']);
 	const flags = Object.keys(args).filter(item => !skipFlags.has(item));
 	const cmd = isQueryType(args.cmd) ? args.cmd : throwArgError(args.cmd, 'command', [...ALLOWED_QUERY_TYPES].join(', '));
 
@@ -90,7 +90,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 
 	if ((args.indexOf('from') === 2 || args.indexOf('--from') === 2) && args[3]) {
 		args[2] = '--from';
-	} else if (args[1] === '--help') {
+	} else if (args[1] === 'help' || args.includes('--help')) {
 		// Do nothing
 	}
 	else {
@@ -124,7 +124,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		}
 	}
 	// Throw on any invalid flags
-	checkFlags(parsed);
+	if (!parsed.help) checkFlags(parsed);
 
 	type Headers = { [header: string]: string };
 	let headers: Headers | undefined;

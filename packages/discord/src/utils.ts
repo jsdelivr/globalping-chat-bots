@@ -3,9 +3,12 @@ import { Flags, MeasurementResponse, throwArgError } from '@globalping/bot-utils
 import { ChatInputCommandInteraction, codeBlock } from 'discord.js';
 
 export const getFlags = (interaction: ChatInputCommandInteraction): Flags => {
+	const cmd = interaction.options.getSubcommand();
 	const rawHeader = interaction.options.getString('header')?.split(':').map(header => header.trim()) ?? undefined;
+
+
 	return {
-		cmd: interaction.options.getSubcommand(),
+		cmd,
 		target: interaction.options.getString('target') ?? throwArgError(undefined, 'target', 'jsdelivr.com'),
 		from: interaction.options.getString('from') ?? throwArgError(undefined, 'from', 'New York'),
 		limit: interaction.options.getNumber('limit') ?? undefined as unknown as number, // Force overwrite main interface
@@ -19,7 +22,7 @@ export const getFlags = (interaction: ChatInputCommandInteraction): Flags => {
 		path: interaction.options.getString('path') ?? undefined,
 		host: interaction.options.getString('host') ?? undefined,
 		headers: rawHeader ? { [String(rawHeader.shift())]: rawHeader.join(' ') } : undefined,
-		help: interaction.options.getBoolean('help') ?? undefined,
+		help: (interaction.options.getBoolean('help') || cmd === 'help') ?? undefined,
 	};
 };
 

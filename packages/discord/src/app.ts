@@ -1,4 +1,4 @@
-import { formatAPIError, getMeasurement, help, logger, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { discordLogger as logger, formatAPIError, getMeasurement, help, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import { Client, codeBlock, GatewayIntentBits, inlineCode, userMention } from 'discord.js';
 import * as dotenv from 'dotenv';
 
@@ -25,32 +25,32 @@ if (process.env.NODE_ENV === 'production') {
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 
-	const { commandName, channel, user } = interaction;
+	const { commandName, user } = interaction;
 
 	if (commandName === 'globalping') {
 		await interaction.deferReply();
-		const flags = getFlags(interaction);
-		// eslint-disable-next-line unicorn/consistent-destructuring
-		if (flags.cmd === 'help' || flags.help) {
-			await interaction.editReply({ content: help[flags.cmd] });
-		} else {
-			const txtFlags = expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
-			const txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
+		let txtCommand;
+		try {
+			const flags = getFlags(interaction);
+			if (flags.help) {
+				await interaction.editReply({ content: codeBlock(help[flags.cmd]) });
+			} else {
+				const txtFlags = expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
+				txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
 
-			try {
 				const measurement = parseFlags(flags);
 				const { id } = await postMeasurement(measurement);
 				const res = await getMeasurement(id);
 				await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
 				await expandResults(res, interaction);
-			} catch (error) {
-				await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand)}`);
-				const content = codeBlock(formatAPIError(error));
-				await (channel ? channel.send({ content }) : user.send({ content }));
 			}
+		} catch (error) {
+			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand ?? 'help')}`);
+			await interaction.followUp({ content: codeBlock(formatAPIError(error)) });
 		}
 	}
 });
+
 
 client.login(process.env.DISCORD_TOKEN);
 
