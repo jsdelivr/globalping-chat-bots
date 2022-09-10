@@ -1,4 +1,4 @@
-import { argsToFlags, formatAPIError, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { argsToFlags, formatAPIError, getMeasurement, logger, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
 import { client } from 'discord-bot/src/app';
 import * as dotenv from 'dotenv';
@@ -16,18 +16,28 @@ if (process.env.NODE_ENV === 'production') {
 	if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_DATABASE)
 		throw new Error('DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production');
 
-	if (!process.env.DISCORD_TOKEN)
-		throw new Error('DISCORD_TOKEN environment variable is not loaded for health checks.');
 	// We run a discord instance in the slack express receiver
-	client.login(process.env.DISCORD_TOKEN);
+	if (!process.env.DISCORD_TOKEN && !process.env.DISCORD_APP_ID)
+		throw new Error('DISCORD_TOKEN and DISCORD_APP_ID environment variable must be set for production.');
+
 
 	app = new App({
-		logLevel: LogLevel.INFO,
+
 		signingSecret: process.env.SLACK_SIGNING_SECRET,
 		clientId: process.env.SLACK_CLIENT_ID,
 		clientSecret: process.env.SLACK_CLIENT_SECRET,
 		stateSecret: process.env.SLACK_STATE_SECRET,
 		scopes: ['chat:write', 'chat:write.public', 'commands'],
+		logLevel: LogLevel.INFO,
+		logger: {
+			debug: (...msgs) => { logger.debug(JSON.stringify(msgs)); },
+			info: (...msgs) => { logger.info(JSON.stringify(msgs)); },
+			warn: (...msgs) => { logger.warn(JSON.stringify(msgs)); },
+			error: (...msgs) => { logger.error(JSON.stringify(msgs)); },
+			setLevel: () => { },
+			getLevel: () => logger.level as LogLevel,
+			setName: () => { },
+		},
 		installationStore: {
 			storeInstallation: async (installation) => {
 				// Bolt will pass your handler an installation object
@@ -165,7 +175,7 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	// Start your app
 	await app.start(Number(process.env.PORT) || 3000);
 	if (process.env.NODE_ENV === 'production') {
-		console.log('⚡️ Bolt app is running! [PRODUCTION]');
+		logger.info('Slack bot is online [PRODUCTION]');
 	} else {
 		console.log('⚡️ Bolt app is running! [DEVELOPMENT]');
 	}

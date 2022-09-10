@@ -1,8 +1,7 @@
-import { formatAPIError, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { formatAPIError, getMeasurement, logger, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import { Client, codeBlock, GatewayIntentBits, inlineCode, userMention } from 'discord.js';
 import * as dotenv from 'dotenv';
 
-import { logger } from './logger';
 import { expandFlags, expandResults, getFlags } from './utils';
 
 dotenv.config();
@@ -13,11 +12,11 @@ if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_APP_ID)
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 if (process.env.NODE_ENV === 'production') {
-	client.on('ready', () => logger.info('The bot is online'));
+	client.on('ready', () => logger.info('Discord bot is online'));
 	client.on('warn', m => logger.warn(m));
 	client.on('error', m => logger.error(m));
 } else {
-	client.on('ready', () => console.info('The bot is online'));
+	client.on('ready', () => console.info('Discord bot is online'));
 	client.on('debug', m => console.debug(m));
 	client.on('warn', m => console.warn(m));
 	client.on('error', m => console.error(m));
