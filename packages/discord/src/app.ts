@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === 'production') {
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 
-	const { commandName, user } = interaction;
+	const { commandName, user, channel, user } = interaction;
 
 	if (commandName === 'globalping') {
 		await interaction.deferReply();
@@ -41,7 +41,9 @@ client.on('interactionCreate', async interaction => {
 			await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
 			await expandResults(res, interaction);
 		} catch (error) {
-			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand)}\n${codeBlock(formatAPIError(error))}`);
+			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand)}`);
+			const content = codeBlock(formatAPIError(error));
+			await (channel ? channel.send({ content }) : user.send({ content }));
 		}
 	}
 });
