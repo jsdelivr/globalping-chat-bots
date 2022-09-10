@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === 'production') {
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 
-	const { commandName, user, channel, user } = interaction;
+	const { commandName, channel, user } = interaction;
 
 	if (commandName === 'globalping') {
 		await interaction.deferReply();
