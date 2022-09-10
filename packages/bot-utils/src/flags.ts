@@ -39,6 +39,7 @@ export interface Flags {
 	path?: string
 	host?: string
 	headers?: { [header: string]: string }
+	help?: boolean
 }
 
 const checkFlags = (args: Record<string, string>): void => {
@@ -95,7 +96,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 
 
 	const parsed = parser(args, {
-		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header'],
+		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help'],
 		configuration: {
 			'greedy-arrays': true,
 		}
@@ -152,7 +153,8 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		...parsed.method && { method: String(parsed.method[0]).toUpperCase() },
 		...parsed.path && { path: String(parsed.path[0]) },
 		...parsed.host && { host: String(parsed.host[0]) },
-		...headers && { headers }
+		...headers && { headers },
+		...parsed.help && { help: true }
 	};
 
 	return flags;

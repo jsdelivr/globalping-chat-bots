@@ -17,7 +17,7 @@ export const formatAPIError = (error: unknown): string => {
 	if (error instanceof HTTPError) {
 		const errObj: APIError = JSON.parse(error.response.body as string) as APIError;
 		if (errObj.error.type === 'invalid_request_error')
-			return `${error}\n\n${errObj.error.message}\n\n${errObj.error.params ? Object.keys(errObj.error.params).map(key => `${errObj.error.params?.[key]}`).join('\n') : 'Unknown validation error. Please make an issue to the Globalping repository.'}`;
+			return `${error}\n\n${errObj.error.message}\n${errObj.error.params ? Object.keys(errObj.error.params).map(key => `${errObj.error.params?.[key]}`).join('\n') : 'Unknown validation error. Please make an issue to the Globalping repository.'}`;
 
 		if (errObj.error.type === 'api_error')
 			return `${error}\n\n${errObj.error.message}\n\nIf you think this is a bug, please make an issue at the Globalping repository reporting this.`;
@@ -25,8 +25,12 @@ export const formatAPIError = (error: unknown): string => {
 	return String(error);
 };
 
-export const help = {
-	default: `The Globalping bot is a simple interface to interact with the Globalping API and run global networking tests. Need a traceroute done from Japan? Or check the ping latency of an endpoint from Brazil? Just ask me!
+interface Help {
+	[key: string]: string
+}
+
+export const help: Help = {
+	'help': `The Globalping bot is a simple interface to interact with the Globalping API and run global networking tests. Need a traceroute done from Japan? Or check the ping latency of an endpoint from Brazil? Just ask me!
 
 	Usage:
 		globalping ping <target> from <location> [options]
@@ -53,14 +57,14 @@ export const help = {
 
 	Reference: https://github.com/jsdelivr/globalping/tree/master/docs`,
 
-	ping: `Usage:
+	'ping': `Usage:
 	globalping ping <target> from <location> [options]
 
 	Options:
 		--limit			Number of probes - e.g. 1
 		--packets		Number of packets - e.g. 4`,
 
-	traceroute: `Usage:
+	'traceroute': `Usage:
 	globalping traceroute <target> from <location> [options]
 
 	Options:
@@ -68,7 +72,7 @@ export const help = {
 		--protocol	Protocol to use - TCP | UDP | ICMP
 		--port 			Port to use - e.g. 33434`,
 
-	dns: `Usage:
+	'dns': `Usage:
 	globalping dns <target> from <location> [options]
 
 	Options:
@@ -79,7 +83,7 @@ export const help = {
 		--resolver 	Resolver to use - e.g. 1.1.1.1
 		--trace			Boolean flag to enable trace`,
 
-	mtr: `Usage:
+	'mtr': `Usage:
 	globalping mtr <target> from <location> [options]
 
 	Options:
@@ -87,11 +91,15 @@ export const help = {
 		--protocol	Protocol to use - TCP | UDP | ICMP
 		--port 			Port to use - e.g. 33434`,
 
-	http: `Usage:
+	'http': `Usage:
 	globalping http <target> from <location> [options]
 
 	Options:
 		--limit			Number of probes - e.g. 1
 		--protocol	Protocol to use - HTTP | HTTPS | HTTP2
 		--port 			Port to use - e.g. 80
-		--path`};
+		--method		HTTP method - HEAD | GET
+		--path			URL pathname - e.g. /
+		--query			Query string
+		--host 			Hostname
+		--header		Headers to use e.g. "Content-Type: text/html; charset=UTF-8"`};

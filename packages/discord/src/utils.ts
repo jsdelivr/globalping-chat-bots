@@ -19,6 +19,7 @@ export const getFlags = (interaction: ChatInputCommandInteraction): Flags => {
 		path: interaction.options.getString('path') ?? undefined,
 		host: interaction.options.getString('host') ?? undefined,
 		headers: rawHeader ? { [String(rawHeader.shift())]: rawHeader.join(' ') } : undefined,
+		help: interaction.options.getBoolean('help') ?? undefined,
 	};
 };
 

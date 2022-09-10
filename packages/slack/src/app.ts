@@ -1,4 +1,4 @@
-import { argsToFlags, formatAPIError, getMeasurement, logger, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { argsToFlags, formatAPIError, getMeasurement, help, logger, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
 import { client } from 'discord-bot/src/app';
 import * as dotenv from 'dotenv';
@@ -119,37 +119,56 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	// Acknowledge command request
 	await ack();
 	try {
-		const args = parseFlags(argsToFlags(command.text));
-		await respond({
-			'response_type': 'ephemeral',
-			'text': 'Processing request...',
-			'blocks': [
-				{
-					'type': 'section',
-					'text': {
-						'type': 'mrkdwn',
-						'text': '```Processing request...```',
+		const args = argsToFlags(command.text);
+		// Run flags first to validate args.cmd
+		const flags = parseFlags(args);
+
+		if (args.help) {
+			await respond({
+				'response_type': 'ephemeral',
+				'text': 'Globalping help',
+				'blocks': [
+					{
+						'type': 'section',
+						'text': {
+							'type': 'mrkdwn',
+							'text': `\`\`\`${help[args.cmd]}\`\`\``,
+						}
 					}
-				}
-			]
-		});
-		const { id } = await postMeasurement(args);
-		const res = await getMeasurement(id);
-		const username = payload.user_name;
-		await respond({
-			'response_type': 'in_channel',
-			'text': `@${username}, here are the results for "${command.text}"`,
-			'blocks': [
-				{
-					'type': 'section',
-					'text': {
-						'type': 'mrkdwn',
-						'text': `@${username}, here are the results for \`${command.text}\``
+				]
+			});
+		} else {
+			await respond({
+				'response_type': 'ephemeral',
+				'text': 'Processing request...',
+				'blocks': [
+					{
+						'type': 'section',
+						'text': {
+							'type': 'mrkdwn',
+							'text': '```Processing request...```',
+						}
 					}
-				},
-				...expandResults(res)
-			]
-		});
+				]
+			});
+			const { id } = await postMeasurement(flags);
+			const res = await getMeasurement(id);
+			const username = payload.user_name;
+			await respond({
+				'response_type': 'in_channel',
+				'text': `@${username}, here are the results for "${command.text}"`,
+				'blocks': [
+					{
+						'type': 'section',
+						'text': {
+							'type': 'mrkdwn',
+							'text': `@${username}, here are the results for \`${command.text}\``
+						}
+					},
+					...expandResults(res)
+				]
+			});
+		}
 	} catch (error) {
 		await respond({
 			'response_type': 'ephemeral',
