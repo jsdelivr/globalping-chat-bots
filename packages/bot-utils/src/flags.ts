@@ -90,8 +90,9 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 
 	if ((args.indexOf('from') === 2 || args.indexOf('--from') === 2) && args[3]) {
 		args[2] = '--from';
-	} else if (args[1] === 'help' || args.includes('--help')) {
-		// Do nothing
+	} else if (args[0] === 'help' || args[1] === 'help' || args.includes('--help')) {
+		// Ensure help flag is added for parser to catch
+		args.push('--help');
 	}
 	else {
 		throw new Error('Invalid command format! Example: "/globalping ping jsdelivr.com from world"');
@@ -124,7 +125,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		}
 	}
 	// Throw on any invalid flags
-	if (!parsed.help) checkFlags(parsed);
+	if (parsed.help === undefined) checkFlags(parsed);
 
 	type Headers = { [header: string]: string };
 	let headers: Headers | undefined;
@@ -145,7 +146,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	const flags: Flags = {
 		cmd: parsed.cmd,
 		target: String(parsed._[1]),
-		from: String(parsed.from.join(' ')).toLowerCase(),
+		from: String(parsed.from?.join(' ')).toLowerCase(),
 		limit: parsed.limit ? Number(parsed.limit) : 1,
 		...parsed.packets && { packets: Number(parsed.packets[0]) },
 		...parsed.protocol && { protocol: String(parsed.protocol[0]).toUpperCase() },

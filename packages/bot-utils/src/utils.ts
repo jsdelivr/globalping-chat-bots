@@ -49,11 +49,11 @@ export const help: Help = {
 		--limit			Number of probes - e.g. 1
 
 	Command specific options can be found with:
-		globalping ping -h | --help
-		globalping traceroute -h | --help
-		globalping dns -h | --help
-		globalping mtr -h | --help
-		globalping http -h | --help
+		globalping ping --help
+		globalping traceroute --help
+		globalping dns --help
+		globalping mtr --help
+		globalping http --help
 
 	Reference: https://github.com/jsdelivr/globalping/tree/master/docs`,
 
