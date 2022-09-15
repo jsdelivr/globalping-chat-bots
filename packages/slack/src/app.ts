@@ -1,6 +1,6 @@
 import { argsToFlags, formatAPIError, getMeasurement, help, parseFlags, postMeasurement, slackLogger as logger } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
-import { client } from 'discord-bot/src/app';
+import { client as discord } from 'discord-bot/src/app';
 import * as dotenv from 'dotenv';
 
 import * as database from './db';
@@ -90,7 +90,7 @@ if (process.env.NODE_ENV === 'production') {
 					try {
 						// Check if db is accessible
 						await database.knex.raw('select 1+1 as result');
-						if (!client.ws.ping) {
+						if (!discord.ws.ping) {
 							throw new Error('Discord bot down.');
 						}
 
@@ -115,72 +115,25 @@ if (process.env.NODE_ENV === 'production') {
 	});
 }
 
-app.command('/globalping', async ({ payload, command, ack, respond }) => {
+app.command('/globalping', async ({ payload, command, ack, client }) => {
 	// Acknowledge command request
 	await ack();
 	try {
 		const args = argsToFlags(command.text);
 
 		if (args.help) {
-			await respond({
-				'response_type': 'ephemeral',
-				'text': 'Globalping help',
-				'blocks': [
-					{
-						'type': 'section',
-						'text': {
-							'type': 'mrkdwn',
-							'text': `\`\`\`${help[args.cmd] ?? 'Unknown command'}\`\`\``,
-						}
-					}
-				]
-			});
+			await client.chat.postEphemeral({ text: `\`\`\`${help[args.cmd] ?? 'Unknown command'}\`\`\``, channel: payload.channel_id, user: payload.user_id });
 		} else {
 			const flags = parseFlags(args);
-			await respond({
-				'response_type': 'ephemeral',
-				'text': 'Processing request...',
-				'blocks': [
-					{
-						'type': 'section',
-						'text': {
-							'type': 'mrkdwn',
-							'text': '```Processing request...```',
-						}
-					}
-				]
-			});
+			await client.chat.postEphemeral({ text: '```Processing request...```', channel: payload.channel_id, user: payload.user_id });
 			const { id } = await postMeasurement(flags);
 			const res = await getMeasurement(id);
-			const username = payload.user_name;
-			await respond({
-				'response_type': 'in_channel',
-				'text': `@${username}, here are the results for "${command.text}"`,
-				'blocks': [
-					{
-						'type': 'section',
-						'text': {
-							'type': 'mrkdwn',
-							'text': `@${username}, here are the results for \`${command.text}\``
-						}
-					},
-					...expandResults(res)
-				]
-			});
+			client.chat.postMessage({ text: `<@${payload.user_id}>, here are the results for \`${command.text}\``, channel: payload.channel_id });
+			await expandResults(res, payload, client);
 		}
 	} catch (error) {
-		await respond({
-			'response_type': 'ephemeral',
-			'blocks': [
-				{
-					'type': 'section',
-					'text': {
-						'type': 'mrkdwn',
-						'text': `\`\`\`${formatAPIError(error)}\`\`\``,
-					}
-				}
-			]
-		});
+		await client.chat.postEphemeral({ text: `\`\`\`${formatAPIError(error)}\`\`\``, channel: payload.channel_id, user: payload.user_id });
+
 	}
 });
 
