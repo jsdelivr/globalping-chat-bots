@@ -26,36 +26,41 @@ export const formatAPIError = (error: unknown): string => {
 };
 
 interface Help {
-	[key: string]: string
+	[key: string]: {
+		preamble: string
+		usage: string
+		args: string
+		options: string
+		examples?: string
+		end?: string
+	}
 }
 
 export const help: Help = {
-	'help': `The Globalping bot is a simple interface to interact with the Globalping API and run global networking tests. Need a traceroute done from Japan? Or check the ping latency of an endpoint from Brazil? Just ask me!
-
-	Usage:
-		globalping ping <target> from <location> [options]
-		globalping <target> traceroute from <location> [options]
-		globalping <target> dns from <location> [options]
-		globalping mtr <target> from <location> [options]
-		globalping http <target> from <location> [options]
-
-	Arguments:
-		<target>		A public endpoint, such as a hostname or IPv4 address - e.g. "https://www.jsdelivr.com"
+	'help': {
+		preamble: 'The Globalping bot is a simple interface to interact with the Globalping API and run global networking tests. Need a traceroute done from Japan? Or check the ping latency of an endpoint from Brazil? Just ask me!',
+		usage: `Usage:
+		globalping ping<target> from<location> [options]
+		globalping traceroute<target> from<location> [options]
+		globalping dns<target> from<location> [options]
+		globalping mtr<target> from<location> [options]
+		globalping http<target> from<location> [options]`,
+		args: `Arguments:
+		<target>		A public endpoint, such as a hostname or IPv4 address - e.g. "jsdelivr.com"
 		<from>			Magic Location - e.g. "ger", "aws", "google+belgium"
 
-		Location Schema: https://github.com/jsdelivr/globalping/blob/master/docs/measurement/schema/location.md
-
-	Options:
-		--limit			Number of probes - e.g. 1
-
-	Command specific options can be found with:
+		Location Schema: https://github.com/jsdelivr/globalping/blob/master/docs/measurement/schema/location.md`,
+		options: `Options:
+		--limit			Number of probes - e.g. 1`,
+		end: `Command specific options can be found with:
 		globalping ping --help
 		globalping traceroute --help
 		globalping dns --help
 		globalping mtr --help
 		globalping http --help
 
-	Reference: https://github.com/jsdelivr/globalping/tree/master/docs`,
+	For more information, see the Globalping documentation: https://github.com/jsdelivr/globalping/tree/master/docs`
+	},
 
 	'ping': `Usage:
 	globalping ping <target> from <location> [options]

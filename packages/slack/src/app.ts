@@ -102,6 +102,20 @@ if (process.env.NODE_ENV === 'production') {
 					}
 				},
 			},
+			{
+				path: '/',
+				method: ['GET'],
+				handler: async (_req, res) => {
+					try {
+						res.writeHead(301, {
+							Location: 'https://www.jsdelivr.com/globalping'
+						}).end();
+					} catch (error) {
+						res.writeHead(503);
+						res.end(error);
+					}
+				},
+			},
 		],
 	});
 } else {
