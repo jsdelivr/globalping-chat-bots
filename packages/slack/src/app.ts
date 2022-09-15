@@ -2,6 +2,9 @@ import { argsToFlags, formatAPIError, getMeasurement, help, parseFlags, postMeas
 import { App, LogLevel } from '@slack/bolt';
 import { client as discord } from 'discord-bot/src/app';
 import * as dotenv from 'dotenv';
+import * as fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import * as database from './db';
 import { expandResults } from './utils';
@@ -38,47 +41,7 @@ if (process.env.NODE_ENV === 'production') {
 			getLevel: () => logger.level as LogLevel,
 			setName: () => { },
 		},
-		installationStore: {
-			storeInstallation: async (installation) => {
-				// Bolt will pass your handler an installation object
-				// Change the lines below so they save to your database
-				if (installation.isEnterpriseInstall && installation.enterprise !== undefined) {
-					// handle storing org-wide app installation
-					return database.setInstallation(installation.enterprise.id, installation);
-				}
-				if (installation.team !== undefined) {
-					// single team app installation
-					return database.setInstallation(installation.team.id, installation);
-				}
-				throw new Error('Failed saving installation data to installationStore');
-			},
-			fetchInstallation: async (installQuery) => {
-				// Bolt will pass your handler an installQuery object
-				// Change the lines below so they fetch from your database
-				if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
-					// handle org wide app installation lookup
-					return database.getInstallation(installQuery.enterpriseId);
-				}
-				if (installQuery.teamId !== undefined) {
-					// single team app installation lookup
-					return database.getInstallation(installQuery.teamId);
-				}
-				throw new Error('Failed fetching installation');
-			},
-			deleteInstallation: async (installQuery) => {
-				// Bolt will pass your handler  an installQuery object
-				// Change the lines below so they delete from your database
-				if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
-					// org wide app installation deletion
-					return database.deleteInstallation(installQuery.enterpriseId);
-				}
-				if (installQuery.teamId !== undefined) {
-					// single team app installation deletion
-					return database.deleteInstallation(installQuery.teamId);
-				}
-				throw new Error('Failed to delete installation');
-			},
-		},
+		installationStore: database.installationStore,
 		installerOptions: {
 			directInstall: true,
 		},
@@ -110,6 +73,19 @@ if (process.env.NODE_ENV === 'production') {
 						res.writeHead(301, {
 							Location: 'https://www.jsdelivr.com/globalping'
 						}).end();
+					} catch (error) {
+						res.writeHead(503);
+						res.end(error);
+					}
+				},
+			},
+			{
+				path: '/favicon.ico',
+				method: ['GET'],
+				handler: async (_req, res) => {
+					try {
+						res.setHeader('Content-Type', 'image/x-icon');
+						fs.createReadStream(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/favicon.ico')).pipe(res);
 					} catch (error) {
 						res.writeHead(503);
 						res.end(error);
