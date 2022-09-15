@@ -1,12 +1,9 @@
-import { argsToFlags, formatAPIError, getMeasurement, help, parseFlags, postMeasurement, slackLogger as logger } from '@globalping/bot-utils';
+import { argsToFlags, errorParse, formatAPIError, getMeasurement, help, parseFlags, postMeasurement, slackLogger as logger } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
-import { client as discord } from 'discord-bot/src/app';
 import * as dotenv from 'dotenv';
-import * as fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import * as database from './db';
+import { routes } from './routes';
 import { expandResults } from './utils';
 
 dotenv.config();
@@ -31,12 +28,16 @@ if (process.env.NODE_ENV === 'production') {
 		clientSecret: process.env.SLACK_CLIENT_SECRET,
 		stateSecret: process.env.SLACK_STATE_SECRET,
 		scopes: ['chat:write', 'chat:write.public', 'commands'],
-		logLevel: LogLevel.INFO,
+		logLevel: LogLevel.DEBUG,
 		logger: {
 			debug: (...msgs) => { logger.debug(JSON.stringify(msgs)); },
 			info: (...msgs) => { logger.info(JSON.stringify(msgs)); },
 			warn: (...msgs) => { logger.warn(JSON.stringify(msgs)); },
-			error: (...msgs) => { logger.error(JSON.stringify(msgs)); },
+			error: (...msgs) => {
+				for (const msg of msgs) {
+					logger.error(errorParse(msg));
+				}
+			},
 			setLevel: () => { },
 			getLevel: () => logger.level as LogLevel,
 			setName: () => { },
@@ -45,54 +46,7 @@ if (process.env.NODE_ENV === 'production') {
 		installerOptions: {
 			directInstall: true,
 		},
-		customRoutes: [
-			{
-				path: '/health',
-				method: ['GET'],
-				handler: async (_req, res) => {
-					try {
-						// Check if db is accessible
-						await database.knex.raw('select 1+1 as result');
-						if (!discord.ws.ping) {
-							throw new Error('Discord bot down.');
-						}
-
-						res.writeHead(200);
-						res.end('OK');
-					} catch (error) {
-						res.writeHead(503);
-						res.end(error);
-					}
-				},
-			},
-			{
-				path: '/',
-				method: ['GET'],
-				handler: async (_req, res) => {
-					try {
-						res.writeHead(301, {
-							Location: 'https://www.jsdelivr.com/globalping'
-						}).end();
-					} catch (error) {
-						res.writeHead(503);
-						res.end(error);
-					}
-				},
-			},
-			{
-				path: '/favicon.ico',
-				method: ['GET'],
-				handler: async (_req, res) => {
-					try {
-						res.setHeader('Content-Type', 'image/x-icon');
-						fs.createReadStream(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/favicon.ico')).pipe(res);
-					} catch (error) {
-						res.writeHead(503);
-						res.end(error);
-					}
-				},
-			},
-		],
+		customRoutes: routes
 	});
 } else {
 	if (!process.env.SLACK_BOT_TOKEN && !process.env.SLACK_SIGNING_SECRET)

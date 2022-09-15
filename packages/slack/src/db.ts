@@ -1,3 +1,4 @@
+import { slackLogger as logger } from '@globalping/bot-utils';
 import type { Installation, InstallationQuery } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 import { Knex, knex as knexInstance } from 'knex';
@@ -37,7 +38,8 @@ const checkTables = async (): Promise<boolean> => knex.schema.hasTable('installa
 
 const setInstallation = async (id: string, installation: InstallationStore): Promise<void> => {
 	try {
-		await knex.table('installations').insert({ id, installation });
+		await knex.table('installations').upsert({ id, installation });
+		logger.debug(`Installation set: ${id}`);
 	} catch (error) {
 		throw new Error(`Failed to set installation: ${error}`);
 	}
@@ -49,6 +51,7 @@ const getInstallation = async (id: string): Promise<InstallationStore> => {
 		if (!installation) {
 			throw new Error(id);
 		}
+		logger.debug(`Installation retrieved: ${id}`);
 		return installation.installation;
 	} catch (error) {
 		throw new Error(`Failed to get installation: ${error}`);
@@ -57,7 +60,8 @@ const getInstallation = async (id: string): Promise<InstallationStore> => {
 
 const deleteInstallation = async (id: string): Promise<void> => {
 	try {
-		await knex.table('installations').where('id', id).delete();
+		await knex.table('installations').where('id', id).del();
+		logger.debug(`Installation deleted: ${id}`);
 	} catch (error) {
 		throw new Error(`Failed to delete installation: ${error}`);
 	}
@@ -65,43 +69,58 @@ const deleteInstallation = async (id: string): Promise<void> => {
 
 const installationStore = {
 	storeInstallation: (installation: InstallationStore) => {
-		// Bolt will pass your handler an installation object
-		// Change the lines below so they save to your database
-		if (installation.isEnterpriseInstall && installation.enterprise !== undefined) {
-			// handle storing org-wide app installation
-			return setInstallation(installation.enterprise.id, installation);
+		try {
+			// Bolt will pass your handler an installation object
+			// Change the lines below so they save to your database
+			if (installation.isEnterpriseInstall && installation.enterprise !== undefined) {
+				// handle storing org-wide app installation
+				return setInstallation(installation.enterprise.id, installation);
+			}
+			if (installation.team !== undefined) {
+				// single team app installation
+				return setInstallation(installation.team.id, installation);
+			}
+			throw new Error('Failed saving installation data to installationStore (no team or enterprise id)');
+		} catch (error) {
+			logger.error(error);
+			throw error;
 		}
-		if (installation.team !== undefined) {
-			// single team app installation
-			return setInstallation(installation.team.id, installation);
-		}
-		throw new Error('Failed saving installation data to installationStore');
 	},
 	fetchInstallation: async (installQuery: InstallationQuery<boolean>) => {
-		// Bolt will pass your handler an installQuery object
-		// Change the lines below so they fetch from your database
-		if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
-			// handle org wide app installation lookup
-			return getInstallation(installQuery.enterpriseId);
+		try {
+			// Bolt will pass your handler an installQuery object
+			// Change the lines below so they fetch from your database
+			if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
+				// handle org wide app installation lookup
+				return await getInstallation(installQuery.enterpriseId);
+			}
+			if (installQuery.teamId !== undefined) {
+				// single team app installation lookup
+				return await getInstallation(installQuery.teamId);
+			}
+			throw new Error('Failed fetching installation (no teamId or enterpriseId)');
+		} catch (error) {
+			logger.error(error);
+			throw error;
 		}
-		if (installQuery.teamId !== undefined) {
-			// single team app installation lookup
-			return getInstallation(installQuery.teamId);
-		}
-		throw new Error('Failed fetching installation');
 	},
 	deleteInstallation: async (installQuery: InstallationQuery<boolean>) => {
-		// Bolt will pass your handler  an installQuery object
-		// Change the lines below so they delete from your database
-		if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
-			// org wide app installation deletion
-			return deleteInstallation(installQuery.enterpriseId);
+		try {
+			// Bolt will pass your handler  an installQuery object
+			// Change the lines below so they delete from your database
+			if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
+				// org wide app installation deletion
+				return await deleteInstallation(installQuery.enterpriseId);
+			}
+			if (installQuery.teamId !== undefined) {
+				// single team app installation deletion
+				return await deleteInstallation(installQuery.teamId);
+			}
+			throw new Error('Failed to delete installation (no teamId or enterpriseId)');
+		} catch (error) {
+			logger.error(error);
+			throw error;
 		}
-		if (installQuery.teamId !== undefined) {
-			// single team app installation deletion
-			return deleteInstallation(installQuery.teamId);
-		}
-		throw new Error('Failed to delete installation');
 	},
 };
 
