@@ -93,7 +93,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	} else if (args[0] === 'help' || args[1] === 'help' || args.includes('--help')) {
 		// Ensure help flag is added for parser to catch
 		args.push('--help');
-	} else if (args[2] === undefined) {
+	} else if (args[1] && args[2] === undefined) {
 		// If no from flag is passed, default to world e.g. globalping ping jsdelivr.com
 		args.push('--from', 'world');
 	}

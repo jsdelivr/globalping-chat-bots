@@ -81,7 +81,7 @@ app.command('/globalping', async ({ payload, command, ack, client }) => {
 			await expandResults(res, payload, client);
 		}
 	} catch (error) {
-		await client.chat.postEphemeral({ text: `Unable to process command \`${command.text}\`\n\`\`\`${formatAPIError(error)}\`\`\``, channel: payload.channel_id, user: payload.user_id });
+		await client.chat.postEphemeral({ text: `Unable to successfully process command \`${command.text}\`.\n\`\`\`${formatAPIError(error)}\`\`\``, channel: payload.channel_id, user: payload.user_id });
 	}
 });
 

@@ -17,12 +17,12 @@ export const formatAPIError = (error: unknown): string => {
 	if (error instanceof HTTPError) {
 		const errObj: APIError = JSON.parse(error.response.body as string) as APIError;
 		if (errObj.error.type === 'invalid_request_error')
-			return `${error}\n\n${errObj.error.message}\n${errObj.error.params ? Object.keys(errObj.error.params).map(key => `${errObj.error.params?.[key]}`).join('\n') : 'Unknown validation error. Please make an issue to the Globalping repository.'}`;
+			return `${error}\n\n${errObj.error.message}\n${errObj.error.params ? Object.keys(errObj.error.params).map(key => `${errObj.error.params?.[key]}`).join('\n') : 'Unknown validation error.'}\n\nIf you think this is a bug, please make an issue at the Globalping repository reporting this.`;
 
 		if (errObj.error.type === 'api_error')
 			return `${error}\n\n${errObj.error.message}\n\nIf you think this is a bug, please make an issue at the Globalping repository reporting this.`;
 	}
-	return String(error);
+	return `${error}\n\nIf you think this is a bug, please make an issue at the Globalping repository reporting this.`;
 };
 
 interface Help {
@@ -70,7 +70,7 @@ globalping ping google.com from EU --limit 2 --packets 5`,
 		preamble: 'Traceroute is a tool used to diagnose problems in a network path.',
 		usage: 'globalping traceroute <target> from <location> [options]',
 		options: `--limit			Number of probes - e.g. 1
---protocol	Protocol to use - TCP | UDP | ICMP
+--protocol		 Protocol to use - TCP | UDP | ICMP
 --port 			Port to use - e.g. 33434`,
 		examples: `globalping traceroute jsdelivr.com from united kingdom
 globalping traceroute google.com from EU --limit 2 --protocol TCP --port 33434`,
@@ -81,9 +81,9 @@ globalping traceroute google.com from EU --limit 2 --protocol TCP --port 33434`,
 		usage: 'globalping dns <target> from <location> [options]',
 		options: `--limit			Number of probes - e.g. 1
 --query			Query type - A | AAAA | ANY | CNAME | DNSKEY | DS | MX | NS | NSEC | PTR | RRSIG | SOA | TXT | SRV
---port			Port to use - e.g. 53
---protocol	Protocol to use - UDP | TCP
---resolver 	Resolver to use - e.g.
+--port			 Port to use - e.g. 53
+--protocol		 Protocol to use - UDP | TCP
+--resolver		 Resolver to use - e.g.
 --trace			Boolean flag to enable trace`,
 		examples: `globalping dns jsdelivr.com from united kingdom
 globalping dns google.com from EU --limit 2 --query A --port 53 --protocol UDP --resolver
@@ -95,7 +95,7 @@ globalping dns google.com from EU --limit 2 --query A --port 53 --protocol UDP -
 		preamble: 'My Traceroute (MTR) is a tool that combines traceroute and ping, which is a common method for testing network connectivity and speed.',
 		usage: 'globalping mtr <target> from <location> [options]',
 		options: `--limit			Number of probes - e.g. 1
---protocol	Protocol to use - TCP | UDP | ICMP
+--protocol		 Protocol to use - TCP | UDP | ICMP
 --port 			Port to use - e.g. 33434`,
 		examples: `globalping mtr jsdelivr.com from united kingdom
 globalping mtr google.com from EU --limit 2 --protocol TCP --port 33434`,
@@ -105,13 +105,13 @@ globalping mtr google.com from EU --limit 2 --protocol TCP --port 33434`,
 		preamble: 'HTTP is a network protocol used to transfer data between a client and a server.',
 		usage: 'globalping http <target> from <location> [options]',
 		options: `--limit			Number of probes - e.g. 1
---protocol	Protocol to use - HTTP | HTTPS | HTTP2
+--protocol		 Protocol to use - HTTP | HTTPS | HTTP2
 --port 			Port to use - e.g. 80
---method		HTTP method - HEAD | GET
---path			URL pathname - e.g. /
+--method		   HTTP method - HEAD | GET
+--path			 URL pathname - e.g. /
 --query			Query string
 --host 			Hostname
---header		Headers to use e.g. "Content-Type: text/html; charset=UTF-8"`,
+--header		   Headers to use e.g. "Content-Type: text/html; charset=UTF-8"`,
 		examples: `globalping http jsdelivr.com from united kingdom
 globalping http google.com from EU --limit 2 --protocol HTTP --port 80 --method GET --path / --query --host --header`,
 	}
