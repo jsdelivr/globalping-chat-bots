@@ -60,7 +60,7 @@ if (process.env.NODE_ENV === 'production') {
 	});
 }
 
-app.command('/globalping', async ({ payload, command, ack, client }) => {
+app.command('/globalping', async ({ payload, command, ack, respond }) => {
 	// Acknowledge command request
 	await ack();
 	logger.debug(`Calling command ${command.text} with token: ${payload.token}`);
@@ -68,20 +68,19 @@ app.command('/globalping', async ({ payload, command, ack, client }) => {
 		const args = argsToFlags(command.text);
 
 		if (args.help) {
-			await client.chat.postEphemeral({ text: helpCmd(args.cmd), channel: payload.channel_id, user: payload.user_id });
+			await respond({ text: helpCmd(args.cmd) });
 		} else {
 			const flags = parseFlags(args);
 			// We post measurement first to catch any validation errors before committing to processing request message
 			const { id } = await postMeasurement(flags);
-			const { ts } = await client.chat.postMessage({ text: '```Processing request...```', channel: payload.channel_id, user: payload.user_id });
+			await respond({ text: '```Processing request...```', response_type: 'ephemeral' });
 
 			const res = await getMeasurement(id);
-			const msg = { text: `<@${payload.user_id}>, here are the results for \`${command.text}\``, channel: payload.channel_id };
-			await (ts ? client.chat.update({ ...msg, ts }) : client.chat.postMessage(msg));
-			await expandResults(res, payload, client);
+			await respond({ text: `<@${payload.user_id}>, here are the results for \`${command.text}\``, response_type: 'in_channel' });
+			await expandResults(res, respond);
 		}
 	} catch (error) {
-		await client.chat.postEphemeral({ text: `Unable to successfully process command \`${command.text}\`.\n\`\`\`${formatAPIError(error)}\`\`\``, channel: payload.channel_id, user: payload.user_id });
+		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n\`\`\`${formatAPIError(error)}\`\`\``, response_type: 'ephemeral' });
 	}
 });
 
