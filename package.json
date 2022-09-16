@@ -4,6 +4,7 @@
 	"packageManager": "pnpm@7.8.0",
 	"scripts": {
 		"start": "pnpm --filter slack-bot start",
+		"dev": "pnpm --filter slack-bot start-pretty",
 		"test": "vitest"
 	},
 	"author": "Ayuhito <hello@ayuhito.com>",

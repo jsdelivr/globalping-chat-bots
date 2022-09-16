@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'production') {
 			warn: (...msgs) => { logger.warn(JSON.stringify(msgs)); },
 			error: (...msgs) => {
 				for (const msg of msgs) {
-					logger.error(errorParse(msg));
+					logger.error(JSON.stringify(errorParse(msg)));
 				}
 			},
 			setLevel: () => { },
@@ -62,6 +62,7 @@ if (process.env.NODE_ENV === 'production') {
 app.command('/globalping', async ({ payload, command, ack, client }) => {
 	// Acknowledge command request
 	await ack();
+	logger.debug(`Calling command ${command.text} with token: ${payload.token}`);
 	try {
 		const args = argsToFlags(command.text);
 

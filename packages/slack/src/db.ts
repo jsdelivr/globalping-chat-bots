@@ -38,7 +38,7 @@ const checkTables = async (): Promise<boolean> => knex.schema.hasTable('installa
 
 const setInstallation = async (id: string, installation: InstallationStore): Promise<void> => {
 	try {
-		await knex.table('installations').upsert({ id, installation });
+		await knex.table('installations').insert({ id, installation }).onConflict('id').merge();
 		logger.debug(`Installation set: ${id}`);
 	} catch (error) {
 		throw new Error(`Failed to set installation: ${error}`);
@@ -51,8 +51,8 @@ const getInstallation = async (id: string): Promise<InstallationStore> => {
 		if (!installation) {
 			throw new Error(id);
 		}
-		logger.debug(`Installation retrieved: ${id}`);
-		return installation.installation;
+		logger.debug(`Installation retrieved: ${JSON.stringify(installation)}`);
+		return JSON.parse(installation.installation as unknown as string);
 	} catch (error) {
 		throw new Error(`Failed to get installation: ${error}`);
 	}
@@ -69,6 +69,7 @@ const deleteInstallation = async (id: string): Promise<void> => {
 
 const installationStore = {
 	storeInstallation: (installation: InstallationStore) => {
+		logger.debug(`Storing installation: ${JSON.stringify(installation)}`);
 		try {
 			// Bolt will pass your handler an installation object
 			// Change the lines below so they save to your database
@@ -80,13 +81,14 @@ const installationStore = {
 				// single team app installation
 				return setInstallation(installation.team.id, installation);
 			}
-			throw new Error('Failed saving installation data to installationStore (no team or enterprise id)');
+			throw new Error('Failed saving installation to installationStore (no team or enterprise id)');
 		} catch (error) {
 			logger.error(error);
 			throw error;
 		}
 	},
 	fetchInstallation: async (installQuery: InstallationQuery<boolean>) => {
+		logger.debug(`Fetching installation: ${JSON.stringify(installQuery)}`);
 		try {
 			// Bolt will pass your handler an installQuery object
 			// Change the lines below so they fetch from your database
@@ -105,6 +107,7 @@ const installationStore = {
 		}
 	},
 	deleteInstallation: async (installQuery: InstallationQuery<boolean>) => {
+		logger.debug(`Deleting installation: ${JSON.stringify(installQuery)}`);
 		try {
 			// Bolt will pass your handler  an installQuery object
 			// Change the lines below so they delete from your database
