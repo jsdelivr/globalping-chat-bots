@@ -45,7 +45,7 @@ globalping dns <target> from <location> [options]
 globalping mtr <target> from<location> [options]
 globalping http <target> from <location> [options]`,
 		args: `<target>		A public endpoint, such as a hostname or IPv4 address - e.g. "jsdelivr.com"
-<from>		  Magic Location - e.g. "ger", "aws", "google+belgium", "55286"
+<from>		  Magic Location - It can be anything, a city, country, ISP provider, AS number and more. e.g. "germany", "aws", "google+belgium", "55286"
 
 Location Schema: https://github.com/jsdelivr/globalping/blob/master/docs/measurement/schema/location.md`,
 		end: `globalping ping --help
