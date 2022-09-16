@@ -1,4 +1,4 @@
-import { argsToFlags, errorParse, formatAPIError, getMeasurement, help, parseFlags, postMeasurement, slackLogger as logger } from '@globalping/bot-utils';
+import { argsToFlags, errorParse, formatAPIError, getMeasurement, parseFlags, postMeasurement, slackLogger as logger } from '@globalping/bot-utils';
 import { helpCmd } from '@globalping/bot-utils/src/utils';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
@@ -68,19 +68,20 @@ app.command('/globalping', async ({ payload, command, ack, client }) => {
 		const args = argsToFlags(command.text);
 
 		if (args.help) {
-			// await client.chat.postEphemeral({ text: `\`\`\`${help[args.cmd] ?? 'Unknown command'}\`\`\``, channel: payload.channel_id, user: payload.user_id });
 			await client.chat.postEphemeral({ text: helpCmd(args.cmd), channel: payload.channel_id, user: payload.user_id });
 		} else {
 			const flags = parseFlags(args);
-			const { ts } = await client.chat.postMessage({ text: '```Processing request...```', channel: payload.channel_id, user: payload.user_id });
+			// We post measurement first to catch any validation errors before committing to processing request message
 			const { id } = await postMeasurement(flags);
+			const { ts } = await client.chat.postMessage({ text: '```Processing request...```', channel: payload.channel_id, user: payload.user_id });
+
 			const res = await getMeasurement(id);
 			const msg = { text: `<@${payload.user_id}>, here are the results for \`${command.text}\``, channel: payload.channel_id };
 			await (ts ? client.chat.update({ ...msg, ts }) : client.chat.postMessage(msg));
 			await expandResults(res, payload, client);
 		}
 	} catch (error) {
-		await client.chat.postEphemeral({ text: `\`\`\`${formatAPIError(error)}\`\`\``, channel: payload.channel_id, user: payload.user_id });
+		await client.chat.postEphemeral({ text: `Unable to process command \`${command.text}\`\n\`\`\`${formatAPIError(error)}\`\`\``, channel: payload.channel_id, user: payload.user_id });
 	}
 });
 
