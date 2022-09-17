@@ -8,19 +8,19 @@ describe('Utils', () => {
 			it('should parse ping args', () => {
 				const args = 'ping google.com from New York';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'ping',
 					target: 'google.com',
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {}
-				});
+				}]);
 			});
 
 			it('should parse ping args with flags', () => {
 				const args = 'ping google.com from New York --limit 2 --packets 3';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'ping',
 					target: 'google.com',
 					limit: 2,
@@ -28,7 +28,7 @@ describe('Utils', () => {
 					measurementOptions: {
 						packets: 3
 					}
-				});
+				}]);
 			});
 
 			it('should throw if incorrect ping flag', () => {
@@ -41,19 +41,19 @@ describe('Utils', () => {
 			it('should parse traceroute args', () => {
 				const args = 'traceroute google.com from New York';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'traceroute',
 					target: 'google.com',
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {}
-				});
+				}]);
 			});
 
 			it('should parse traceroute args with flags', () => {
 				const args = 'traceroute google.com from New York --limit 2 --protocol tcp --port 80';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'traceroute',
 					target: 'google.com',
 					limit: 2,
@@ -62,7 +62,7 @@ describe('Utils', () => {
 						protocol: 'TCP',
 						port: 80
 					}
-				});
+				}]);
 			});
 
 			it('should throw if incorrect traceroute flag', () => {
@@ -75,19 +75,19 @@ describe('Utils', () => {
 			it('should parse dns args', () => {
 				const args = 'dns google.com from New York';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'dns',
 					target: 'google.com',
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {}
-				});
+				}]);
 			});
 
 			it('should parse dns args with flags', () => {
 				const args = 'dns google.com from New York --limit 2 --query AAAA --protocol tcp --port 80 --resolver 1.1.1.1 --trace';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'dns',
 					target: 'google.com',
 					limit: 2,
@@ -101,7 +101,7 @@ describe('Utils', () => {
 						resolver: '1.1.1.1',
 						trace: true
 					}
-				});
+				}]);
 			});
 
 			it('should throw if incorrect dns flag', () => {
@@ -114,19 +114,19 @@ describe('Utils', () => {
 			it('should parse mtr args', () => {
 				const args = 'mtr google.com from New York';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'mtr',
 					target: 'google.com',
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {}
-				});
+				}]);
 			});
 
 			it('should parse mtr args with flags', () => {
 				const args = 'mtr google.com from New York --limit 2 --protocol tcp --port 80 --packets 16';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'mtr',
 					target: 'google.com',
 					limit: 2,
@@ -136,7 +136,7 @@ describe('Utils', () => {
 						port: 80,
 						packets: 16
 					}
-				});
+				}]);
 			});
 
 			it('should throw if incorrect mtr flag', () => {
@@ -149,7 +149,7 @@ describe('Utils', () => {
 			it('should parse http args', () => {
 				const args = 'http google.com from New York';
 				const result = parseFlags(argsToFlags(args));
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'http',
 					target: 'google.com',
 					limit: 1,
@@ -157,14 +157,14 @@ describe('Utils', () => {
 					measurementOptions: {
 						request: {}
 					}
-				});
+				}]);
 			});
 
 			it('should parse http args with flags', () => {
 				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header Content-Type: text/html; charset=utf-8 --header Content-Encoding: gzip';
 				const result = parseFlags(argsToFlags(args));
 
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'http',
 					target: 'google.com',
 					limit: 2,
@@ -183,14 +183,14 @@ describe('Utils', () => {
 							}
 						}
 					}
-				});
+				}]);
 			});
 
 			it('should infer url for http parse', () => {
 				const args = 'http https://google.com:80/test?a=abc from New York --limit 2 --method get --header Content-Encoding: gzip --header Content-Type: text/html; charset=utf-8';
 				const result = parseFlags(argsToFlags(args));
 
-				expect(result).toEqual({
+				expect(result).toEqual([{
 					type: 'http',
 					target: 'https://google.com:80/test?a=abc',
 					limit: 2,
@@ -209,7 +209,7 @@ describe('Utils', () => {
 							}
 						}
 					}
-				});
+				}]);
 			});
 
 			it('should throw if incorrect http flag', () => {

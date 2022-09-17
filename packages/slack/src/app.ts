@@ -1,9 +1,9 @@
+/* eslint-disable no-await-in-loop */
 import { argsToFlags, errorParse, formatAPIError, getMeasurement, parseFlags, postMeasurement, slackLogger as logger } from '@globalping/bot-utils';
 import { helpCmd } from '@globalping/bot-utils/src/utils';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
-import { defaultCallbackFailure, defaultCallbackSuccess } from './callbacks';
 import * as database from './db';
 import { routes } from './routes';
 import { expandResults } from './utils';
@@ -61,7 +61,7 @@ if (process.env.NODE_ENV === 'production') {
 	});
 }
 
-app.command('/globalping', async ({ payload, command, ack, respond }) => {
+app.command('/globalping', async ({ payload, command, ack, respond, say }) => {
 	// Acknowledge command request
 	await ack();
 	logger.debug(`Calling command ${command.text} with token: ${payload.token}`);
@@ -73,15 +73,24 @@ app.command('/globalping', async ({ payload, command, ack, respond }) => {
 		} else {
 			const flags = parseFlags(args);
 			// We post measurement first to catch any validation errors before committing to processing request message
-			const { id } = await postMeasurement(flags);
-			await respond({ text: '```Processing request...```', response_type: 'ephemeral' });
+			const measurements = await postMeasurement(flags);
+			await respond({ text: '```Processing request...```' });
+			logger.debug(`Post response: ${JSON.stringify(measurements)}`);
 
-			const res = await getMeasurement(id);
-			await respond({ text: `<@${payload.user_id}>, here are the results for \`${command.text}\``, response_type: 'in_channel' });
-			await expandResults(res, respond);
+			let first = true;
+			for (const measurement of measurements) {
+				const res = await getMeasurement(measurement.id);
+				logger.debug(`Get response: ${JSON.stringify(res)}`);
+				// Only want this to run on first measurement
+				if (first) {
+					await say({ text: `<@${payload.user_id}>, here are the results for \`${command.text}\`` });
+					first = false;
+				}
+				await expandResults(res, say);
+			}
 		}
 	} catch (error) {
-		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n\`\`\`${formatAPIError(error)}\`\`\``, response_type: 'ephemeral' });
+		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n\`\`\`${formatAPIError(error)}\`\`\`` });
 	}
 });
 
