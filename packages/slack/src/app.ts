@@ -3,6 +3,7 @@ import { helpCmd } from '@globalping/bot-utils/src/utils';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
+import { defaultCallbackFailure, defaultCallbackSuccess } from './callbacks';
 import * as database from './db';
 import { routes } from './routes';
 import { expandResults } from './utils';
@@ -46,6 +47,10 @@ if (process.env.NODE_ENV === 'production') {
 		installationStore: database.installationStore,
 		installerOptions: {
 			directInstall: true,
+			callbackOptions: {
+				success: defaultCallbackSuccess,
+				failure: defaultCallbackFailure,
+			},
 		},
 		customRoutes: routes
 	});
