@@ -47,10 +47,6 @@ if (process.env.NODE_ENV === 'production') {
 		installationStore: database.installationStore,
 		installerOptions: {
 			directInstall: true,
-			callbackOptions: {
-				success: defaultCallbackSuccess,
-				failure: defaultCallbackFailure,
-			},
 		},
 		customRoutes: routes
 	});
