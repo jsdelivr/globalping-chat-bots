@@ -90,7 +90,7 @@ app.command('/globalping', async ({ payload, command, ack, respond, say }) => {
 			}
 		}
 	} catch (error) {
-		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n\`\`\`${formatAPIError(error)}\`\`\`` });
+		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n${formatAPIError(error)}` });
 	}
 });
 

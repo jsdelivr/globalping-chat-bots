@@ -1,4 +1,4 @@
-import { HTTPError } from 'got';
+import { Response } from 'got';
 
 export const throwArgError = (invalid: string | undefined, type: string, expected: string) => {
 	throw new TypeError(`Invalid argument "${invalid}" for "${type}"!\nExpected "${expected}".`);
@@ -13,16 +13,38 @@ interface APIError {
 	}
 }
 
-export const formatAPIError = (error: unknown): string => {
-	if (error instanceof HTTPError) {
-		const errObj: APIError = JSON.parse(error.response.body as string) as APIError;
-		if (errObj.error.type === 'invalid_request_error')
-			return `${error}\n\n${errObj.error.message}\n${errObj.error.params ? Object.keys(errObj.error.params).map(key => `${errObj.error.params?.[key]}`).join('\n') : 'Unknown validation error.'}\n\nIf you think this is a bug, please make an issue at the Globalping repository reporting this.`;
+export class PostError extends Error {
+	response: Response<unknown>;
 
-		if (errObj.error.type === 'api_error')
-			return `${error}\n\n${errObj.error.message}\n\nIf you think this is a bug, please make an issue at the Globalping repository reporting this.`;
+	location: string;
+
+	constructor(response: Response<unknown>, location: string, message = '') {
+		super(message);
+		this.message = message;
+		this.response = response;
+		this.location = location;
 	}
-	return `${error}\n\nIf you think this is a bug, please make an issue at the Globalping repository reporting this.`;
+}
+
+export const formatAPIError = (error: unknown): string => {
+	// @ts-ignore - skip for now
+	if (error instanceof PostError) {
+		const { location, response } = error;
+		const { statusCode, body } = response;
+		const errObj: APIError = JSON.parse(body as string) as APIError;
+		if (errObj.error.type === 'invalid_request_error')
+			return `\`\`\`${errObj.error.message}\n${errObj.error.params ? Object.keys(errObj.error.params).map(key => `${errObj.error.params?.[key]}`).join('\n') : 'Unknown validation error.'}\`\`\`\nDocumentation and Support: https://github.com/jsdelivr/globalping`;
+
+		if (errObj.error.type === 'api_error' && statusCode === 400) {
+			return `\`\`\`${errObj.error.message} at location ${location}\`\`\`\nDocumentation and Support: https://github.com/jsdelivr/globalping`;
+		}
+		if (errObj.error.type === 'api_error') {
+			return `\`\`\`${errObj.error.message}\`\`\`\nDocumentation and Support: https://github.com/jsdelivr/globalping`;
+		}
+	} else if (error instanceof Error || error instanceof TypeError) {
+		return `\`\`\`${error.message}\`\`\`\nDocumentation and Support: https://github.com/jsdelivr/globalping`;
+	}
+	return `\`\`\`${error}\`\`\`\nDocumentation and Support: https://github.com/jsdelivr/globalping`;
 };
 
 interface Help {
@@ -45,7 +67,10 @@ globalping dns <target> from <location> [options]
 globalping mtr <target> from<location> [options]
 globalping http <target> from <location> [options]`,
 		args: `<target>		A public endpoint, such as a hostname or IPv4 address - e.g. "jsdelivr.com"
-<from>		  Magic Location - It can be anything, a city, country, ISP provider, AS number and more. e.g. "germany", "aws", "google+belgium", "55286"
+<from>		  Magic Location - It can be anything, a city, country, ISP provider, AS number and more. e.g. "germany", "eu", "aws", "55286"
+
+Magic locations can be combined with a comma to run a test from multiple locations in parallel. e.g. "germany, france, spain".
+Alternatively, they can be combined with a plus to narrow the filter. e.g. "google+belgium" will match a server in Belgium hosted at Google Cloud DC.
 
 Location Schema: https://github.com/jsdelivr/globalping/blob/master/docs/measurement/schema/location.md`,
 		end: `globalping ping --help
