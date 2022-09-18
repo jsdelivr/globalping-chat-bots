@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "NODE_ENV=production tsx src/app.ts",
-		"start-pretty": "NODE_ENV=production tsx src/app.ts | pino-pretty",
+		"start-pretty": "tsx src/app.ts | pino-pretty",
 		"dev": "tsx src/app.ts",
 		"watch": "tsx watch src/app.ts",
 		"setup-db": "tsx scripts/setup-db.ts"

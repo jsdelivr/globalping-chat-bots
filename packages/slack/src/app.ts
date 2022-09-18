@@ -105,6 +105,6 @@ app.event('app_uninstalled', async ({ context }) => {
 	if (process.env.NODE_ENV === 'production') {
 		logger.info('Slack bot is online [PRODUCTION]');
 	} else {
-		console.log('⚡️ Bolt app is running! [DEVELOPMENT]');
+		logger.info('⚡️ Bolt app is running! [DEVELOPMENT]');
 	}
 })();
