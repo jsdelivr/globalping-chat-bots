@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-export const logger = loggerInit('slack', process.env.LOG_LEVEL ?? 'info');
+export const logger = loggerInit('slack', 'debug');
 
 export const expandResults = async (response: MeasurementResponse, say: SayFn) => {
 	const { results } = response;
