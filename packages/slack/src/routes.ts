@@ -15,15 +15,15 @@ export const routes: CustomRoute[] = [
 			try {
 				// Check if db is accessible
 				await database.knex.raw('select 1+1 as result');
-				logger.debug('Database is accessible');
+				// logger.debug('Database is accessible');
 
 				if (!(await database.checkTables()))
 					throw new Error('Tables not found');
-				logger.debug('Tables are accessible');
+				// logger.debug('Tables are accessible');
 
 				if (!discord.ws.ping)
 					throw new Error('Discord bot down.');
-				logger.debug('Discord bot is accessible');
+				// logger.debug('Discord bot is accessible');
 
 				res.writeHead(200);
 				res.end('OK');
