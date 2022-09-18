@@ -1,6 +1,11 @@
 /* eslint-disable no-await-in-loop */
-import { Flags, MeasurementResponse, throwArgError } from '@globalping/bot-utils';
+import { Flags, loggerInit, MeasurementResponse, throwArgError } from '@globalping/bot-utils';
 import { ChatInputCommandInteraction, codeBlock } from 'discord.js';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+export const logger = loggerInit('discord', process.env.LOG_LEVEL ?? 'info');
 
 export const getFlags = (interaction: ChatInputCommandInteraction): Flags => {
 	const cmd = interaction.options.getSubcommand();

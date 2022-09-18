@@ -1,6 +1,12 @@
 /* eslint-disable no-await-in-loop */
+import { loggerInit } from '@globalping/bot-utils';
 import { MeasurementResponse } from '@globalping/bot-utils/src/types';
 import type { SayFn } from '@slack/bolt';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+export const logger = loggerInit('slack', process.env.LOG_LEVEL ?? 'info');
 
 export const expandResults = async (response: MeasurementResponse, say: SayFn) => {
 	const { results } = response;

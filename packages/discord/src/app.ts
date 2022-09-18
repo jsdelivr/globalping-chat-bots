@@ -1,8 +1,8 @@
-import { discordLogger as logger, formatAPIError, getMeasurement, help, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { formatAPIError, getMeasurement, help, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import { Client, codeBlock, GatewayIntentBits, inlineCode, userMention } from 'discord.js';
 import * as dotenv from 'dotenv';
 
-import { expandFlags, expandResults, getFlags } from './utils';
+import { expandFlags, expandResults, getFlags, logger } from './utils';
 
 dotenv.config();
 

@@ -1,7 +1,9 @@
-import { slackLogger as logger } from '@globalping/bot-utils';
+
 import type { Installation, InstallationQuery } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 import { Knex, knex as knexInstance } from 'knex';
+
+import { logger } from './utils';
 
 dotenv.config();
 

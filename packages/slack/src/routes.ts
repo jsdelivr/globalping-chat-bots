@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import * as database from './db';
+import { logger } from './utils';
 
 export const routes: CustomRoute[] = [
 	{
@@ -14,9 +15,15 @@ export const routes: CustomRoute[] = [
 			try {
 				// Check if db is accessible
 				await database.knex.raw('select 1+1 as result');
-				if (!discord.ws.ping) {
+				logger.debug('Database is accessible');
+
+				if (!(await database.checkTables()))
+					throw new Error('Tables not found');
+				logger.debug('Tables are accessible');
+
+				if (!discord.ws.ping)
 					throw new Error('Discord bot down.');
-				}
+				logger.debug('Discord bot is accessible');
 
 				res.writeHead(200);
 				res.end('OK');

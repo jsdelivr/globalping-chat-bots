@@ -3,7 +3,6 @@ import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED
 import { Routes, SlashCommandBuilder } from 'discord.js';
 import * as dotenv from 'dotenv';
 
-
 dotenv.config();
 
 if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_APP_ID)
