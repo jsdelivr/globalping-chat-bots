@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import * as database from './db';
-import { logger } from './utils';
+// import { logger } from './utils';
 
 export const routes: CustomRoute[] = [
 	{

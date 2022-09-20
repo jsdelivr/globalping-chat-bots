@@ -1,12 +1,11 @@
 /* eslint-disable no-await-in-loop */
-import { argsToFlags, errorParse, formatAPIError, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils';
-import { helpCmd } from '@globalping/bot-utils/src/utils';
+import { errorParse, formatAPIError } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
 import * as database from './db';
 import { routes } from './routes';
-import { expandResults, logger } from './utils';
+import { logger, postAPI } from './utils';
 
 dotenv.config();
 
@@ -25,7 +24,7 @@ const baseAppConfig = {
 	clientId: process.env.SLACK_CLIENT_ID,
 	clientSecret: process.env.SLACK_CLIENT_SECRET,
 	stateSecret: process.env.SLACK_STATE_SECRET,
-	scopes: ['chat:write', 'chat:write.public', 'commands'],
+	scopes: ['chat:write', 'chat:write.public', 'commands', 'groups:write', 'channels:manage', 'im:read', 'im:write', 'mpim:read', 'mpim:write', 'channels:read', 'groups:read'],
 	logLevel: LogLevel.INFO,
 	logger: {
 		debug: (...msgs: unknown[]) => { logger.debug(JSON.stringify(msgs)); },
@@ -55,33 +54,49 @@ if (process.env.NODE_ENV === 'production') {
 	app = new App(baseAppConfig);
 }
 
-app.command('/globalping', async ({ payload, command, ack, respond, say }) => {
-	// Acknowledge command request
-	await ack();
-	logger.debug(`Calling command ${command.text} with token: ${payload.token}`);
+app.command('/globalping', async ({ payload, command, ack, client, respond }) => {
 	try {
-		const args = argsToFlags(command.text);
+		// Acknowledge command request
+		await ack();
+		logger.debug(`Calling command ${command.text} with payload: ${JSON.stringify(payload)}`);
 
-		if (args.help) {
-			await respond({ text: helpCmd(args.cmd) });
-		} else {
-			const flags = parseFlags(args);
-			// We post measurement first to catch any validation errors before committing to processing request message
-			const measurements = await postMeasurement(flags);
-			await respond({ text: '```Processing request...```' });
-			logger.debug(`Post response: ${JSON.stringify(measurements)}`);
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		const { channel_id, user_id, channel_name } = payload;
 
-			let first = true;
-			for (const measurement of measurements) {
-				const res = await getMeasurement(measurement.id);
-				logger.debug(`Get response: ${JSON.stringify(res)}`);
-				// Only want this to run on first measurement
-				if (first) {
-					await say({ text: `<@${payload.user_id}>, here are the results for \`${command.text}\`` });
-					first = false;
+		let info;
+		// Check if channel is accessible just to be sure
+		try {
+			info = await client.conversations.info({ channel: channel_id });
+			logger.debug(`Channel info: ${JSON.stringify(info)}`);
+		} catch {
+			// Continue
+		}
+
+		// If channel is not accessible, respond with errors
+		if (!info) {
+			// This is a user DM
+			if (channel_name === 'directmessage' || channel_id.startsWith('D')) {
+				logger.debug('Channel is a DM');
+				const conversation = await client.conversations.open({ users: user_id });
+				logger.debug(`Open conversation: ${JSON.stringify(conversation)}`);
+
+				// If the DM is not the Globalping DM, we cancel the request
+				if (conversation.channel?.id && channel_id !== conversation.channel.id) {
+					await respond({ text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.' });
+				} else {
+					throw new Error('Unable to open a DM with the Globalping App.');
 				}
-				await expandResults(res, say);
+			} else if (channel_name.startsWith('mpdm-') || channel_name.startsWith('group-')) {
+				logger.debug('Channel is mpdm or group dm');
+				await respond({ text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.' });
+			} else {
+				// If not DM, try checking the properties of the channel
+				logger.debug('Could not get channel info, assuming private channel');
+				await respond('Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.');
 			}
+		} else {
+			const channelPayload = { channel_id, user_id };
+			await postAPI(client, channelPayload, command.text);
 		}
 	} catch (error) {
 		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n${formatAPIError(error)}` });
