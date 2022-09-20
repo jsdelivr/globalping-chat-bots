@@ -40,6 +40,7 @@ Since both frameworks don't support E2E testing, we have to manually test the bo
 
 `/globalping ping google.com from badprobe` - No probes found at badprobe
 `/globalping ping 1.1.1.1 from new york, london, badprobe --limit 2` - No probes found at badprobe
+`/globalping ping 1.1.1.1 from new york, --limit 2`
 `/globalping ping google.com from eu, eu, eu, eu, eu, eu, eu, eu, eu, eu, eu --limit 2` - Too many locations
 
 ### Environments
@@ -49,11 +50,11 @@ Test if commands run successfully in the following places to ensure authenticati
 - Public Slack Channel
 - Slack DM with Bot
 
-- Private Slack Channel / Group Chat
+- Private Slack Channel
   - This should prompt a request for the bot to be invited to the channel before continuing.
 - Slack DM with yourself
-  - This should inform the user that results will be outputted to Slack DM with Bot due to API limitations
-- Slack DM with another user
+  - This should prompt the user to DM the bot.
+- Slack DM with another user / DM group chat
   - This should prompt the user to create a new group chat with the bot.
 
 For the private environments, ensure both API success, error and help commands work.

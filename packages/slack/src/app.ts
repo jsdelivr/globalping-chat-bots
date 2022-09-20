@@ -24,7 +24,7 @@ const baseAppConfig = {
 	clientId: process.env.SLACK_CLIENT_ID,
 	clientSecret: process.env.SLACK_CLIENT_SECRET,
 	stateSecret: process.env.SLACK_STATE_SECRET,
-	scopes: ['chat:write', 'chat:write.public', 'commands', 'groups:write', 'channels:manage', 'im:read', 'im:write', 'mpim:read', 'mpim:write', 'channels:read', 'groups:read'],
+	scopes: ['chat:write', 'chat:write.public', 'commands', 'channels:read', 'groups:read', 'im:read', 'mpim:read', 'im:write'],
 	logLevel: LogLevel.INFO,
 	logger: {
 		debug: (...msgs: unknown[]) => { logger.debug(JSON.stringify(msgs)); },
@@ -68,7 +68,8 @@ app.command('/globalping', async ({ payload, command, ack, client, respond }) =>
 		try {
 			info = await client.conversations.info({ channel: channel_id });
 			logger.debug(`Channel info: ${JSON.stringify(info)}`);
-		} catch {
+		} catch (error) {
+			logger.debug(`Channel info not accessible: ${JSON.stringify(error)}`);
 			// Continue
 		}
 
@@ -86,8 +87,8 @@ app.command('/globalping', async ({ payload, command, ack, client, respond }) =>
 				} else {
 					throw new Error('Unable to open a DM with the Globalping App.');
 				}
-			} else if (channel_name.startsWith('mpdm-') || channel_name.startsWith('group-')) {
-				logger.debug('Channel is mpdm or group dm');
+			} else if (channel_name.startsWith('mpdm-')) {
+				logger.debug('Channel is mpdm');
 				await respond({ text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.' });
 			} else {
 				// If not DM, try checking the properties of the channel
