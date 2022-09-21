@@ -77,7 +77,7 @@ Magic locations can be combined with a comma to run a test from multiple locatio
 Alternatively, they can be combined with a plus to narrow the filter. e.g. "google+belgium" will match a server in Belgium hosted at Google Cloud DC.
 
 Location Schema: https://github.com/jsdelivr/globalping/blob/master/docs/measurement/schema/location.md`,
-		end: `globalping ping --help
+		end: `/globalping ping --help
 /globalping traceroute --help
 /globalping dns --help
 /globalping mtr --help
@@ -164,3 +164,5 @@ export const welcome = (id: string) => `Hi <@${id}>! :wave:\nI help make running
 \`/globalping dns jsdelivr.com from eu --resolver 1.1.1.1\`
 \`/globalping mtr jsdelivr.com from new york, london --protocol udp\`
 \`/globalping http jsdelivr.com from google+belgium --protocol http2\``;
+
+export const channelWelcome = 'Hello, I\'m Globalping. To learn more about me, run `/globalping help`.';

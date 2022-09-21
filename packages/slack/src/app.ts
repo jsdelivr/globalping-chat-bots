@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { errorParse, formatAPIError, welcome } from '@globalping/bot-utils';
+import { channelWelcome } from '@globalping/bot-utils/src/utils';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
@@ -129,6 +130,19 @@ app.event('app_home_opened', async ({ context, event, say }) => {
 app.event('app_uninstalled', async ({ context }) => {
 	// @ts-ignore - They are pretty much the same type
 	await database.installationStore.deleteInstallation(context);
+});
+
+
+app.event('member_joined_channel', async ({ event, context, say }) => {
+	logger.debug(`Member joined channel: ${JSON.stringify(event)}`);
+	logger.debug(`Context: ${JSON.stringify(context)}`);
+	if (event.user === context.botUserId) {
+		logger.debug('Bot joined channel, sending welcome message');
+		await say({
+			text: channelWelcome
+		});
+	}
+
 });
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
