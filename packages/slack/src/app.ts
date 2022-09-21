@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { errorParse, formatAPIError } from '@globalping/bot-utils';
+import { errorParse, formatAPIError, welcome } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
@@ -24,7 +24,7 @@ const baseAppConfig = {
 	clientId: process.env.SLACK_CLIENT_ID,
 	clientSecret: process.env.SLACK_CLIENT_SECRET,
 	stateSecret: process.env.SLACK_STATE_SECRET,
-	scopes: ['chat:write', 'chat:write.public', 'commands', 'channels:read', 'groups:read', 'im:read', 'mpim:read', 'im:write'],
+	scopes: ['chat:write', 'chat:write.public', 'commands', 'channels:read', 'groups:read', 'im:read', 'mpim:read', 'im:write', 'im:history', 'users:read'],
 	logLevel: LogLevel.INFO,
 	logger: {
 		debug: (...msgs: unknown[]) => { logger.debug(JSON.stringify(msgs)); },
@@ -101,6 +101,27 @@ app.command('/globalping', async ({ payload, command, ack, client, respond }) =>
 		}
 	} catch (error) {
 		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n${formatAPIError(error)}` });
+	}
+});
+
+app.event('app_home_opened', async ({ context, event, say }) => {
+	if (event.tab === 'messages') {
+		logger.debug(`Opening messages tab for user ${event.user}`);
+		// check the message history if there was a prior interaction for this App DM
+		const history = await app.client.conversations.history({
+			token: context.botToken,
+			channel: event.channel,
+			count: 1 // we only need to check if >=1 messages exist
+		});
+		logger.debug(`History: ${JSON.stringify(history)}`);
+
+		// if there was no prior interaction (= 0 messages), it's safe to send a welcome message
+		if (history?.messages?.length === 0) {
+			logger.debug('No prior interaction, sending welcome message');
+			say({
+				text: welcome(event.user)
+			});
+		}
 	}
 });
 

@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
 import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED_HTTP_PROTOCOLS, ALLOWED_MTR_PROTOCOLS, ALLOWED_QUERY_TYPES, ALLOWED_TRACE_PROTOCOLS, DnsProtocol, DnsType, HttpMethod, HttpProtocol, isDnsProtocol, isDnsType, isHttpMethod, isHttpProtocol, isMtrProtocol, isQueryType, isTraceProtocol, MtrProtocol, PostMeasurement, QueryType, TraceProtocol } from './types';
-import { throwArgError } from './utils';
+import { throwArgError, throwOptError } from './utils';
 
 const ALLOWED_BASE_FLAGS = ['target', 'from', 'limit'] as const;
 const ALLOWED_PING_FLAGS = ['packets', ...ALLOWED_BASE_FLAGS] as const;
@@ -50,35 +50,35 @@ const checkFlags = (args: Record<string, string>): void => {
 	if (cmd === 'ping') {
 		for (const flag of flags) {
 			if (!isPingFlag(flag))
-				throwArgError(flag, 'ping', [...ALLOWED_PING_FLAGS].join(', '));
+				throwOptError(flag, 'ping', [...ALLOWED_PING_FLAGS].join(', '));
 		}
 	}
 
 	if (cmd === 'traceroute') {
 		for (const flag of flags) {
 			if (!isTraceFlag(flag))
-				throwArgError(flag, 'traceroute', [...ALLOWED_TRACE_FLAGS].join(', '));
+				throwOptError(flag, 'traceroute', [...ALLOWED_TRACE_FLAGS].join(', '));
 		}
 	}
 
 	if (cmd === 'dns') {
 		for (const flag of flags) {
 			if (!isDnsFlag(flag))
-				throwArgError(flag, 'dns', [...ALLOWED_DNS_FLAGS].join(', '));
+				throwOptError(flag, 'dns', [...ALLOWED_DNS_FLAGS].join(', '));
 		}
 	}
 
 	if (cmd === 'mtr') {
 		for (const flag of flags) {
 			if (!isMtrFlag(flag))
-				throwArgError(flag, 'mtr', [...ALLOWED_MTR_FLAGS].join(', '));
+				throwOptError(flag, 'mtr', [...ALLOWED_MTR_FLAGS].join(', '));
 		}
 	}
 
 	if (args.cmd === 'http') {
 		for (const flag of flags) {
 			if (!isHttpFlag(flag))
-				throwArgError(flag, 'http', [...ALLOWED_HTTP_FLAGS].join(', '));
+				throwOptError(flag, 'http', [...ALLOWED_HTTP_FLAGS].join(', '));
 		}
 	}
 };
@@ -88,12 +88,12 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	if (typeof args === 'string')
 		args = args.split(' ');
 
-	if ((args.indexOf('from') === 2 || args.indexOf('--from') === 2) && args[3]) {
+	if ((args.indexOf('from') === 2 || args.indexOf('--from') === 2) && (args[3] && !args[3].startsWith('--'))) {
 		args[2] = '--from';
 	} else if (args[0] === 'help' || args[1] === 'help' || args.includes('--help')) {
 		// Ensure help flag is added for parser to catch
 		args.push('--help');
-	} else if (args[1] && args[2] === undefined) {
+	} else if (args[1] && (args[2] === undefined || args[2].startsWith('--'))) {
 		// If no from flag is passed, default to world e.g. globalping ping jsdelivr.com
 		args.push('--from', 'world');
 	}

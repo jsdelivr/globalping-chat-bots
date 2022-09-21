@@ -16,6 +16,8 @@ You will want to enable the following **Bot Token Scopes** under the **OAuth & P
 6. `im:read`
 7. `mpim:read`
 8. `im:write`
+9. `im:history`
+10. `users:read`
 
 Setup the Globalping command by navigating to the **Slash Commands** tab in your app configuration and create new command `/globalping` with the request URL `https://<yourdomain.com>/slack/events`.
 
