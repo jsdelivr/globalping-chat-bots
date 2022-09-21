@@ -92,7 +92,7 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 		options: `--limit			  Number of probes - e.g. 1
 --packets			Number of packets - e.g. 4`,
 		examples: `/globalping ping jsdelivr.com from united kingdom
-globalping ping google.com from EU --limit 2 --packets 5`,
+/globalping ping google.com from EU --limit 2 --packets 5`,
 	},
 
 	'traceroute': {
@@ -102,7 +102,7 @@ globalping ping google.com from EU --limit 2 --packets 5`,
 --protocol		 Protocol to use - TCP | UDP | ICMP
 --port 			Port to use - e.g. 33434`,
 		examples: `/globalping traceroute jsdelivr.com from united kingdom
-/globalping traceroute google.com from EU --limit 2 --protocol TCP --port 33434`,
+/globalping traceroute google.com from EU --limit 2 --protocol tcp --port 33434`,
 	},
 
 	'dns': {
@@ -112,11 +112,11 @@ globalping ping google.com from EU --limit 2 --packets 5`,
 --query			Query type - A | AAAA | ANY | CNAME | DNSKEY | DS | MX | NS | NSEC | PTR | RRSIG | SOA | TXT | SRV
 --port			 Port to use - e.g. 53
 --protocol		 Protocol to use - UDP | TCP
---resolver		 Resolver to use - e.g.
+--resolver		 Resolver to use - e.g. 1.1.1.1
 --trace			Boolean flag to enable trace`,
 		examples: `/globalping dns jsdelivr.com from united kingdom
-/globalping dns google.com from EU --limit 2 --query A --port 53 --protocol UDP --resolver
-/globalping dns google.com from EU --limit 2 --query A --port 53 --protocol UDP --resolver --trace`,
+/globalping dns google.com from EU --limit 2 --query A --port 53 --protocol UDP --resolver 1.1.1.1
+/globalping dns google.com from new york --limit 2 --query A --port 53 --protocol udp --resolver 1.1.1.1 --trace`,
 	},
 
 
@@ -126,8 +126,8 @@ globalping ping google.com from EU --limit 2 --packets 5`,
 		options: `--limit			Number of probes - e.g. 1
 --protocol		 Protocol to use - TCP | UDP | ICMP
 --port 			Port to use - e.g. 33434`,
-		examples: `globalping mtr jsdelivr.com from united kingdom
-globalping mtr google.com from EU --limit 2 --protocol TCP --port 33434`,
+		examples: `/globalping mtr jsdelivr.com from united kingdom
+/globalping mtr google.com from new york --limit 2 --protocol tcp --port 33434`,
 	},
 
 	'http': {
@@ -142,7 +142,7 @@ globalping mtr google.com from EU --limit 2 --protocol TCP --port 33434`,
 --host 			Hostname
 --header		   Headers to use e.g. "Content-Type: text/html; charset=UTF-8"`,
 		examples: `/globalping http jsdelivr.com from united kingdom
-/globalping http google.com from EU --limit 2 --protocol HTTP --port 80 --method GET --path / --query --host --header`,
+/globalping http google.com from EU --limit 2 --protocol https --port 443 --method HEAD --path / --query a=1 --header Content-Type: text/html; charset=UTF-8 --header Accept-CH: Viewport-Width, Width`,
 	}
 
 };
