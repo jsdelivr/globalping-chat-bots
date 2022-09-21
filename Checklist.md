@@ -40,7 +40,7 @@ Since both frameworks don't support E2E testing, we have to manually test the bo
 
 - `/globalping ping google.com from badprobe` - No probes found at badprobe
 - `/globalping ping 1.1.1.1 from new york, london, badprobe --limit 2` - No probes found at badprobe
-- `/globalping ping 1.1.1.1 from new york, --limit 2`
+- `/globalping ping 1.1.1.1 from new york, --limit 2` - Empty location error
 - `/globalping ping google.com from eu, eu, eu, eu, eu, eu, eu, eu, eu, eu, eu --limit 2` - Too many locations
 
 - `/globalping` - Invalid command format

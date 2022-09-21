@@ -174,6 +174,9 @@ export const parseFlags = (args: Flags): PostMeasurement[] => {
 
 	const postArray: PostMeasurement[] = [];
 	for (const location of multiFrom) {
+		if (location === '')
+			throw new Error('Empty location! Run "/globalping help" for more information.');
+
 		const locations = [{ magic: location }];
 
 		switch (cmd) {
