@@ -70,7 +70,7 @@ export const help: Help = {
 /globalping dns <target> from <location> [options]
 /globalping mtr <target> from<location> [options]
 /globalping http <target> from <location> [options]`,
-		args: `<target>		A public endpoint, such as a hostname or IPv4 address - e.g. "jsdelivr.com"
+		args: `<target>		A public endpoint, such as a hostname or IPv4 address - e.g. "jsdelivr.com", "1.1.1.1"
 <from>		  Magic Location - It can be anything, a city, country, ISP provider, AS number and more. e.g. "germany", "eu", "aws", "55286"
 
 Magic locations can be combined with a comma to run a test from multiple locations in parallel. e.g. "germany, france, spain".
@@ -159,7 +159,7 @@ export const helpCmd = (cmd: string): string => {
 };
 
 export const welcome = (id: string) => `Hi <@${id}>! :wave:\nI help make running networking commands easy. To learn more about me, try running \`/globalping help!\`\n\n:zap: Here are some quick example commands to help you get started:
-\`/globalping ping jsdelivr.com from new york--packets 4\`
+\`/globalping ping jsdelivr.com from new york --packets 4\`
 \`/globalping traceroute jsdelivr.com from united kingdom --limit 2\`
 \`/globalping dns jsdelivr.com from eu --resolver 1.1.1.1\`
 \`/globalping mtr jsdelivr.com from new york, london --protocol udp\`

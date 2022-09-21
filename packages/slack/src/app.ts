@@ -114,7 +114,7 @@ app.event('app_home_opened', async ({ context, event, say }) => {
 			channel: event.channel,
 			count: 1 // we only need to check if >=1 messages exist
 		});
-		logger.debug(`History: ${JSON.stringify(history)}`);
+		// logger.debug(`History: ${JSON.stringify(history)}`);
 
 		// if there was no prior interaction (= 0 messages), it's safe to send a welcome message
 		if (history?.messages?.length === 0) {

@@ -37,6 +37,7 @@ Since both frameworks don't support E2E testing, we have to manually test the bo
 - `/globalping ping badtarget --limit 2` - Validation error
 - `/globalping ping google.com --packets 17` - Validation error
 - `/globalping ping google.com from new york, london --packets 0` - Validation error
+- `/globalping ping 127.0.0.1` - Validation error
 
 - `/globalping ping google.com from badprobe` - No probes found at badprobe
 - `/globalping ping 1.1.1.1 from new york, london, badprobe --limit 2` - No probes found at badprobe
