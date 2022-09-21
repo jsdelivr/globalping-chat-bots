@@ -21,7 +21,7 @@ You will want to enable the following **Bot Token Scopes** under the **OAuth & P
 
 Setup the Globalping command by navigating to the **Slash Commands** tab in your app configuration and create new command `/globalping` with the request URL `https://<yourdomain.com>/slack/events`.
 
-Navigate to **Event Subscriptions** in your app configuration and enable the feature. The request URL will also be `https://<yourdomain.com>/slack/events`. Scroll down to **Subscribe to Bot Events** and add `app_uninstalled` to the subscribed events.
+Navigate to **Event Subscriptions** in your app configuration and enable the feature. The request URL will also be `https://<yourdomain.com>/slack/events`. Scroll down to **Subscribe to Bot Events** and add `app_uninstalled` and `app_home_opened` to the subscribed events.
 
 Then navigate to **OAuth & Permissions** in your app configuration and click Add a Redirect URL. The redirect URL should be set to your domain with the `slack/oauth_redirect` path appended. e.g. `https://<yourdomain.com>/slack/oauth_redirect`
 
