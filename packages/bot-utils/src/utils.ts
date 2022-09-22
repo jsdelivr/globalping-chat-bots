@@ -76,6 +76,8 @@ export const help: Help = {
 Magic locations can be combined with a comma to run a test from multiple locations in parallel. e.g. "germany, france, spain".
 Alternatively, they can be combined with a plus to narrow the filter. e.g. "google+belgium" will match a server in Belgium hosted at Google Cloud DC.
 
+Providing no location will default to "world" which will match a probe from anywhere in the world. e.g. "/globalping ping jsdelivr.com"
+
 Location Schema: https://github.com/jsdelivr/globalping/blob/master/docs/measurement/schema/location.md`,
 		end: `/globalping ping --help
 /globalping traceroute --help
@@ -92,6 +94,7 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 		options: `--limit			  Number of probes - e.g. 1
 --packets			Number of packets - e.g. 4`,
 		examples: `/globalping ping jsdelivr.com from united kingdom
+/globalping ping 1.1.1.1 --limit 2
 /globalping ping google.com from EU --limit 2 --packets 5`,
 	},
 
@@ -102,6 +105,7 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 --protocol		 Protocol to use - TCP | UDP | ICMP
 --port 			Port to use - e.g. 33434`,
 		examples: `/globalping traceroute jsdelivr.com from united kingdom
+/globalping traceroute 1.1.1.1 --limit 2
 /globalping traceroute google.com from EU --limit 2 --protocol tcp --port 33434`,
 	},
 
@@ -116,6 +120,7 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 --trace			Boolean flag to enable trace`,
 		examples: `/globalping dns jsdelivr.com from united kingdom
 /globalping dns google.com from EU --limit 2 --query A --port 53 --protocol UDP --resolver 1.1.1.1
+/globalping dns one.one.one.one --limit 2
 /globalping dns google.com from new york --limit 2 --query A --port 53 --protocol udp --resolver 1.1.1.1 --trace`,
 	},
 
@@ -127,6 +132,7 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 --protocol		 Protocol to use - TCP | UDP | ICMP
 --port 			Port to use - e.g. 33434`,
 		examples: `/globalping mtr jsdelivr.com from united kingdom
+/globalping mtr 1.1.1.1 --limit 2
 /globalping mtr google.com from new york --limit 2 --protocol tcp --port 33434`,
 	},
 
@@ -142,6 +148,7 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 --host 			Hostname
 --header		   Headers to use e.g. "Content-Type: text/html; charset=UTF-8"`,
 		examples: `/globalping http jsdelivr.com from united kingdom
+/globalping http 1.1.1.1 --limit 2
 /globalping http google.com from EU --limit 2 --protocol https --port 443 --method HEAD --path / --query a=1 --header Content-Type: text/html; charset=UTF-8 --header Accept-CH: Viewport-Width, Width`,
 	}
 

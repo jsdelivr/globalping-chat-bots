@@ -23,6 +23,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 	} else {
 		const flags = parseFlags(args);
 		// We post measurement first to catch any validation errors before committing to processing request message
+		logger.debug(`Posting measurement: ${JSON.stringify(flags)}`);
 		const measurements = await postMeasurement(flags);
 		await client.chat.postEphemeral({ text: '```Processing request...```', user: user_id, channel: channel_id });
 		logger.debug(`Post response: ${JSON.stringify(measurements)}`);
