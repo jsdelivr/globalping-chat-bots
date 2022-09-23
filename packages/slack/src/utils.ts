@@ -44,7 +44,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 				const output = result.result.rawOutput.length > 2800 ? `\`\`\`${result.result.rawOutput.slice(0, 2800)}\n... (truncated)\`\`\`` : `\`\`\`${result.result.rawOutput}\`\`\``;
 
 				try {
-					await client.chat.postMessage({ text: `*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}*\n${output}`, channel: channel_id });
+					await client.chat.postMessage({ text: `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}*\n${output}`, channel: channel_id });
 				} catch (error) {
 					logger.error(error);
 					throw error;
