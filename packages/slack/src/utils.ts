@@ -39,7 +39,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const { channel_id, user_id } = payload;
 
-	if (args.cmd === 'help') {
+	if (args.help) {
 		await client.chat.postEphemeral({ text: helpCmd(args.cmd), user: user_id, channel: channel_id });
 	} else {
 		const flags = parseFlags(args);
