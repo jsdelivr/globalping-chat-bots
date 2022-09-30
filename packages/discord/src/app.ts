@@ -1,8 +1,9 @@
-import { formatAPIError, getMeasurement, help, parseFlags, postMeasurement } from '@globalping/bot-utils';
-import { Client, codeBlock, GatewayIntentBits, inlineCode, userMention } from 'discord.js';
+/* eslint-disable no-await-in-loop */
+import { formatAPIError, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { Client, GatewayIntentBits, inlineCode, userMention } from 'discord.js';
 import * as dotenv from 'dotenv';
 
-import { expandFlags, expandResults, getFlags, logger } from './utils';
+import { expandFlags, expandResults, getFlags, helpCmd, logger } from './utils';
 
 dotenv.config();
 
@@ -28,21 +29,30 @@ client.on('interactionCreate', async interaction => {
 		let txtCommand;
 		try {
 			const flags = getFlags(interaction);
-			if (flags.help) {
-				await interaction.editReply({ content: codeBlock(help[flags.cmd]) });
+			logger.debug(`Flags received: ${JSON.stringify(flags)}`);
+			if (flags.cmd === 'help') {
+				if (typeof flags.help !== 'string')
+					flags.help = 'help';
+
+				await interaction.editReply({ content: helpCmd(flags.help) });
 			} else {
 				const txtFlags = expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
 				txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
 
-				const measurement = parseFlags(flags);
-				const { id } = await postMeasurement(measurement);
-				const res = await getMeasurement(id);
-				await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
-				await expandResults(res, interaction);
+				const measurements = await postMeasurement(parseFlags(flags));
+
+				for (const measurement of measurements) {
+					const res = await getMeasurement(measurement.id);
+					logger.debug(`Get response: ${JSON.stringify(res)}`);
+					await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
+
+					await expandResults(res, interaction);
+				}
+
 			}
 		} catch (error) {
 			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand ?? 'help')}`);
-			await interaction.followUp({ content: codeBlock(formatAPIError(error)) });
+			await interaction.followUp({ content: formatAPIError(error) });
 		}
 	}
 });

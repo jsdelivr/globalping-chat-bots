@@ -1,12 +1,11 @@
 /* eslint-disable no-await-in-loop */
-import { errorParse, formatAPIError, welcome } from '@globalping/bot-utils';
-import { channelWelcome } from '@globalping/bot-utils/src/utils';
+import { errorParse, formatAPIError } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
 import * as database from './db';
 import { routes } from './routes';
-import { logger, postAPI } from './utils';
+import { channelWelcome, logger, postAPI, welcome } from './utils';
 
 dotenv.config();
 

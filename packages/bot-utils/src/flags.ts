@@ -39,7 +39,7 @@ export interface Flags {
 	path?: string
 	host?: string
 	headers?: { [header: string]: string }
-	help?: boolean
+	help?: QueryType | string | boolean
 }
 
 const checkFlags = (args: Record<string, string>): void => {

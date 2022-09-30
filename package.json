@@ -5,7 +5,8 @@
 	"scripts": {
 		"start": "pnpm --filter slack-bot start",
 		"dev": "pnpm --filter slack-bot start-pretty",
-		"test": "vitest"
+		"test": "vitest",
+		"lint": "eslint . --fix"
 	},
 	"author": "Ayuhito <hello@ayuhito.com>",
 	"engines": {
