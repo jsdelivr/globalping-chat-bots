@@ -34,7 +34,7 @@ export const formatAPIError = (error: unknown): string => {
 	// @ts-ignore Discord error format
 	if (error.code === 50_001)
 		return 'Missing access! Please add the Globalping bot to this channel!';
-	// @ts-ignore - skip for now
+
 	if (error instanceof PostError) {
 		const { location, response } = error;
 		const { body } = response;
