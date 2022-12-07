@@ -6,7 +6,8 @@
 		"start": "pnpm --filter slack-bot start",
 		"dev": "pnpm --filter slack-bot start-pretty",
 		"test": "vitest",
-		"lint": "eslint . --fix"
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix"
 	},
 	"author": "Ayuhito <hello@ayuhito.com>",
 	"engines": {
