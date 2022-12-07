@@ -10,7 +10,7 @@ export const throwOptError = (invalid: string | undefined, type: string, expecte
 interface APIError {
 	error: {
 		message: string
-		type: 'invalid_request_error' | 'api_error'
+		type: 'validation_error' | 'no_probes_found' | 'api_error'
 		params?: {
 			[key: string]: string
 		}
@@ -34,15 +34,15 @@ export const formatAPIError = (error: unknown): string => {
 	// @ts-ignore Discord error format
 	if (error.code === 50_001)
 		return 'Missing access! Please add the Globalping bot to this channel!';
-	// @ts-ignore - skip for now
+
 	if (error instanceof PostError) {
 		const { location, response } = error;
-		const { statusCode, body } = response;
+		const { body } = response;
 		const errObj: APIError = JSON.parse(body as string) as APIError;
-		if (errObj.error.type === 'invalid_request_error')
+		if (errObj.error.type === 'validation_error')
 			return `\`\`\`${errObj.error.message}\n${errObj.error.params ? Object.keys(errObj.error.params).map(key => `${errObj.error.params?.[key]}`).join('\n') : 'Unknown validation error.'}\`\`\`\nDocumentation and Support: https://github.com/jsdelivr/globalping`;
 
-		if (errObj.error.type === 'api_error' && statusCode === 400) {
+		if (errObj.error.type === 'no_probes_found') {
 			return `\`\`\`${errObj.error.message} at location ${location}\`\`\`\nDocumentation and Support: https://github.com/jsdelivr/globalping`;
 		}
 		if (errObj.error.type === 'api_error') {

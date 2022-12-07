@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/return-await */
 import type { Installation, InstallationQuery } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 import { Knex, knex as knexInstance } from 'knex';
