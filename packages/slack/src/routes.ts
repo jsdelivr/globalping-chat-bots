@@ -60,4 +60,17 @@ export const routes: CustomRoute[] = [
 			}
 		},
 	},
+	{
+		path: '/robots.txt',
+		method: ['GET'],
+		handler: async (_req, res) => {
+			try {
+				res.setHeader('Content-Type', 'text/plain');
+				fs.createReadStream(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/robots.txt')).pipe(res);
+			} catch (error) {
+				res.writeHead(503);
+				res.end(error);
+			}
+		}
+	}
 ];
