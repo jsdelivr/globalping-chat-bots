@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { Flags, help, loggerInit, MeasurementResponse, throwArgError } from '@globalping/bot-utils';
+import { Flags, getTag, help, loggerInit, MeasurementResponse, throwArgError } from '@globalping/bot-utils';
 import { ChatInputCommandInteraction, codeBlock } from 'discord.js';
 import * as dotenv from 'dotenv';
 
@@ -55,9 +55,10 @@ export const expandFlags = (flags: Flags): string => {
 export const expandResults = async (response: MeasurementResponse, interaction: ChatInputCommandInteraction) => {
 	const { results } = response;
 	for (const result of results) {
-		const msg = { content: `> **${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}**` };
+		const tag = getTag(result.probe.tags);
+		const msg = { content: `> **${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}**` };
 		// Discord has a limit of 2000 characters per block - truncate if necessary
-		const rawOutput = result.result.rawOutput.length > 1950 ? `${result.result.rawOutput.slice(0, 1950)}\n... (truncated)` : `${result.result.rawOutput}`;
+		const rawOutput = result.result.rawOutput.length > 1900 ? `${result.result.rawOutput.slice(0, 1900)}\n... (truncated)` : `${result.result.rawOutput}`;
 		const output = { content: codeBlock('shell', rawOutput) };
 		if (interaction.channel) {
 			await interaction.channel.send(msg);

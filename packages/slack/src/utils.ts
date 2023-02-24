@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { argsToFlags, getMeasurement, help, loggerInit, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { argsToFlags, getMeasurement, getTag, help, loggerInit, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
@@ -65,7 +65,8 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 				const output = result.result.rawOutput.length > 2800 ? `\`\`\`${result.result.rawOutput.slice(0, 2800)}\n... (truncated)\`\`\`` : `\`\`\`${result.result.rawOutput}\`\`\``;
 
 				try {
-					await client.chat.postMessage({ text: `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}*\n${output}`, channel: channel_id });
+					const tag = getTag(result.probe.tags);
+					await client.chat.postMessage({ text: `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}*\n${output}`, channel: channel_id });
 				} catch (error) {
 					logger.error(error);
 					throw error;
