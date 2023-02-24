@@ -126,6 +126,7 @@ interface SharedResults {
 		latitude: number
 		network: string
 		resolvers: string[]
+		tags: string[]
 	}
 	result: {
 		rawOutput: string

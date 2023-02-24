@@ -8,7 +8,7 @@ To run this setup, you need Node.js 16 installed. This monorepo uses PNPM worksp
 
 1. Clone repository
 2. `pnpm install`
-3. Finish Discord and Slack application setup
+3. Finish Discord and Slack application setup (separate apps/tokens should be setup for dev and prod)
 4. Deploy to a Render instance or run locally
 
 ## Discord Application Setup

@@ -20,3 +20,12 @@ export const getMeasurement = async (id: string): Promise<MeasurementResponse> =
 	}
 	return data;
 };
+
+export const getTag = (tags: string[]): string | undefined => {
+	if (tags.length === 0) return undefined;
+	// Iterarate through tags and return the first one that has its last character be a number
+	for (const tag of tags) {
+		if (Number.isInteger(Number(tag.slice(-1)))) return `(${tag})`;
+	}
+	return undefined;
+};
