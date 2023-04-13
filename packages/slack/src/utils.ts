@@ -1,7 +1,9 @@
 /* eslint-disable no-await-in-loop */
-import { argsToFlags, getMeasurement, getTag, help, loggerInit, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { argsToFlags, getMeasurement, help, loggerInit, parseFlags, postMeasurement } from '@globalping/bot-utils';
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
+
+import { measurementsChatResponse } from './response';
 
 dotenv.config();
 
@@ -43,11 +45,13 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 		await client.chat.postEphemeral({ text: helpCmd(args.cmd), user: user_id, channel: channel_id });
 	} else {
 		const flags = parseFlags(args);
+
 		// We post measurement first to catch any validation errors before committing to processing request message
 		logger.debug(`Posting measurement: ${JSON.stringify(flags)}`);
 		const measurements = await postMeasurement(flags);
 		await client.chat.postEphemeral({ text: '```Processing request...```', user: user_id, channel: channel_id });
 		logger.debug(`Post response: ${JSON.stringify(measurements)}`);
+		logger.debug(`Latency mode: ${args.latency}`);
 
 		let first = true;
 		// You can have multiple locations run in parallel
@@ -60,18 +64,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 				first = false;
 			}
 
-			for (const result of res.results) {
-				// Slack has a limit of 3000 characters per block - truncate if necessary
-				const output = result.result.rawOutput.length > 2800 ? `\`\`\`${result.result.rawOutput.slice(0, 2800)}\n... (truncated)\`\`\`` : `\`\`\`${result.result.rawOutput}\`\`\``;
-
-				try {
-					const tag = getTag(result.probe.tags);
-					await client.chat.postMessage({ text: `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}*\n${output}`, channel: channel_id });
-				} catch (error) {
-					logger.error(error);
-					throw error;
-				}
-			}
+			measurementsChatResponse(logger, client, channel_id, res, args.cmd, args.latency);
 		}
 	}
 };

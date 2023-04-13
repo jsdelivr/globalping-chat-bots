@@ -129,25 +129,22 @@ interface SharedResults {
 		tags: string[]
 	}
 	result: {
-		rawOutput: string
+		rawOutput: string,
+		stats: {
+			loss: number
+			min: number
+			avg: number
+			max: number
+		}
+		/* eslint-disable  @typescript-eslint/no-explicit-any */
+		timings: any
 	}
 }
 
 // Ping
-interface PingTimings {
-	ttl: number
-	rtt: number
-}
 export interface PingResult extends SharedResults {
 	resolvedAddress: string
 	resolvedHostname: string
-	stats: {
-		loss: number
-		min: number
-		avg: number
-		max: number
-	}
-	timing: PingTimings[]
 }
 
 // Trace

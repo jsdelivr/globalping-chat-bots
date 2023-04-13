@@ -103,7 +103,8 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 		preamble: 'Ping is a simple ICMP echo request to a target endpoint.',
 		usage: '/globalping ping <target> from <location> [options]',
 		options: `--limit			  Number of probes - e.g. 1
---packets			Number of packets - e.g. 4`,
+--packets			Number of packets - e.g. 4
+--latency		    Output only the stats of a measurement`,
 		examples: `/globalping ping jsdelivr.com from united kingdom
 /globalping ping 1.1.1.1 --limit 2
 /globalping ping google.com from EU --limit 2 --packets 5`,
@@ -123,12 +124,13 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 	'dns': {
 		preamble: 'DNS is a network protocol used to translate domain names to IP addresses.',
 		usage: '/globalping dns <target> from <location> [options]',
-		options: `--limit			Number of probes - e.g. 1
---query			Query type - A | AAAA | ANY | CNAME | DNSKEY | DS | MX | NS | NSEC | PTR | RRSIG | SOA | TXT | SRV
---port			 Port to use - e.g. 53
---protocol		 Protocol to use - UDP | TCP
---resolver		 Resolver to use - e.g. 1.1.1.1
---trace			Boolean flag to enable trace`,
+		options: `--limit            Number of probes - e.g. 1
+--latency          Output only the stats of a measurement
+--query            Query type - A | AAAA | ANY | CNAME | DNSKEY | DS | MX | NS | NSEC | PTR | RRSIG | SOA | TXT | SRV
+--port             Port to use - e.g. 53
+--protocol         Protocol to use - UDP | TCP
+--resolver         Resolver to use - e.g. 1.1.1.1
+--trace            Boolean flag to enable trace`,
 		examples: `/globalping dns jsdelivr.com from united kingdom
 /globalping dns google.com from EU --limit 2 --query A --port 53 --protocol UDP --resolver 1.1.1.1
 /globalping dns one.one.one.one --limit 2
@@ -150,14 +152,15 @@ For more information, see the Globalping documentation: https://github.com/jsdel
 	'http': {
 		preamble: 'HTTP is a network protocol used to transfer data between a client and a server.',
 		usage: '/globalping http <target> from <location> [options]',
-		options: `--limit			Number of probes - e.g. 1
---protocol		 Protocol to use - HTTP | HTTPS | HTTP2
---port 			Port to use - e.g. 80
---method		   HTTP method - HEAD | GET
---path			 URL pathname - e.g. /
---query			Query string
---host 			Hostname
---header		   Headers to use e.g. "Content-Type: text/html; charset=UTF-8"`,
+		options: `--limit            Number of probes - e.g. 1
+--latency          Output only the stats of a measurement
+--protocol         Protocol to use - HTTP | HTTPS | HTTP2
+--port             Port to use - e.g. 80
+--method           HTTP method - HEAD | GET
+--path             URL pathname - e.g. /
+--query            Query string
+--host             Hostname
+--header           Headers to use e.g. "Content-Type: text/html; charset=UTF-8"`,
 		examples: `/globalping http jsdelivr.com from united kingdom
 /globalping http 1.1.1.1 --limit 2
 /globalping http google.com from EU --limit 2 --protocol https --port 443 --method HEAD --path / --query a=1 --header Content-Type: text/html; charset=UTF-8 --header Accept-CH: Viewport-Width, Width`,
