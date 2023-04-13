@@ -129,7 +129,14 @@ interface SharedResults {
 		tags: string[]
 	}
 	result: {
-		rawOutput: string
+		rawOutput: string,
+		stats: {
+			loss: number
+			min: number
+			avg: number
+			max: number
+		}
+		timings: any
 	}
 }
 
@@ -141,13 +148,6 @@ interface PingTimings {
 export interface PingResult extends SharedResults {
 	resolvedAddress: string
 	resolvedHostname: string
-	stats: {
-		loss: number
-		min: number
-		avg: number
-		max: number
-	}
-	timing: PingTimings[]
 }
 
 // Trace

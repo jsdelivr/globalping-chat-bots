@@ -4,7 +4,7 @@ import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED
 import { throwArgError, throwOptError } from './utils';
 
 const ALLOWED_BASE_FLAGS = ['target', 'from', 'limit'] as const;
-const ALLOWED_PING_FLAGS = ['packets', ...ALLOWED_BASE_FLAGS] as const;
+const ALLOWED_PING_FLAGS = ['packets', 'latency', ...ALLOWED_BASE_FLAGS] as const;
 type PingFlags = typeof ALLOWED_PING_FLAGS[number];
 const isPingFlag = (flag: string): flag is PingFlags => ALLOWED_PING_FLAGS.includes(flag as PingFlags);
 
@@ -12,7 +12,7 @@ const ALLOWED_TRACE_FLAGS = ['protocol', 'port', ...ALLOWED_BASE_FLAGS] as const
 type TraceFlags = typeof ALLOWED_TRACE_FLAGS[number];
 const isTraceFlag = (flag: string): flag is TraceFlags => ALLOWED_TRACE_FLAGS.includes(flag as TraceFlags);
 
-const ALLOWED_DNS_FLAGS = ['query', 'protocol', 'port', 'resolver', 'trace', ...ALLOWED_BASE_FLAGS] as const;
+const ALLOWED_DNS_FLAGS = ['query', 'protocol', 'port', 'resolver', 'trace', 'latency', ...ALLOWED_BASE_FLAGS] as const;
 type DnsFlags = typeof ALLOWED_DNS_FLAGS[number];
 const isDnsFlag = (flag: string): flag is DnsFlags => ALLOWED_DNS_FLAGS.includes(flag as DnsFlags);
 
@@ -20,7 +20,7 @@ const ALLOWED_MTR_FLAGS = ['protocol', 'port', 'packets', ...ALLOWED_BASE_FLAGS]
 type MtrFlags = typeof ALLOWED_MTR_FLAGS[number];
 const isMtrFlag = (flag: string): flag is MtrFlags => ALLOWED_MTR_FLAGS.includes(flag as MtrFlags);
 
-const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'method', 'path', 'query', 'host', 'header', ...ALLOWED_BASE_FLAGS] as const;
+const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'method', 'path', 'query', 'host', 'header', 'latency', ...ALLOWED_BASE_FLAGS] as const;
 type HttpFlags = typeof ALLOWED_HTTP_FLAGS[number];
 const isHttpFlag = (flag: string): flag is HttpFlags => ALLOWED_HTTP_FLAGS.includes(flag as HttpFlags);
 
@@ -40,6 +40,7 @@ export interface Flags {
 	host?: string
 	headers?: { [header: string]: string }
 	help?: QueryType | string | boolean
+	latency?: boolean
 }
 
 const checkFlags = (args: Record<string, string>): void => {
@@ -103,7 +104,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 
 
 	const parsed = parser(args, {
-		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help'],
+		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency'],
 		configuration: {
 			'greedy-arrays': true,
 		}
@@ -161,7 +162,8 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		...parsed.path && { path: String(parsed.path[0]) },
 		...parsed.host && { host: String(parsed.host[0]) },
 		...headers && { headers },
-		...parsed.help && { help: true }
+		...parsed.help && { help: true },
+		...parsed.latency && { latency: true },
 	};
 
 	return flags;

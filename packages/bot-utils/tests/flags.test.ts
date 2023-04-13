@@ -33,7 +33,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect ping flag', () => {
 				const args = 'ping google.com from New York --limit 2 --packets 3 --protocol icmp';
-				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid option "protocol" for "ping"!\nExpected "packets, target, from, limit".');
+				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid option "protocol" for "ping"!\nExpected "packets, latency, target, from, limit".');
 			});
 		});
 
@@ -99,14 +99,14 @@ describe('Utils', () => {
 						protocol: 'TCP',
 						port: 80,
 						resolver: '1.1.1.1',
-						trace: true
+						trace: true,
 					}
 				}]);
 			});
 
 			it('should throw if incorrect dns flag', () => {
 				const args = 'dns google.com from New York --limit 2 --query AAAA --protocol tcp --port 80 --test';
-				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid option "test" for "dns"!\nExpected "query, protocol, port, resolver, trace, target, from, limit".');
+				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid option "test" for "dns"!\nExpected "query, protocol, port, resolver, trace, latency, target, from, limit".');
 			});
 		});
 
@@ -214,7 +214,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect http flag', () => {
 				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header Content-Encoding: gzip --header Content-Type: text/html; charset=utf-8 --test';
-				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid option "test" for "http"!\nExpected "protocol, port, method, path, query, host, header, target, from, limit".');
+				expect(() => parseFlags(argsToFlags(args))).toThrow('Invalid option "test" for "http"!\nExpected "protocol, port, method, path, query, host, header, latency, target, from, limit".');
 			});
 		});
 	});
