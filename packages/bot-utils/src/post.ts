@@ -1,6 +1,7 @@
 import got, { HTTPError } from 'got';
 
 import type { PostMeasurement, PostMeasurementResponse } from './types';
+import { userAgent } from './user-agent';
 import { PostError } from './utils';
 
 export const postMeasurement = async (optsArr: PostMeasurement[]): Promise<PostMeasurementResponse[]> => {
@@ -13,6 +14,8 @@ export const postMeasurement = async (optsArr: PostMeasurement[]): Promise<PostM
 			const res = await got.post('https://api.globalping.io/v1/measurements', {
 				headers: {
 					'Content-Type': 'application/json',
+					'User-Agent': userAgent(),
+					'Accept-Encoding': 'br',
 				},
 				json: opts,
 			});

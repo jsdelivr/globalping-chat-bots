@@ -51,6 +51,7 @@ interface Locations {
 interface SharedMeasurement {
 	target: string
 	limit: number
+	inProgressUpdates: boolean
 	locations: Locations[]
 }
 

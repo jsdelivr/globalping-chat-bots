@@ -186,6 +186,7 @@ export const parseFlags = (args: Flags): PostMeasurement[] => {
 				postArray.push({
 					type: 'ping',
 					target,
+					inProgressUpdates: false,
 					limit,
 					locations,
 					measurementOptions: {
@@ -199,6 +200,7 @@ export const parseFlags = (args: Flags): PostMeasurement[] => {
 				postArray.push({
 					type: 'traceroute',
 					target,
+					inProgressUpdates: false,
 					limit,
 					locations,
 					measurementOptions: {
@@ -213,6 +215,7 @@ export const parseFlags = (args: Flags): PostMeasurement[] => {
 				postArray.push({
 					type: 'dns',
 					target,
+					inProgressUpdates: false,
 					limit,
 					locations,
 					measurementOptions: {
@@ -230,6 +233,7 @@ export const parseFlags = (args: Flags): PostMeasurement[] => {
 				postArray.push({
 					type: 'mtr',
 					target,
+					inProgressUpdates: false,
 					limit,
 					locations,
 					measurementOptions: {
@@ -245,6 +249,7 @@ export const parseFlags = (args: Flags): PostMeasurement[] => {
 				postArray.push({
 					type: 'http',
 					target,
+					inProgressUpdates: false,
 					limit,
 					locations,
 					measurementOptions: {

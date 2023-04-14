@@ -11,6 +11,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'ping',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {}
@@ -23,6 +24,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'ping',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 2,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {
@@ -44,6 +46,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'traceroute',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {}
@@ -56,6 +59,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'traceroute',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 2,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {
@@ -78,6 +82,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'dns',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {}
@@ -90,6 +95,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'dns',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 2,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {
@@ -117,6 +123,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'mtr',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {}
@@ -129,6 +136,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'mtr',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 2,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {
@@ -152,6 +160,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'http',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {
@@ -167,6 +176,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'http',
 					target: 'google.com',
+					inProgressUpdates: false,
 					limit: 2,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {
@@ -193,6 +203,7 @@ describe('Utils', () => {
 				expect(result).toEqual([{
 					type: 'http',
 					target: 'https://google.com:80/test?a=abc',
+					inProgressUpdates: false,
 					limit: 2,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {
