@@ -11,13 +11,13 @@
 	"author": "Ayuhito <declininglotus@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
-		"got": "^12.3.0",
-		"pino": "^8.5.0",
-		"pino-std-serializers": "^6.0.0",
+		"got": "^12.6.0",
+		"pino": "^8.11.0",
+		"pino-std-serializers": "^6.2.0",
 		"yargs-parser": "^21.1.1"
 	},
 	"devDependencies": {
 		"@types/yargs-parser": "^21.0.0",
-		"pkgroll": "^1.4.0"
+		"pkgroll": "^1.9.0"
 	}
 }

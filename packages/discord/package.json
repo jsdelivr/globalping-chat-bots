@@ -12,10 +12,10 @@
 	"author": "Ayuhito <declininglotus@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
-		"@discordjs/rest": "^1.0.1",
+		"@discordjs/rest": "^1.7.0",
 		"@globalping/bot-utils": "workspace:*",
-		"discord.js": "^14.2.0",
-		"dotenv": "^16.0.1",
-		"pino-pretty": "^9.0.0"
+		"discord.js": "^14.9.0",
+		"dotenv": "^16.0.3",
+		"pino-pretty": "^10.0.0"
 	}
 }
