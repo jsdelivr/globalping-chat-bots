@@ -70,8 +70,8 @@ class MeasurementsFetcher {
 
 export const ApiUrl = 'https://api.globalping.io/v1/measurements';
 
-
-const apiPollInterval = 500;
+// api poll interval in milliseconds
+const apiPollInterval = 1000;
 
 export const getMeasurement = async (id: string): Promise<MeasurementResponse> => {
 	const measurementsFetcher = new MeasurementsFetcher(ApiUrl);
