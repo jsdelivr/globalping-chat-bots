@@ -1,7 +1,7 @@
 {
 	"name": "globalping-chat-bots",
 	"private": true,
-	"packageManager": "pnpm@7.8.0",
+	"packageManager": "pnpm@8.2.0",
 	"scripts": {
 		"start": "pnpm --filter slack-bot start",
 		"dev": "pnpm --filter slack-bot start-pretty",
@@ -11,7 +11,7 @@
 	},
 	"author": "Ayuhito <hello@ayuhito.com>",
 	"engines": {
-		"node": ">=18.16.0"
+		"node": ">=18.15.0"
 	},
 	"license": "MIT",
 	"dependencies": {
