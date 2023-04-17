@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED_HTTP_PROTOCOLS, ALLOWED_MTR_PROTOCOLS, ALLOWED_QUERY_TYPES, ALLOWED_TRACE_PROTOCOLS, DnsProtocol, DnsType, HttpMethod, HttpProtocol, isDnsProtocol, isDnsType, isHttpMethod, isHttpProtocol, isMtrProtocol, isQueryType, isTraceProtocol, MtrProtocol, PostMeasurement, QueryType, TraceProtocol } from './types';
+import { ALLOWED_QUERY_TYPES, DnsProtocol, DnsType, HttpMethod, HttpProtocol, isQueryType, MtrProtocol, QueryType, TraceProtocol } from './types';
 import { throwArgError, throwOptError } from './utils';
 
 const ALLOWED_BASE_FLAGS = ['target', 'from', 'limit'] as const;
@@ -43,10 +43,13 @@ export interface Flags {
 	latency?: boolean
 }
 
-const checkFlags = (args: Record<string, string>): void => {
-	const skipFlags = new Set(['cmd', '--', '_', 'help']);
+const checkFlags = (cmd: string, args: Record<string, string>): void => {
+	const skipFlags = new Set(['--', '_', 'help']);
 	const flags = Object.keys(args).filter(item => !skipFlags.has(item));
-	const cmd = isQueryType(args.cmd) ? args.cmd : throwArgError(args.cmd, 'command', [...ALLOWED_QUERY_TYPES].join(', '));
+
+	if (!isQueryType(cmd)) {
+		throwArgError(cmd, 'command', [...ALLOWED_QUERY_TYPES].join(', '));
+	}
 
 	if (cmd === 'ping') {
 		for (const flag of flags) {
@@ -76,7 +79,7 @@ const checkFlags = (args: Record<string, string>): void => {
 		}
 	}
 
-	if (args.cmd === 'http') {
+	if (cmd === 'http') {
 		for (const flag of flags) {
 			if (!isHttpFlag(flag))
 				throwOptError(flag, 'http', [...ALLOWED_HTTP_FLAGS].join(', '));
@@ -91,32 +94,35 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 
 	if ((args.indexOf('from') === 2 || args.indexOf('--from') === 2) && (args[3] && !args[3].startsWith('--'))) {
 		args[2] = '--from';
-	} else if (args[0] === 'help' || args[1] === 'help' || args.includes('--help')) {
+	} else if (args[0] === 'help' || args[1] === 'help') {
 		// Ensure help flag is added for parser to catch
 		args.push('--help');
-	} else if (args[1] && (args[2] === undefined || args[2].startsWith('--'))) {
-		// If no from flag is passed, default to world e.g. globalping ping jsdelivr.com
-		args.push('--from', 'world');
-	}
-	else {
-		throw new Error('Invalid command format! Run "/globalping help" for more information.');
 	}
 
+	const flagAlias = {
+		'help': ['h'],
+		'from': ['F'],
+		'limit': ['L'],
+		'header': ['H'],
+	};
 
 	const parsed = parser(args, {
 		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency'],
+		alias: flagAlias,
 		configuration: {
 			'greedy-arrays': true,
+			'strip-aliased': true,
 		}
 	});
 
 	// Add to parsed for checkFlags later
-	parsed.cmd = String(parsed._[0]).toLowerCase();
+	const cmd = parsed._[0] ? String(parsed._[0]).toLowerCase() : undefined;
+	const targetQueryStr = parsed._[1] ? String(parsed._[1]) : undefined;
 
 	// Try to infer parameters from URL
-	if (parsed.cmd === 'http') {
+	if (cmd === 'http' && targetQueryStr) {
 		try {
-			const url = new URL(parsed._[1] as string);
+			const url = new URL(targetQueryStr);
 
 			// If a flag  isn't passed to override, infer from URL obj instead
 			if (!parsed.host && url.hostname) parsed.host = [url.hostname];
@@ -129,7 +135,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		}
 	}
 	// Throw on any invalid flags
-	if (parsed.help === undefined) checkFlags(parsed);
+	if (cmd && parsed.help === undefined) checkFlags(cmd, parsed);
 
 	type Headers = { [header: string]: string };
 	let headers: Headers | undefined;
@@ -147,10 +153,12 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		}
 	}
 
+	const from = parsed.from ? String(parsed.from.join(' ')).toLowerCase() : 'world';
+
 	const flags: Flags = {
-		cmd: parsed.cmd,
-		target: String(parsed._[1]),
-		from: String(parsed.from?.join(' ')).toLowerCase(),
+		cmd,
+		target: targetQueryStr,
+		from,
 		limit: parsed.limit ? Number(parsed.limit) : 1,
 		...parsed.packets && { packets: Number(parsed.packets[0]) },
 		...parsed.protocol && { protocol: String(parsed.protocol[0]).toUpperCase() },
@@ -169,109 +177,3 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	return flags;
 };
 
-export const parseFlags = (args: Flags): PostMeasurement[] => {
-	const { cmd, target, from, limit, packets, protocol, port, query, resolver, trace, path, method, host, headers } = args;
-	const multiFrom = from.split(',').map((f) => f.trim());
-	if (multiFrom.length > 10) throw new Error('You can only query up to 10 different locations at once!');
-
-	const postArray: PostMeasurement[] = [];
-	for (const location of multiFrom) {
-		if (location === '')
-			throw new Error('Empty location! Run "/globalping help" for more information.');
-
-		const locations = [{ magic: location }];
-
-		switch (cmd) {
-			case 'ping': {
-				postArray.push({
-					type: 'ping',
-					target,
-					inProgressUpdates: false,
-					limit,
-					locations,
-					measurementOptions: {
-						...packets && { packets },
-					}
-				});
-
-				break;
-			}
-			case 'traceroute': {
-				postArray.push({
-					type: 'traceroute',
-					target,
-					inProgressUpdates: false,
-					limit,
-					locations,
-					measurementOptions: {
-						...protocol && { protocol: isTraceProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_TRACE_PROTOCOLS].join(', ')) },
-						...port && { port },
-					}
-				});
-
-				break;
-			}
-			case 'dns': {
-				postArray.push({
-					type: 'dns',
-					target,
-					inProgressUpdates: false,
-					limit,
-					locations,
-					measurementOptions: {
-						...query && { query: { type: isDnsType(query) ? query : throwArgError(query, 'query', [...ALLOWED_DNS_TYPES].join(', ')) } },
-						...protocol && { protocol: isDnsProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_DNS_PROTOCOLS].join(', ')) },
-						...port && { port },
-						...resolver && { resolver },
-						...trace && { trace },
-					}
-				});
-
-				break;
-			}
-			case 'mtr': {
-				postArray.push({
-					type: 'mtr',
-					target,
-					inProgressUpdates: false,
-					limit,
-					locations,
-					measurementOptions: {
-						...protocol && { protocol: isMtrProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_MTR_PROTOCOLS].join(', ')) },
-						...port && { port },
-						...packets && { packets },
-					}
-				});
-
-				break;
-			}
-			case 'http': {
-				postArray.push({
-					type: 'http',
-					target,
-					inProgressUpdates: false,
-					limit,
-					locations,
-					measurementOptions: {
-						...port && { port },
-						...protocol && { protocol: isHttpProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS].join(', ')) },
-						request: {
-							...path && { path },
-							...query && { query },
-							...method && { method: isHttpMethod(method) ? method : throwArgError(method, 'method', [...ALLOWED_HTTP_METHODS].join(', ')) },
-							...host && { host },
-							...headers && { headers },
-						}
-					}
-				});
-
-				break;
-			}
-			default: {
-				throwArgError(String(cmd), 'command', [...ALLOWED_QUERY_TYPES].join(', '));
-				throw new Error('Unknown error.');
-			}
-		}
-	}
-	return postArray;
-};

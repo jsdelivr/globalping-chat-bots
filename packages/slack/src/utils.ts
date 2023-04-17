@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { argsToFlags, getMeasurement, help, loggerInit, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { argsToFlags, buildPostMeasurements, getMeasurement, help, loggerInit, postMeasurement } from '@globalping/bot-utils';
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
@@ -10,7 +10,7 @@ dotenv.config();
 export const logger = loggerInit('slack', process.env.LOG_LEVEL ?? 'info');
 
 export const helpCmd = (cmd: string): string => {
-	if (cmd === 'help') return `${help.help.preamble}\n\n*Usage:*\n\`\`\`${help.help.usage}\`\`\`\n\n*Arguments*:\n\`\`\`${help.help.args}\`\`\`\n\nMore help can be found here:\n\`\`\`${help.help.end}\`\`\``;
+	if (!cmd || cmd === 'help') return `${help.help.preamble}\n\n*Usage:*\n\`\`\`${help.help.usage}\`\`\`\n\n*Arguments*:\n\`\`\`${help.help.args}\`\`\`\n\nMore help can be found here:\n\`\`\`${help.help.end}\`\`\``;
 	if (cmd === 'ping') return `${help.ping.preamble}\n\n*Usage:*\n\`\`\`${help.ping.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.ping.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.ping.examples}\`\`\``;
 	if (cmd === 'traceroute') return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
 	if (cmd === 'dns') return `${help.dns.preamble}\n\n*Usage:*\n\`\`\`${help.dns.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.dns.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.dns.examples}\`\`\``;
@@ -36,22 +36,22 @@ interface ChannelPayload {
 }
 
 export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdText: string) => {
-	const args = argsToFlags(cmdText);
+	const flags = argsToFlags(cmdText);
 
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const { channel_id, user_id } = payload;
 
-	if (args.help) {
-		await client.chat.postEphemeral({ text: helpCmd(args.cmd), user: user_id, channel: channel_id });
+	if (!flags.cmd || flags.help) {
+		await client.chat.postEphemeral({ text: helpCmd(flags.cmd), user: user_id, channel: channel_id });
 	} else {
-		const flags = parseFlags(args);
+		const postMeasurements = buildPostMeasurements(flags);
 
 		// We post measurement first to catch any validation errors before committing to processing request message
-		logger.debug(`Posting measurement: ${JSON.stringify(flags)}`);
-		const measurements = await postMeasurement(flags);
+		logger.debug(`Posting measurement: ${JSON.stringify(postMeasurements)}`);
+		const measurements = await postMeasurement(postMeasurements);
 		await client.chat.postEphemeral({ text: '```Processing request...```', user: user_id, channel: channel_id });
 		logger.debug(`Post response: ${JSON.stringify(measurements)}`);
-		logger.debug(`Latency mode: ${args.latency}`);
+		logger.debug(`Latency mode: ${flags.latency}`);
 
 		let first = true;
 		// You can have multiple locations run in parallel
@@ -64,7 +64,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 				first = false;
 			}
 
-			measurementsChatResponse(logger, client, channel_id, res, args.cmd, args.latency);
+			measurementsChatResponse(logger, client, channel_id, res, flags.cmd, flags.latency);
 		}
 	}
 };

@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { formatAPIError, getMeasurement, parseFlags, postMeasurement } from '@globalping/bot-utils';
+import { buildPostMeasurements, formatAPIError, getMeasurement, postMeasurement } from '@globalping/bot-utils';
 import { Client, GatewayIntentBits, inlineCode, userMention } from 'discord.js';
 import * as dotenv from 'dotenv';
 
@@ -39,7 +39,7 @@ client.on('interactionCreate', async interaction => {
 				const txtFlags = expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
 				txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
 
-				const measurements = await postMeasurement(parseFlags(flags));
+				const measurements = await postMeasurement(buildPostMeasurements(flags));
 
 				for (const measurement of measurements) {
 					const res = await getMeasurement(measurement.id);
