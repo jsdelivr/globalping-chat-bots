@@ -11,7 +11,7 @@
 	},
 	"author": "Ayuhito <hello@ayuhito.com>",
 	"engines": {
-		"node": ">=18.15.0"
+		"node": "^18.15.0"
 	},
 	"license": "MIT",
 	"dependencies": {
