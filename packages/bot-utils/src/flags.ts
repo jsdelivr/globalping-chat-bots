@@ -87,6 +87,19 @@ const checkFlags = (cmd: string, args: Record<string, string>): void => {
 	}
 };
 
+interface UrlData {
+	target: string
+	host: string
+	path: string
+	port?: number
+	protocol?: string
+	query?: string
+}
+
+interface HttpHeaders {
+	[header: string]: string
+};
+
 export const argsToFlags = (argv: string | string[]): Flags => {
 	let args = argv;
 	if (typeof args === 'string')
@@ -110,66 +123,68 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency'],
 		alias: flagAlias,
 		configuration: {
-			'greedy-arrays': true,
 			'strip-aliased': true,
 		}
 	});
 
 	// Add to parsed for checkFlags later
 	const cmd = parsed._[0] ? String(parsed._[0]).toLowerCase() : undefined;
-	const targetQueryStr = parsed._[1] ? String(parsed._[1]) : undefined;
+	let target = parsed._[1] ? String(parsed._[1]) : undefined;
 
-	// Try to infer parameters from URL
-	if (cmd === 'http' && targetQueryStr) {
-		try {
-			const url = new URL(targetQueryStr);
+	let host = parsed.host ? String(parsed.host) : undefined;
+	let path = parsed.path ? String(parsed.path) : undefined;
+	let port = parsed.port ? Number(parsed.port) : undefined;
+	let protocol = parsed.protocol ? String(parsed.protocol).toUpperCase() : undefined;
+	let httpQuery = parsed.query ? String(parsed.query) : undefined;
+	const httpMethod = parsed.method ? String(parsed.method).toUpperCase() : undefined;
 
-			// If a flag  isn't passed to override, infer from URL obj instead
-			if (!parsed.host && url.hostname) parsed.host = [url.hostname];
-			if (!parsed.path && url.pathname) parsed.path = [url.pathname];
-			if (!parsed.port && url.port) parsed.port = [Number(url.port)];
-			if (!parsed.protocol && url.protocol) parsed.protocol = [url.protocol.replace(':', '')];
-			if (!parsed.query && url.search) parsed.query = [url.search];
-		} catch {
-			// Do nothing
-		}
-	}
 	// Throw on any invalid flags
 	if (cmd && parsed.help === undefined) checkFlags(cmd, parsed);
 
-	type Headers = { [header: string]: string };
-	let headers: Headers | undefined;
-	if (parsed.header) {
-		headers = {};
+	let urlData: UrlData | undefined;
+	let httpHeaders: HttpHeaders | undefined;
 
-		let key;
-		for (const item of parsed.header) {
-			// Typical input would be Content-Type: text/html; charset=utf-8
-			// Arr representation is ['Content-Type', 'text/html;', 'charset=utf-8']
-			if (item.endsWith(':'))
-				key = item.slice(0, -1);
-			else
-				headers[key] = headers[key] ? `${headers[key]} ${item}` : item;
+	if (cmd === 'http' && target) {
+		urlData = parseUrlData(target);
+
+		target = urlData.target;
+
+		if (!host) {
+			host = urlData.host;
 		}
+		if (!path) {
+			path = urlData.path;
+		}
+		if (!port) {
+			port = urlData.port;
+		}
+		if (!protocol) {
+			protocol = urlData.protocol;
+		}
+		if (!httpQuery) {
+			httpQuery = urlData.query;
+		}
+
+		httpHeaders = parseHttpHeaders(parsed.header);
 	}
 
 	const from = parsed.from ? String(parsed.from.join(' ')).toLowerCase() : 'world';
 
 	const flags: Flags = {
 		cmd,
-		target: targetQueryStr,
+		target,
 		from,
 		limit: parsed.limit ? Number(parsed.limit) : 1,
-		...parsed.packets && { packets: Number(parsed.packets[0]) },
-		...parsed.protocol && { protocol: String(parsed.protocol[0]).toUpperCase() },
-		...parsed.port && { port: Number(parsed.port[0]) },
-		...parsed.resolver && { resolver: String(parsed.resolver[0]) },
+		...parsed.packets && { packets: Number(parsed.packets) },
+		protocol,
+		port,
+		...parsed.resolver && { resolver: String(parsed.resolver) },
 		...parsed.trace && { trace: true },
-		...parsed.query && { query: String(parsed.query[0]) }, // Case choice has to be done at cmd level
-		...parsed.method && { method: String(parsed.method[0]).toUpperCase() },
-		...parsed.path && { path: String(parsed.path[0]) },
-		...parsed.host && { host: String(parsed.host[0]) },
-		...headers && { headers },
+		query: httpQuery,
+		method: httpMethod,
+		path,
+		host,
+		headers: httpHeaders,
 		...parsed.help && { help: true },
 		...parsed.latency && { latency: true },
 	};
@@ -177,3 +192,62 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	return flags;
 };
 
+function parseUrlData(input: string): UrlData {
+	const urlData = {} as UrlData;
+
+	let u = input;
+
+	// add url scheme if missing
+	if (!u.startsWith('http://') && !u.startsWith('https://')) {
+		u = `http://${u}`;
+	}
+
+	try {
+		const url = new URL(u);
+
+		urlData.target = url.hostname;
+		urlData.host = url.hostname;
+		urlData.path = url.pathname;
+		urlData.port = url.port ? Number(url.port) : undefined;
+		urlData.protocol = url.protocol ? url.protocol.replace(':', '').toUpperCase() : undefined;
+		urlData.query = url.search ? url.search.slice(1) : undefined;
+	} catch {
+		// parsing failed
+		throw new Error('Invalid http target');
+	}
+	return urlData;
+}
+
+
+function parseHttpHeaders(rawHeaders: string[]): HttpHeaders {
+	const headers = {} as HttpHeaders;
+	if (!rawHeaders) {
+		return headers;
+	}
+
+	let currentKey = '';
+	let currentValue = '';
+
+	for (const item of rawHeaders) {
+		// yargs parsers splits all --header inputs on whitespace and provides them as a single array
+		// replace quoting chars used in command
+		const str = item.replace('‘', '').replace('’', '').replace('“', '').replace('”', '').replace('"', '').replace('\'', '');
+		if (str.endsWith(':')) {
+			if (currentKey !== '') {
+				headers[currentKey] = currentValue.trim();
+			}
+
+			currentKey = str.slice(0, -1);
+			currentValue = '';
+		} else {
+			currentValue += `${str} `;
+		}
+	}
+
+	if (currentValue !== '') {
+		headers[currentKey] = currentValue.trim();
+		currentValue = '';
+	}
+
+	return headers;
+}
