@@ -40,6 +40,7 @@ describe('Utils', () => {
                     query: '?a=abc',
                     target: 'google.com',
                     latency: true,
+                    headers: {},
                 };
 
                 expect(result).toEqual(flags);
@@ -60,6 +61,56 @@ describe('Utils', () => {
                     protocol: 'HTTPS',
                     query: 'abc=123&xyz=test',
                     target: 'www.example.com',
+                    headers: {},
+                };
+
+                expect(result).toEqual(flags);
+            });
+
+            it('with 1 simple', () => {
+                const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency -H "AB: 123z" ';
+                const result = argsToFlags(args);
+
+                const flags: Flags = {
+                    cmd: 'http',
+                    from: 'new york',
+                    host: 'google.fr',
+                    limit: 2,
+                    method: 'GET',
+                    path: '/',
+                    port: 80,
+                    protocol: 'HTTP2',
+                    query: '?a=abc',
+                    target: 'google.com',
+                    latency: true,
+                    headers: {
+                        'AB': '123z',
+                    },
+                };
+
+                expect(result).toEqual(flags);
+            });
+
+            it('with 2 headers', () => {
+                const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency --header "Content-Encoding: gzip" --header \'Content-Type: text/html; charset=utf-8\'';
+                const result = argsToFlags(args);
+
+                const flags: Flags = {
+                    cmd: 'http',
+                    from: 'new york',
+                    host: 'google.fr',
+                    limit: 2,
+                    method: 'GET',
+                    path: '/',
+                    port: 80,
+                    protocol: 'HTTP2',
+                    query: '?a=abc',
+                    target: 'google.com',
+                    latency: true,
+                    headers: {
+                        'Content-Encoding': 'gzip',
+                        'Content-Type': 'text/html; charset=utf-8',
+                    },
                 };
 
                 expect(result).toEqual(flags);

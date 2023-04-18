@@ -94,7 +94,7 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
                             ...query && { query },
                             ...method && { method: isHttpMethod(method) ? method : throwArgError(method, 'method', [...ALLOWED_HTTP_METHODS].join(', ')) },
                             ...host && { host },
-                            ...headers && { headers },
+                            headers,
                         }
                     }
                 });
@@ -107,5 +107,8 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
             }
         }
     }
+
+    console.log(headers);
+
     return postArray;
 };

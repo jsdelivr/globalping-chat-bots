@@ -169,13 +169,14 @@ describe('Utils', () => {
 						request: {
 							host: 'google.com',
 							path: '/',
+							headers: {},
 						},
 					}
 				}]);
 			});
 
 			it('should parse http args with flags', () => {
-				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header Content-Type: text/html; charset=utf-8 --header Content-Encoding: gzip';
+				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header "Content-Type: text/html; charset=utf-8" --header "Content-Encoding: gzip"';
 				const result = buildPostMeasurements(argsToFlags(args));
 
 				expect(result).toEqual([{
@@ -202,7 +203,7 @@ describe('Utils', () => {
 			});
 
 			it('should infer url for http parse', () => {
-				const args = 'http https://google.com:80/test?a=abc from New York --limit 2 --method get --header Content-Encoding: gzip --header Content-Type: text/html; charset=utf-8';
+				const args = 'http https://google.com:80/test?a=abc from New York --limit 2 --method get --header "Content-Encoding: gzip" --header "Content-Type: text/html; charset=utf-8"';
 				const result = buildPostMeasurements(argsToFlags(args));
 
 				expect(result).toEqual([{

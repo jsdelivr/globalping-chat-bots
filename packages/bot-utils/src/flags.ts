@@ -96,6 +96,10 @@ interface UrlData {
 	query?: string
 }
 
+interface HttpHeaders {
+	[header: string]: string
+};
+
 export const argsToFlags = (argv: string | string[]): Flags => {
 	let args = argv;
 	if (typeof args === 'string')
@@ -138,6 +142,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	if (cmd && parsed.help === undefined) checkFlags(cmd, parsed);
 
 	let urlData: UrlData | undefined;
+	let httpHeaders: HttpHeaders | undefined;
 
 	if (cmd === 'http' && target) {
 		urlData = parseUrlData(target);
@@ -159,22 +164,8 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		if (!httpQuery) {
 			httpQuery = urlData.query;
 		}
-	}
 
-	type Headers = { [header: string]: string };
-	let headers: Headers | undefined;
-	if (parsed.header) {
-		headers = {};
-
-		let key;
-		for (const item of parsed.header) {
-			// Typical input would be Content-Type: text/html; charset=utf-8
-			// Arr representation is ['Content-Type', 'text/html;', 'charset=utf-8']
-			if (item.endsWith(':'))
-				key = item.slice(0, -1);
-			else
-				headers[key] = headers[key] ? `${headers[key]} ${item}` : item;
-		}
+		httpHeaders = parseHttpHeaders(parsed.header);
 	}
 
 	const from = parsed.from ? String(parsed.from.join(' ')).toLowerCase() : 'world';
@@ -193,7 +184,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		method: httpMethod,
 		path,
 		host,
-		...headers && { headers },
+		headers: httpHeaders,
 		...parsed.help && { help: true },
 		...parsed.latency && { latency: true },
 	};
@@ -225,4 +216,38 @@ function parseUrlData(input: string): UrlData {
 		throw new Error('Invalid http target');
 	}
 	return urlData;
+}
+
+
+function parseHttpHeaders(rawHeaders: string[]): HttpHeaders {
+	const headers = {} as HttpHeaders;
+	if (!rawHeaders) {
+		return headers;
+	}
+
+	let currentKey = '';
+	let currentValue = '';
+
+	for (const item of rawHeaders) {
+		// yargs parsers splits all --header inputs on whitespace and provides them as a single array
+		// replace quoting chars used in command
+		const str = item.replace('‘', '').replace('’', '').replace('“', '').replace('”', '').replace('"', '').replace('\'', '');
+		if (str.endsWith(':')) {
+			if (currentKey !== '') {
+				headers[currentKey] = currentValue.trim();
+			}
+
+			currentKey = str.slice(0, -1);
+			currentValue = '';
+		} else {
+			currentValue += `${str} `;
+		}
+	}
+
+	if (currentValue !== '') {
+		headers[currentKey] = currentValue.trim();
+		currentValue = '';
+	}
+
+	return headers;
 }
