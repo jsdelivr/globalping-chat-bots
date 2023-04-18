@@ -23,27 +23,48 @@ describe('Utils', () => {
             expect(result).toEqual(flags);
         });
 
-        it('convert http args to flags', () => {
-            const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol https --latency';
-            const result = argsToFlags(args);
+        describe('http args to flags', () => {
+            it('host target', () => {
+                const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency';
+                const result = argsToFlags(args);
 
-            const flags: Flags = {
-                cmd: 'http',
-                from: 'new york',
-                host: 'google.fr',
-                limit: 2,
-                method: 'GET',
-                path: '/',
-                port: 80,
-                protocol: 'HTTPS',
-                query: '?a=abc',
-                target: 'google.com',
-                latency: true,
-            };
+                const flags: Flags = {
+                    cmd: 'http',
+                    from: 'new york',
+                    host: 'google.fr',
+                    limit: 2,
+                    method: 'GET',
+                    path: '/',
+                    port: 80,
+                    protocol: 'HTTP2',
+                    query: '?a=abc',
+                    target: 'google.com',
+                    latency: true,
+                };
 
-            expect(result).toEqual(flags);
+                expect(result).toEqual(flags);
+            });
+
+            it('url target', () => {
+                const args = 'http https://www.example.com:1234/my/path/?abc=123&xyz=test --from usa --limit 2 --method get';
+                const result = argsToFlags(args);
+
+                const flags: Flags = {
+                    cmd: 'http',
+                    from: 'usa',
+                    host: 'www.example.com',
+                    limit: 2,
+                    method: 'GET',
+                    path: '/my/path/',
+                    port: 1234,
+                    protocol: 'HTTPS',
+                    query: 'abc=123&xyz=test',
+                    target: 'www.example.com',
+                };
+
+                expect(result).toEqual(flags);
+            });
         });
-
 
         it('convert ping args to flags', () => {
             const args = 'ping google.com from New York --limit 2 --packets 3 --latency';

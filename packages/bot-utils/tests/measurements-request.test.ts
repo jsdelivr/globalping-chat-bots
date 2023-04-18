@@ -165,7 +165,11 @@ describe('Utils', () => {
 					limit: 1,
 					locations: [{ magic: 'new york' }],
 					measurementOptions: {
-						request: {}
+						protocol: 'HTTP',
+						request: {
+							host: 'google.com',
+							path: '/',
+						},
 					}
 				}]);
 			});
@@ -203,7 +207,7 @@ describe('Utils', () => {
 
 				expect(result).toEqual([{
 					type: 'http',
-					target: 'https://google.com:80/test?a=abc',
+					target: 'google.com',
 					inProgressUpdates: false,
 					limit: 2,
 					locations: [{ magic: 'new york' }],
@@ -212,7 +216,7 @@ describe('Utils', () => {
 						protocol: 'HTTPS',
 						request: {
 							path: '/test',
-							query: '?a=abc',
+							query: 'a=abc',
 							method: 'GET',
 							host: 'google.com',
 							headers: {
