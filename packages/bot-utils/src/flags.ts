@@ -133,6 +133,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 
 	for (const key of parsedKeys) {
 		if (parsed[key] !== undefined) {
+			// remove empty entries that result from spaces in the command
 			parsed[key] = parsed[key].filter((item: (string | number)) => item !== '');
 		}
 	}
