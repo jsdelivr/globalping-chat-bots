@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { parseTargetQuery } from './target-query';
 import { ALLOWED_QUERY_TYPES, DnsProtocol, DnsType, HttpMethod, HttpProtocol, isQueryType, MtrProtocol, QueryType, TraceProtocol } from './types';
 import { throwArgError, throwOptError } from './utils';
 
@@ -100,14 +101,14 @@ interface HttpHeaders {
 	[header: string]: string
 };
 
+
+
 export const argsToFlags = (argv: string | string[]): Flags => {
 	let args = argv;
 	if (typeof args === 'string')
 		args = args.split(' ');
 
-	if ((args.indexOf('from') === 2 || args.indexOf('--from') === 2) && (args[3] && !args[3].startsWith('--'))) {
-		args[2] = '--from';
-	} else if (args[0] === 'help' || args[1] === 'help') {
+	if (args[0] === 'help' || args[1] === 'help') {
 		// Ensure help flag is added for parser to catch
 		args.push('--help');
 	}
@@ -119,21 +120,39 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		'header': ['H'],
 	};
 
+
+	const parsedKeys = ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency'];
+
 	const parsed = parser(args, {
-		array: ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency'],
+		array: parsedKeys,
 		alias: flagAlias,
 		configuration: {
 			'strip-aliased': true,
 		}
 	});
 
+	for (const key of parsedKeys) {
+		if (parsed[key] !== undefined) {
+			// remove empty entries that result from spaces in the command
+			parsed[key] = parsed[key].filter((item: (string | number)) => item !== '');
+		}
+	}
+
+
 	// Add to parsed for checkFlags later
 	const cmd = parsed._[0] ? String(parsed._[0]).toLowerCase() : undefined;
-	let target = parsed._[1] ? String(parsed._[1]) : undefined;
+
+	const argsForTargetQueryParser = parsed._
+		.slice(1)
+		.map((arg) => arg.toString())
+		.filter((arg) => arg !== '');
+
+	const targetQuery = parseTargetQuery(cmd, argsForTargetQueryParser);
+	let { target, from, resolver } = targetQuery;
 
 	let host = parsed.host ? String(parsed.host) : undefined;
 	let path = parsed.path ? String(parsed.path) : undefined;
-	let port = parsed.port ? Number(parsed.port) : undefined;
+	let port = parsed.port ? Number(parsed.port[0]) : undefined;
 	let protocol = parsed.protocol ? String(parsed.protocol).toUpperCase() : undefined;
 	let httpQuery = parsed.query ? String(parsed.query) : undefined;
 	const httpMethod = parsed.method ? String(parsed.method).toUpperCase() : undefined;
@@ -168,17 +187,25 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		httpHeaders = parseHttpHeaders(parsed.header);
 	}
 
-	const from = parsed.from ? String(parsed.from.join(' ')).toLowerCase() : 'world';
+	// from based on target query takes precedence
+	if (!from) {
+		from = parsed.from ? String(parsed.from.join(' ')).trim().toLowerCase() : 'world';
+	}
+
+	// resolver based on flags takes precedence
+	if (parsed.resolver) {
+		resolver = String(parsed.resolver);
+	}
 
 	const flags: Flags = {
 		cmd,
 		target,
 		from,
-		limit: parsed.limit ? Number(parsed.limit) : 1,
-		...parsed.packets && { packets: Number(parsed.packets) },
+		limit: parsed.limit ? Number(parsed.limit[0]) : 1,
+		...parsed.packets && { packets: Number(parsed.packets[0]) },
 		protocol,
 		port,
-		...parsed.resolver && { resolver: String(parsed.resolver) },
+		resolver,
 		...parsed.trace && { trace: true },
 		query: httpQuery,
 		method: httpMethod,
@@ -191,6 +218,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 
 	return flags;
 };
+
 
 function parseUrlData(input: string): UrlData {
 	const urlData = {} as UrlData;

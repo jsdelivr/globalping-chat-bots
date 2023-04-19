@@ -108,7 +108,5 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
         }
     }
 
-    console.log(headers);
-
     return postArray;
 };
