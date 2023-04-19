@@ -46,8 +46,8 @@ describe('Utils', () => {
                 expect(result).toEqual(flags);
             });
 
-            it('url target', () => {
-                const args = 'http https://www.example.com:1234/my/path/?abc=123&xyz=test --from usa --limit 2 --method get';
+            it('url target, resolver and spaces', () => {
+                const args = 'http https://www.example.com:1234/my/path/?abc=123&xyz=test @8.8.8.8  --from usa  --limit 2   --method get';
                 const result = argsToFlags(args);
 
                 const flags: Flags = {
@@ -62,13 +62,14 @@ describe('Utils', () => {
                     query: 'abc=123&xyz=test',
                     target: 'www.example.com',
                     headers: {},
+                    resolver: '8.8.8.8'
                 };
 
                 expect(result).toEqual(flags);
             });
 
-            it('with 1 simple', () => {
-                const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency -H "AB: 123z" ';
+            it('with 1 simple header', () => {
+                const args = 'http google.com from New York --limit 2 --path / --query  ?a=abc --host  google.fr --method get --port  80 --protocol http2 --latency -H "AB: 123z" ';
                 const result = argsToFlags(args);
 
                 const flags: Flags = {
