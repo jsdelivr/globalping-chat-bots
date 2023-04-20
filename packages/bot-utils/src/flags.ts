@@ -21,7 +21,7 @@ const ALLOWED_MTR_FLAGS = ['protocol', 'port', 'packets', ...ALLOWED_BASE_FLAGS]
 type MtrFlags = typeof ALLOWED_MTR_FLAGS[number];
 const isMtrFlag = (flag: string): flag is MtrFlags => ALLOWED_MTR_FLAGS.includes(flag as MtrFlags);
 
-const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'method', 'path', 'query', 'host', 'header', 'latency', ...ALLOWED_BASE_FLAGS] as const;
+const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'resolver', 'method', 'path', 'query', 'host', 'header', 'latency', ...ALLOWED_BASE_FLAGS] as const;
 type HttpFlags = typeof ALLOWED_HTTP_FLAGS[number];
 const isHttpFlag = (flag: string): flag is HttpFlags => ALLOWED_HTTP_FLAGS.includes(flag as HttpFlags);
 
@@ -118,6 +118,8 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		'from': ['F'],
 		'limit': ['L'],
 		'header': ['H'],
+		// --type aliased to query because initial version of the chatbot was written expecting --query flag for dns type
+		'query': ['type'],
 	};
 
 
@@ -135,9 +137,15 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		if (parsed[key] !== undefined) {
 			// remove empty entries that result from spaces in the command
 			parsed[key] = parsed[key].filter((item: (string | number)) => item !== '');
+
+			for (let i = 0; i < parsed[key].length; i += 1) {
+				if (typeof parsed[key][i] === 'string') {
+					// replace quoting chars used in command
+					parsed[key][i] = parsed[key][i].replaceAll('‘', '').replaceAll('’', '').replaceAll('“', '').replaceAll('”', '').replaceAll('"', '').replaceAll('\'', '');
+				}
+			}
 		}
 	}
-
 
 	// Add to parsed for checkFlags later
 	const cmd = parsed._[0] ? String(parsed._[0]).toLowerCase() : undefined;
@@ -154,7 +162,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	let path = parsed.path ? String(parsed.path) : undefined;
 	let port = parsed.port ? Number(parsed.port[0]) : undefined;
 	let protocol = parsed.protocol ? String(parsed.protocol).toUpperCase() : undefined;
-	let httpQuery = parsed.query ? String(parsed.query) : undefined;
+	let query = parsed.query ? String(parsed.query) : undefined;
 	const httpMethod = parsed.method ? String(parsed.method).toUpperCase() : undefined;
 
 	// Throw on any invalid flags
@@ -180,8 +188,8 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		if (!protocol) {
 			protocol = urlData.protocol;
 		}
-		if (!httpQuery) {
-			httpQuery = urlData.query;
+		if (!query) {
+			query = urlData.query;
 		}
 
 		httpHeaders = parseHttpHeaders(parsed.header);
@@ -207,7 +215,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		port,
 		resolver,
 		...parsed.trace && { trace: true },
-		query: httpQuery,
+		query,
 		method: httpMethod,
 		path,
 		host,
@@ -259,7 +267,7 @@ function parseHttpHeaders(rawHeaders: string[]): HttpHeaders {
 	for (const item of rawHeaders) {
 		// yargs parsers splits all --header inputs on whitespace and provides them as a single array
 		// replace quoting chars used in command
-		const str = item.replace('‘', '').replace('’', '').replace('“', '').replace('”', '').replace('"', '').replace('\'', '');
+		const str = item.replaceAll('‘', '').replaceAll('’', '').replaceAll('“', '').replaceAll('”', '').replaceAll('"', '').replaceAll('\'', '');
 		if (str.endsWith(':')) {
 			if (currentKey !== '') {
 				headers[currentKey] = currentValue.trim();

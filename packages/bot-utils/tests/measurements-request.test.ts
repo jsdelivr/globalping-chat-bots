@@ -231,7 +231,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect http flag', () => {
 				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header Content-Encoding: gzip --header Content-Type: text/html; charset=utf-8 --test';
-				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "test" for "http"!\nExpected "protocol, port, method, path, query, host, header, latency, target, from, limit".');
+				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "test" for "http"!\nExpected "protocol, port, resolver, method, path, query, host, header, latency, target, from, limit".');
 			});
 		});
 	});

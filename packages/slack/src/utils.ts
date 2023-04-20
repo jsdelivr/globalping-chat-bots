@@ -1,23 +1,41 @@
 /* eslint-disable no-await-in-loop */
-import { argsToFlags, buildPostMeasurements, getMeasurement, help, loggerInit, postMeasurement } from '@globalping/bot-utils';
+import { argsToFlags, buildPostMeasurements, getMeasurement, loggerInit, postMeasurement } from '@globalping/bot-utils';
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
+import { dnsHelp, generalHelp, httpHelp, mtrHelp, pingHelp, tracerouteHelp } from './format-help';
 import { measurementsChatResponse } from './response';
 
 dotenv.config();
 
 export const logger = loggerInit('slack', process.env.LOG_LEVEL ?? 'info');
 
-export const helpCmd = (cmd: string): string => {
-	if (!cmd || cmd === 'help') return `${help.help.preamble}\n\n*Usage:*\n\`\`\`${help.help.usage}\`\`\`\n\n*Arguments*:\n\`\`\`${help.help.args}\`\`\`\n\nMore help can be found here:\n\`\`\`${help.help.end}\`\`\``;
-	if (cmd === 'ping') return `${help.ping.preamble}\n\n*Usage:*\n\`\`\`${help.ping.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.ping.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.ping.examples}\`\`\``;
-	if (cmd === 'traceroute') return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
-	if (cmd === 'dns') return `${help.dns.preamble}\n\n*Usage:*\n\`\`\`${help.dns.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.dns.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.dns.examples}\`\`\``;
-	if (cmd === 'mtr') return `${help.mtr.preamble}\n\n*Usage:*\n\`\`\`${help.mtr.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.mtr.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.mtr.examples}\`\`\``;
-	if (cmd === 'http') return `${help.http.preamble}\n\n*Usage:*\n\`\`\`${help.http.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.http.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.http.examples}\`\`\``;
 
-	return 'Unknown command! Please call `/globalping help` for a list of commands.';
+export const helpCmd = (cmd: string, target?: string): string => {
+	switch (cmd) {
+		case 'dns':
+			return dnsHelp();
+		case 'http':
+			return httpHelp();
+		case 'mtr':
+			return mtrHelp();
+		case 'ping':
+			return pingHelp();
+		case 'traceroute':
+			return tracerouteHelp();
+
+		case undefined:
+		case '':
+		case 'help':
+			if (!target) {
+				return generalHelp();
+			}
+			// handle case: /globalping help <subcommand>
+			return helpCmd(target);
+
+		default:
+			return 'Unknown command! Please call `/globalping help` for a list of commands.';
+	}
 };
 
 export const welcome = (id: string) => `Hi <@${id}>! :wave:\nI help make running networking commands easy. To learn more about me, try running \`/globalping help!\`\n\n:zap: Here are some quick example commands to help you get started:
@@ -42,7 +60,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 	const { channel_id, user_id } = payload;
 
 	if (!flags.cmd || flags.help) {
-		await client.chat.postEphemeral({ text: helpCmd(flags.cmd), user: user_id, channel: channel_id });
+		await client.chat.postEphemeral({ text: helpCmd(flags.cmd, flags.target), user: user_id, channel: channel_id });
 	} else {
 		const postMeasurements = buildPostMeasurements(flags);
 
