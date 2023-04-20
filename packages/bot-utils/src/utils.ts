@@ -66,38 +66,28 @@ interface Help {
 	}
 }
 
+export const generalHelpTexts = {
+	preamble: `Globalping is a platform that allows anyone to run networking commands such as ping, traceroute, dig and mtr on probes distributed all around the world.
+The Globalping bot allows you to interact with the API in a simple and human-friendly way to debug networking issues like anycast routing and script automated tests and benchmarks.`,
+	usage: '/globalping [command]',
+	measurementCommands: `  dns           Resolve a DNS record similarly to dig
+  http          Perform a HEAD or GET request to a host
+  mtr           Run an MTR test, similar to traceroute
+  ping          Run a ping test
+  traceroute    Run a traceroute test`,
+	additionalCommands: '  help          Help about any command',
+	flags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+  -h, --help          help for globalping
+      --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
+  -L, --limit int     Limit the number of probes to use (default 1)
+
+  Use "globalping [command] --help" for more information about a command.`
+};
+
+
+
 export const help: Help = {
-	'help': {
-		preamble: 'The Globalping bot is a simple interface to interact with the Globalping API and run global networking tests. Need a traceroute done from Japan? Or check the ping latency of an endpoint from Brazil? Just ask me!',
-		usage: `/globalping ping <target> from <location> [options]
-/globalping traceroute <target> from <location> [options]
-/globalping dns <target> from <location> [options]
-/globalping mtr <target> from <location> [options]
-/globalping http <target> from <location> [options]`,
-		args: `<target>		A public endpoint, such as a hostname or IPv4 address - e.g. "jsdelivr.com", "1.1.1.1"
-<from>		  Magic Location - It can be anything, a city, country, ISP provider, AS number and more. e.g. "germany", "eu", "aws", "55286"
-
-Magic locations can be combined with a comma to run a test from multiple locations in parallel. e.g. "germany, france, spain".
-Alternatively, they can be combined with a plus to narrow the filter. e.g. "google+belgium" will match a server in Belgium hosted at Google Cloud DC.
-
-Providing no location will default to "world" which will match a probe from anywhere in the world. e.g. "/globalping ping jsdelivr.com"
-
-Location Schema: https://github.com/jsdelivr/globalping/blob/master/docs/measurement/schema/location.md`,
-		end: `/globalping ping --help
-/globalping traceroute --help
-/globalping dns --help
-/globalping mtr --help
-/globalping http --help
-
-For more information, see the Globalping documentation: https://github.com/jsdelivr/globalping/tree/master/docs`,
-		endDiscord: `/globalping help ping
-/globalping help traceroute
-/globalping help dns
-/globalping help mtr
-/globalping help http
-
-For more information, see the Globalping documentation: https://github.com/jsdelivr/globalping/tree/master/docs`
-	},
+	'help': generalHelpTexts,
 
 	'ping': {
 		preamble: 'Ping is a simple ICMP echo request to a target endpoint.',

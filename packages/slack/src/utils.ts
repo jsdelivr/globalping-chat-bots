@@ -3,14 +3,16 @@ import { argsToFlags, buildPostMeasurements, getMeasurement, help, loggerInit, p
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
+import { generalHelp } from './format-help';
 import { measurementsChatResponse } from './response';
 
 dotenv.config();
 
 export const logger = loggerInit('slack', process.env.LOG_LEVEL ?? 'info');
 
+
 export const helpCmd = (cmd: string): string => {
-	if (!cmd || cmd === 'help') return `${help.help.preamble}\n\n*Usage:*\n\`\`\`${help.help.usage}\`\`\`\n\n*Arguments*:\n\`\`\`${help.help.args}\`\`\`\n\nMore help can be found here:\n\`\`\`${help.help.end}\`\`\``;
+	if (!cmd || cmd === 'help') return generalHelp();
 	if (cmd === 'ping') return `${help.ping.preamble}\n\n*Usage:*\n\`\`\`${help.ping.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.ping.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.ping.examples}\`\`\``;
 	if (cmd === 'traceroute') return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
 	if (cmd === 'dns') return `${help.dns.preamble}\n\n*Usage:*\n\`\`\`${help.dns.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.dns.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.dns.examples}\`\`\``;
