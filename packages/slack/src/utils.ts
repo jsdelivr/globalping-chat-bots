@@ -3,7 +3,7 @@ import { argsToFlags, buildPostMeasurements, getMeasurement, help, loggerInit, p
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
-import { generalHelp } from './format-help';
+import { dnsHelp, generalHelp } from './format-help';
 import { measurementsChatResponse } from './response';
 
 dotenv.config();
@@ -12,14 +12,24 @@ export const logger = loggerInit('slack', process.env.LOG_LEVEL ?? 'info');
 
 
 export const helpCmd = (cmd: string): string => {
-	if (!cmd || cmd === 'help') return generalHelp();
-	if (cmd === 'ping') return `${help.ping.preamble}\n\n*Usage:*\n\`\`\`${help.ping.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.ping.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.ping.examples}\`\`\``;
-	if (cmd === 'traceroute') return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
-	if (cmd === 'dns') return `${help.dns.preamble}\n\n*Usage:*\n\`\`\`${help.dns.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.dns.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.dns.examples}\`\`\``;
-	if (cmd === 'mtr') return `${help.mtr.preamble}\n\n*Usage:*\n\`\`\`${help.mtr.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.mtr.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.mtr.examples}\`\`\``;
-	if (cmd === 'http') return `${help.http.preamble}\n\n*Usage:*\n\`\`\`${help.http.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.http.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.http.examples}\`\`\``;
-
-	return 'Unknown command! Please call `/globalping help` for a list of commands.';
+	switch (cmd) {
+		case 'dns':
+			return dnsHelp();
+		case 'traceroute':
+			return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
+		case 'ping':
+			return `${help.dns.preamble}\n\n*Usage:*\n\`\`\`${help.dns.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.dns.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.dns.examples}\`\`\``;
+		case 'mtr':
+			return `${help.mtr.preamble}\n\n*Usage:*\n\`\`\`${help.mtr.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.mtr.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.mtr.examples}\`\`\``;
+		case 'http':
+			return `${help.http.preamble}\n\n*Usage:*\n\`\`\`${help.http.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.http.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.http.examples}\`\`\``;
+		case undefined:
+		case '':
+		case 'help':
+			return generalHelp();
+		default:
+			return 'Unknown command! Please call `/globalping help` for a list of commands.';
+	}
 };
 
 export const welcome = (id: string) => `Hi <@${id}>! :wave:\nI help make running networking commands easy. To learn more about me, try running \`/globalping help!\`\n\n:zap: Here are some quick example commands to help you get started:

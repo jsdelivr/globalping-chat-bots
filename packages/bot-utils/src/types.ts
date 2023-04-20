@@ -37,7 +37,7 @@ export type HttpMethod = typeof ALLOWED_HTTP_METHODS[number];
 export const isHttpMethod = (type: string): type is HttpMethod => ALLOWED_HTTP_METHODS.includes(type as HttpMethod);
 
 // Post Types
-interface Locations {
+export interface Locations {
 	continent?: string;
 	region?: string;
 	country?: string;

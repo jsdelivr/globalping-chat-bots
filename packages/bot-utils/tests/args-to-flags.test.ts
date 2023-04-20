@@ -5,7 +5,7 @@ import { argsToFlags, Flags } from '../src/flags';
 describe('Utils', () => {
     describe('args to flags', () => {
         it('should convert dns args to flags', () => {
-            const args = 'dns google.com from New York --limit 2 --query AAAA --protocol tcp --port 80 --resolver 1.1.1.1 --trace --latency';
+            const args = 'dns google.com from New York --limit 2 --type AAAA --protocol tcp --port 80 --resolver 1.1.1.1 --trace --latency';
             const result = argsToFlags(args);
             const flags: Flags = {
                 cmd: 'dns',

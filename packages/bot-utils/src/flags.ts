@@ -118,6 +118,8 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		'from': ['F'],
 		'limit': ['L'],
 		'header': ['H'],
+		// --type aliased to query because initial version of the chatbot was written expecting --query flag for dns type
+		'query': ['type'],
 	};
 
 
@@ -138,7 +140,6 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		}
 	}
 
-
 	// Add to parsed for checkFlags later
 	const cmd = parsed._[0] ? String(parsed._[0]).toLowerCase() : undefined;
 
@@ -154,7 +155,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	let path = parsed.path ? String(parsed.path) : undefined;
 	let port = parsed.port ? Number(parsed.port[0]) : undefined;
 	let protocol = parsed.protocol ? String(parsed.protocol).toUpperCase() : undefined;
-	let httpQuery = parsed.query ? String(parsed.query) : undefined;
+	let query = parsed.query ? String(parsed.query) : undefined;
 	const httpMethod = parsed.method ? String(parsed.method).toUpperCase() : undefined;
 
 	// Throw on any invalid flags
@@ -180,8 +181,8 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		if (!protocol) {
 			protocol = urlData.protocol;
 		}
-		if (!httpQuery) {
-			httpQuery = urlData.query;
+		if (!query) {
+			query = urlData.query;
 		}
 
 		httpHeaders = parseHttpHeaders(parsed.header);
@@ -207,7 +208,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		port,
 		resolver,
 		...parsed.trace && { trace: true },
-		query: httpQuery,
+		query,
 		method: httpMethod,
 		path,
 		host,

@@ -84,10 +84,37 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
   Use "globalping [command] --help" for more information about a command.`
 };
 
+export const dnsHelpTexts = {
+	preamble: `Performs DNS lookups and displays the answers that are returned from the name server(s) that were queried.
+The default nameserver depends on the probe and is defined by the user's local settings or DHCP.
+This command provides 2 different ways to provide the dns resolver:
+Using the --resolver argument. For example:\`\`\`dns jsdelivr.com from Berlin --resolver 1.1.1.1\`\`\`
+Using the dig format @resolver. For example:\`\`\`dns jsdelivr.com @1.1.1.1 from Berlin\`\`\``,
+	examples: `Resolve google.com from 2 probes in New York:\`\`\`dns google.com from New York --limit 2\`\`\`
+Resolve google.com from 2 probes from London or Belgium with trace enabled
+\`\`\`dns google.com from London,Belgium --limit 2 --trace\`\`\`
+Resolve google.com from a probe in Paris using the TCP protocol
+\`\`\`dns google.com from Paris --protocol tcp\`\`\`
+Resolve jsdelivr.com from a probe in Berlin using the type MX and the resolver 1.1.1.1
+\`\`\`dns jsdelivr.com from Berlin --type MX --resolver 1.1.1.1\`\`\`
+Resolve jsdelivr.com from a probe that is from the AWS network and is located in Montreal with latency output
+\`\`\`dns jsdelivr.com from aws+montreal --latency\`\`\``,
+	usage: '/globalping dns [target] from [location] [flags]',
+	flags: `  -h, --help              help for dns
+      --port int          Send the query to a non-standard port on the server (default 53)
+      --protocol string   Specifies the protocol to use for the DNS query (TCP or UDP) (default "udp")
+      --resolver string   Resolver is the hostname or IP address of the name server to use (default empty)
+      --trace             Toggle tracing of the delegation path from the root name servers (default false)
+      --type string       Specifies the type of DNS query to perform (default "A")`,
+	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+      --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
+  -L, --limit int     Limit the number of probes to use (default 1)`,
+};
 
 
 export const help: Help = {
 	'help': generalHelpTexts,
+	'dns': dnsHelpTexts,
 
 	'ping': {
 		preamble: 'Ping is a simple ICMP echo request to a target endpoint.',
@@ -111,21 +138,7 @@ export const help: Help = {
 /globalping traceroute google.com from EU --limit 2 --protocol tcp --port 33434`,
 	},
 
-	'dns': {
-		preamble: 'DNS is a network protocol used to translate domain names to IP addresses.',
-		usage: '/globalping dns <target> from <location> [options]',
-		options: `--limit            Number of probes - e.g. 1
---latency          Output only the stats of a measurement
---query            Query type - A | AAAA | ANY | CNAME | DNSKEY | DS | MX | NS | NSEC | PTR | RRSIG | SOA | TXT | SRV
---port             Port to use - e.g. 53
---protocol         Protocol to use - UDP | TCP
---resolver         Resolver to use - e.g. 1.1.1.1
---trace            Boolean flag to enable trace`,
-		examples: `/globalping dns jsdelivr.com from united kingdom
-/globalping dns google.com from EU --limit 2 --query A --port 53 --protocol UDP --resolver 1.1.1.1
-/globalping dns one.one.one.one --limit 2
-/globalping dns google.com from new york --limit 2 --query A --port 53 --protocol udp --resolver 1.1.1.1 --trace`,
-	},
+
 
 
 	'mtr': {
