@@ -3,7 +3,7 @@ import { argsToFlags, buildPostMeasurements, getMeasurement, help, loggerInit, p
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
-import { dnsHelp, generalHelp, httpHelp, mtrHelp } from './format-help';
+import { dnsHelp, generalHelp, httpHelp, mtrHelp,pingHelp } from './format-help';
 import { measurementsChatResponse } from './response';
 
 dotenv.config();
@@ -19,11 +19,10 @@ export const helpCmd = (cmd: string, target?: string): string => {
 			return httpHelp();
 		case 'mtr':
 			return mtrHelp();
+		case 'ping':
+			return pingHelp();
 		case 'traceroute':
 			return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
-		case 'ping':
-			return `${help.dns.preamble}\n\n*Usage:*\n\`\`\`${help.dns.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.dns.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.dns.examples}\`\`\``;
-
 
 		case undefined:
 		case '':

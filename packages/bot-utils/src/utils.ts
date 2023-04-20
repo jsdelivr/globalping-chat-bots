@@ -106,9 +106,9 @@ Resolve jsdelivr.com from a probe that is from the AWS network and is located in
       --resolver string   Resolver is the hostname or IP address of the name server to use (default empty)
       --trace             Toggle tracing of the delegation path from the root name servers (default false)
       --type string       Specifies the type of DNS query to perform (default "A")`,
-	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
-      --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
-  -L, --limit int     Limit the number of probes to use (default 1)`,
+	globalFlags: `  -F, --from string       Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+      --latency           Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
+  -L, --limit int         Limit the number of probes to use (default 1)`,
 };
 
 
@@ -142,9 +142,9 @@ HTTP GET request google.com from a probe in ASN 123 with a dns resolver 1.1.1.1
       --protocol string      Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTP")
       --query string         A query-string
       --resolver string      Specifies the resolver server used for DNS lookup (default is defined by the probe's network)`,
-	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
-      --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
-  -L, --limit int     Limit the number of probes to use (default 1)`,
+	globalFlags: `  -F, --from string          Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+      --latency              Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
+  -L, --limit int            Limit the number of probes to use (default 1)`,
 };
 
 export const mtrHelpTexts = {
@@ -154,9 +154,7 @@ export const mtrHelpTexts = {
 MTR 1.1.1.1 from 2 probes from USA or Belgium with 10 packets
 \`\`\`mtr 1.1.1.1 from USA,Belgium --limit 2 --packets 10\`\`\`
 MTR jsdelivr.com from a probe that is from the AWS network and is located in Montreal using the TCP protocol and port 453
-\`\`\`mtr jsdelivr.com from aws+montreal --protocol tcp --port 453\`\`\`
-MTR jsdelivr.com from a probe in ASN 123
-\`\`\`mtr jsdelivr.com from 123\`\`\``,
+\`\`\`mtr jsdelivr.com from aws+montreal --protocol tcp --port 453\`\`\``,
 	usage: '/globalping mtr [target] from [location] [flags]',
 	flags: `  -h, --help          Help for mtr
   --packets int       Specifies the number of packets to send to each hop (default 3)
@@ -167,21 +165,28 @@ MTR jsdelivr.com from a probe in ASN 123
   -L, --limit int     Limit the number of probes to use (default 1)`,
 };
 
+export const pingHelpTexts = {
+	preamble: 'The ping command allows sending ping requests to a target. Often used to test the network latency and stability.',
+	examples: `Ping google.com from 2 probes in New York
+\`\`\`ping google.com from New York --limit 2\`\`\`
+Ping 1.1.1.1 from 2 probes from USA or Belgium with 10 packets
+\`\`\`ping 1.1.1.1 from USA,Belgium --limit 2 --packets 10\`\`\`
+Ping jsdelivr.com from a probe that is from the AWS network and is located in Montreal with latency output
+\`\`\`ping jsdelivr.com from aws+montreal --latency\`\`\``,
+	usage: '/globalping ping [target] from [location] [flags]',
+	flags: `  -h, --help          Help for ping
+      --packets int   Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)`,
+	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+      --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
+  -L, --limit int     Limit the number of probes to use (default 1)`,
+};
+
 export const help: Help = {
 	'help': generalHelpTexts,
 	'dns': dnsHelpTexts,
 	'http': httpHelpTexts,
 	'mtr': mtrHelpTexts,
-	'ping': {
-		preamble: 'Ping is a simple ICMP echo request to a target endpoint.',
-		usage: '/globalping ping <target> from <location> [options]',
-		options: `--limit			  Number of probes - e.g. 1
---packets			Number of packets - e.g. 4
---latency		    Output only the stats of a measurement`,
-		examples: `/globalping ping jsdelivr.com from united kingdom
-/globalping ping 1.1.1.1 --limit 2
-/globalping ping google.com from EU --limit 2 --packets 5`,
-	},
+	'ping': pingHelpTexts,
 	'traceroute': {
 		preamble: 'Traceroute is a tool used to diagnose problems in a network path.',
 		usage: '/globalping traceroute <target> from <location> [options]',
