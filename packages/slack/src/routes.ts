@@ -1,5 +1,5 @@
 import { CustomRoute } from '@slack/bolt';
-import { client as discord } from 'discord-bot/src/app';
+// import { client as discord } from 'discord-bot/src/app';
 import * as fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,8 +21,8 @@ export const routes: CustomRoute[] = [
 					throw new Error('Tables not found');
 				// logger.debug('Tables are accessible');
 
-				if (!discord.ws.ping)
-					throw new Error('Discord bot down.');
+				/*	if (!discord.ws.ping)
+						throw new Error('Discord bot down.'); */
 				// logger.debug('Discord bot is accessible');
 
 				res.writeHead(200);
