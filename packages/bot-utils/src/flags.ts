@@ -21,7 +21,7 @@ const ALLOWED_MTR_FLAGS = ['protocol', 'port', 'packets', ...ALLOWED_BASE_FLAGS]
 type MtrFlags = typeof ALLOWED_MTR_FLAGS[number];
 const isMtrFlag = (flag: string): flag is MtrFlags => ALLOWED_MTR_FLAGS.includes(flag as MtrFlags);
 
-const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'method', 'path', 'query', 'host', 'header', 'latency', ...ALLOWED_BASE_FLAGS] as const;
+const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'resolver', 'method', 'path', 'query', 'host', 'header', 'latency', ...ALLOWED_BASE_FLAGS] as const;
 type HttpFlags = typeof ALLOWED_HTTP_FLAGS[number];
 const isHttpFlag = (flag: string): flag is HttpFlags => ALLOWED_HTTP_FLAGS.includes(flag as HttpFlags);
 
@@ -137,6 +137,13 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		if (parsed[key] !== undefined) {
 			// remove empty entries that result from spaces in the command
 			parsed[key] = parsed[key].filter((item: (string | number)) => item !== '');
+
+			for (let i = 0; i < parsed[key].length; i += 1) {
+				if (typeof parsed[key][i] === 'string') {
+					// replace quoting chars used in command
+					parsed[key][i] = parsed[key][i].replaceAll('‘', '').replaceAll('’', '').replaceAll('“', '').replaceAll('”', '').replaceAll('"', '').replaceAll('\'', '');
+				}
+			}
 		}
 	}
 
@@ -260,7 +267,7 @@ function parseHttpHeaders(rawHeaders: string[]): HttpHeaders {
 	for (const item of rawHeaders) {
 		// yargs parsers splits all --header inputs on whitespace and provides them as a single array
 		// replace quoting chars used in command
-		const str = item.replace('‘', '').replace('’', '').replace('“', '').replace('”', '').replace('"', '').replace('\'', '');
+		const str = item.replaceAll('‘', '').replaceAll('’', '').replaceAll('“', '').replaceAll('”', '').replaceAll('"', '').replaceAll('\'', '');
 		if (str.endsWith(':')) {
 			if (currentKey !== '') {
 				headers[currentKey] = currentValue.trim();

@@ -3,7 +3,7 @@ import { argsToFlags, buildPostMeasurements, getMeasurement, help, loggerInit, p
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
-import { dnsHelp, generalHelp } from './format-help';
+import { dnsHelp, generalHelp,httpHelp } from './format-help';
 import { measurementsChatResponse } from './response';
 
 dotenv.config();
@@ -15,14 +15,15 @@ export const helpCmd = (cmd: string): string => {
 	switch (cmd) {
 		case 'dns':
 			return dnsHelp();
+		case 'http':
+			return httpHelp();
 		case 'traceroute':
 			return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
 		case 'ping':
 			return `${help.dns.preamble}\n\n*Usage:*\n\`\`\`${help.dns.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.dns.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.dns.examples}\`\`\``;
 		case 'mtr':
 			return `${help.mtr.preamble}\n\n*Usage:*\n\`\`\`${help.mtr.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.mtr.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.mtr.examples}\`\`\``;
-		case 'http':
-			return `${help.http.preamble}\n\n*Usage:*\n\`\`\`${help.http.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.http.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.http.examples}\`\`\``;
+
 		case undefined:
 		case '':
 		case 'help':

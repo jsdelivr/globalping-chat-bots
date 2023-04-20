@@ -69,7 +69,7 @@ describe('Utils', () => {
             });
 
             it('with 1 simple header', () => {
-                const args = 'http google.com from New York --limit 2 --path / --query  ?a=abc --host  google.fr --method get --port  80 --protocol http2 --latency -H "AB: 123z" ';
+                const args = 'http google.com from New York --limit 2 --path / --query  "?a=abc"  --host  google.fr --method get --port  80 --protocol http2 --latency -H "AB: 123z" ';
                 const result = argsToFlags(args);
 
                 const flags: Flags = {

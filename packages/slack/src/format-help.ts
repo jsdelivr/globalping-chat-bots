@@ -1,4 +1,4 @@
-import { dnsHelpTexts, generalHelpTexts } from '@globalping/bot-utils/src/utils';
+import { dnsHelpTexts, generalHelpTexts,httpHelpTexts } from '@globalping/bot-utils/src/utils';
 
 
 export function generalHelp() {
@@ -31,4 +31,20 @@ ${dnsHelpTexts.examples}
 
 *Global Flags*:
 \`\`\`${dnsHelpTexts.globalFlags}\`\`\``;;
+}
+
+export function httpHelp() {
+    return `${httpHelpTexts.preamble}
+
+*Examples:*
+${httpHelpTexts.examples}
+
+*Usage:*
+\`\`\`${httpHelpTexts.usage}\`\`\`
+
+*Flags*:
+\`\`\`${httpHelpTexts.flags}\`\`\`
+
+*Global Flags*:
+\`\`\`${httpHelpTexts.globalFlags}\`\`\``;;
 }

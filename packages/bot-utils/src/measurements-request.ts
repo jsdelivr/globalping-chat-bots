@@ -1,5 +1,5 @@
 import { Flags } from './flags';
-import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED_HTTP_PROTOCOLS, ALLOWED_MTR_PROTOCOLS, ALLOWED_QUERY_TYPES, ALLOWED_TRACE_PROTOCOLS, isDnsProtocol, isDnsType, isHttpMethod, isHttpProtocol, isMtrProtocol, isTraceProtocol, Locations,PostMeasurement } from './types';
+import { ALLOWED_DNS_PROTOCOLS, ALLOWED_DNS_TYPES, ALLOWED_HTTP_METHODS, ALLOWED_HTTP_PROTOCOLS, ALLOWED_MTR_PROTOCOLS, ALLOWED_QUERY_TYPES, ALLOWED_TRACE_PROTOCOLS, isDnsProtocol, isDnsType, isHttpMethod, isHttpProtocol, isMtrProtocol, isTraceProtocol, Locations, PostMeasurement } from './types';
 import { throwArgError } from './utils';
 
 
@@ -92,6 +92,7 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
                 locations,
                 measurementOptions: {
                     ...port && { port },
+                    ...resolver && { resolver },
                     ...protocol && { protocol: isHttpProtocol(protocol) ? protocol : throwArgError(protocol, 'protocol', [...ALLOWED_HTTP_PROTOCOLS].join(', ')) },
                     request: {
                         ...path && { path },

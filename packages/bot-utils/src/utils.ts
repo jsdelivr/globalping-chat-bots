@@ -112,9 +112,46 @@ Resolve jsdelivr.com from a probe that is from the AWS network and is located in
 };
 
 
+export const httpHelpTexts = {
+	preamble: `The http command sends an HTTP request to a host and can perform HEAD or GET operations. GET is limited to 10KB responses, everything above will be cut by the API. Detailed performance stats as available for every request.
+The tool supports 2 formats for this command:
+When the full url is supplied, the tool autoparses the scheme, host, port, domain, path and query. For example:\`\`\`http https://www.jsdelivr.com:443/package/npm/test?nav=stats\`\`\`
+As an alternative that can be useful for scripting, the scheme, host, port, domain, path and query can be provided as separate command line flags. For example:\`\`\`http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"\`\`\`
+This command also provides 2 different ways to provide the dns resolver:
+Using the --resolver argument. For example:\`\`\`http jsdelivr.com from Berlin --resolver 1.1.1.1\`\`\`
+Using the dig format @resolver. For example:\`\`\`http jsdelivr.com @1.1.1.1 from Berlin\`\`\``,
+	examples: `HTTP HEAD request to jsdelivr.com from 2 probes in New York (protocol, port and path are inferred from the URL)
+\`\`\`http https://www.jsdelivr.com:443/package/npm/test?nav=stats from New York --limit 2\`\`\`
+HTTP GET request to google.com from 2 probes from London or Belgium
+\`\`\`http google.com from London,Belgium --limit 2 --method get\`\`\`
+HTTP HEAD request to jsdelivr.com from a probe that is from the AWS network and is located in Montreal using HTTP2. 2 http headers are added to the request.
+\`\`\`http jsdelivr.com from aws+montreal --protocol http2 --header "Accept-Encoding: br,gzip" -H "Accept-Language: *"\`\`\`
+HTTP HEAD request to jsdelivr.com from a probe that is located in Paris, using the /robots.txt path with "test=1" query string
+\`\`\`http jsdelivr.com from Paris --path /robots.txt --query "test=1"\`\`\`
+HTTP HEAD request to example.com from a probe that is located in Berlin, specifying a different host example.org in the request headers
+\`\`\`http example.com from Berlin --host example.org\`\`\`
+HTTP GET request google.com from a probe in ASN 123 with a dns resolver 1.1.1.1
+\`\`\`http google.com from 123 --resolver 1.1.1.1\`\`\``,
+	usage: '/globalping http [target] from [location] [flags]',
+	flags: `  -H, --header string        Specifies a HTTP header to be added to the request, in the format "Key: Value". Multiple headers can be added by adding multiple flags
+  -h, --help                 help for http
+      --host string          Specifies the Host header, which is going to be added to the request (default host defined in target)
+      --method string        Specifies the HTTP method to use (HEAD or GET) (default "HEAD")
+      --path string          A URL pathname (default "/")
+      --port int             Specifies the port to use (default 80 for HTTP, 443 for HTTPS and HTTP2)
+      --protocol string      Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTP")
+      --query string         A query-string
+      --resolver string      Specifies the resolver server used for DNS lookup (default is defined by the probe's network)`,
+	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+      --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
+  -L, --limit int     Limit the number of probes to use (default 1)`,
+};
+
+
 export const help: Help = {
 	'help': generalHelpTexts,
 	'dns': dnsHelpTexts,
+	'http': httpHelpTexts,
 
 	'ping': {
 		preamble: 'Ping is a simple ICMP echo request to a target endpoint.',
@@ -152,22 +189,7 @@ export const help: Help = {
 /globalping mtr google.com from new york --limit 2 --protocol tcp --port 33434`,
 	},
 
-	'http': {
-		preamble: 'HTTP is a network protocol used to transfer data between a client and a server.',
-		usage: '/globalping http <target> from <location> [options]',
-		options: `--limit            Number of probes - e.g. 1
---latency          Output only the stats of a measurement
---protocol         Protocol to use - HTTP | HTTPS | HTTP2
---port             Port to use - e.g. 80
---method           HTTP method - HEAD | GET
---path             URL pathname - e.g. /
---query            Query string
---host             Hostname
---header           Headers to use e.g. "Content-Type: text/html; charset=UTF-8"`,
-		examples: `/globalping http jsdelivr.com from united kingdom
-/globalping http 1.1.1.1 --limit 2
-/globalping http google.com from EU --limit 2 --protocol https --port 443 --method HEAD --path / --query a=1 --header Content-Type: text/html; charset=UTF-8 --header Accept-CH: Viewport-Width, Width`,
-	}
+
 
 };
 
