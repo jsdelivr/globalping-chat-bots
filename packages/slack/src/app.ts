@@ -16,8 +16,8 @@ if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_USER || !pro
 	throw new Error('DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production');
 
 // We run a discord instance in the slack express receiver
-if (!process.env.DISCORD_TOKEN && !process.env.DISCORD_APP_ID)
-	throw new Error('DISCORD_TOKEN and DISCORD_APP_ID environment variable must be set for production.');
+// if (!process.env.DISCORD_TOKEN && !process.env.DISCORD_APP_ID)
+//	throw new Error('DISCORD_TOKEN and DISCORD_APP_ID environment variable must be set for production.');
 
 const baseAppConfig = {
 	signingSecret: process.env.SLACK_SIGNING_SECRET,
