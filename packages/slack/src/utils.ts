@@ -3,7 +3,7 @@ import { argsToFlags, buildPostMeasurements, getMeasurement, help, loggerInit, p
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
-import { dnsHelp, generalHelp,httpHelp } from './format-help';
+import { dnsHelp, generalHelp, httpHelp, mtrHelp } from './format-help';
 import { measurementsChatResponse } from './response';
 
 dotenv.config();
@@ -11,23 +11,29 @@ dotenv.config();
 export const logger = loggerInit('slack', process.env.LOG_LEVEL ?? 'info');
 
 
-export const helpCmd = (cmd: string): string => {
+export const helpCmd = (cmd: string, target?: string): string => {
 	switch (cmd) {
 		case 'dns':
 			return dnsHelp();
 		case 'http':
 			return httpHelp();
+		case 'mtr':
+			return mtrHelp();
 		case 'traceroute':
 			return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
 		case 'ping':
 			return `${help.dns.preamble}\n\n*Usage:*\n\`\`\`${help.dns.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.dns.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.dns.examples}\`\`\``;
-		case 'mtr':
-			return `${help.mtr.preamble}\n\n*Usage:*\n\`\`\`${help.mtr.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.mtr.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.mtr.examples}\`\`\``;
+
 
 		case undefined:
 		case '':
 		case 'help':
-			return generalHelp();
+			if (!target) {
+				return generalHelp();
+			}
+			// handle case: /globalping help <subcommand>
+			return helpCmd(target);
+
 		default:
 			return 'Unknown command! Please call `/globalping help` for a list of commands.';
 	}
@@ -55,7 +61,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 	const { channel_id, user_id } = payload;
 
 	if (!flags.cmd || flags.help) {
-		await client.chat.postEphemeral({ text: helpCmd(flags.cmd), user: user_id, channel: channel_id });
+		await client.chat.postEphemeral({ text: helpCmd(flags.cmd, flags.target), user: user_id, channel: channel_id });
 	} else {
 		const postMeasurements = buildPostMeasurements(flags);
 
