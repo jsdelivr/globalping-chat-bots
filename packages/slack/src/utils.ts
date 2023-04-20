@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop */
-import { argsToFlags, buildPostMeasurements, getMeasurement, help, loggerInit, postMeasurement } from '@globalping/bot-utils';
+import { argsToFlags, buildPostMeasurements, getMeasurement, loggerInit, postMeasurement } from '@globalping/bot-utils';
 import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
-import { dnsHelp, generalHelp, httpHelp, mtrHelp,pingHelp } from './format-help';
+import { dnsHelp, generalHelp, httpHelp, mtrHelp, pingHelp, tracerouteHelp } from './format-help';
 import { measurementsChatResponse } from './response';
 
 dotenv.config();
@@ -22,7 +22,7 @@ export const helpCmd = (cmd: string, target?: string): string => {
 		case 'ping':
 			return pingHelp();
 		case 'traceroute':
-			return `${help.traceroute.preamble}\n\n*Usage:*\n\`\`\`${help.traceroute.usage}\`\`\`\n\n*Options:*\n\`\`\`${help.traceroute.options}\`\`\`\n\n*Examples:*\n\`\`\`${help.traceroute.examples}\`\`\``;
+			return tracerouteHelp();
 
 		case undefined:
 		case '':

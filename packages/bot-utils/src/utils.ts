@@ -148,7 +148,7 @@ HTTP GET request google.com from a probe in ASN 123 with a dns resolver 1.1.1.1
 };
 
 export const mtrHelpTexts = {
-	preamble: 'MTR combines the functionality of the traceroute and ping programs in a single network diagnostic tool.',
+	preamble: 'mtr combines the functionality of the traceroute and ping programs in a single network diagnostic tool.',
 	examples: `MTR google.com from 2 probes in New York
 \`\`\`mtr google.com from New York --limit 2\`\`\`
 MTR 1.1.1.1 from 2 probes from USA or Belgium with 10 packets
@@ -181,21 +181,31 @@ Ping jsdelivr.com from a probe that is from the AWS network and is located in Mo
   -L, --limit int     Limit the number of probes to use (default 1)`,
 };
 
+export const tracerouteHelpTexts = {
+	preamble: 'traceroute tracks the route packets take from an IP network on their way to a given host.',
+	examples: `Traceroute google.com from 2 probes in New York
+\`\`\`traceroute google.com from New York --limit 2\`\`\`
+Traceroute 1.1.1.1 from 2 probes from USA or Belgium
+\`\`\`traceroute 1.1.1.1 from USA,Belgium --limit 2\`\`\`
+Traceroute jsdelivr.com from a probe that is from the AWS network and is located in Montreal using the UDP protocol
+\`\`\`traceroute jsdelivr.com from aws+montreal --protocol udp\`\`\`
+Traceroute jsdelivr.com from a probe that is located in Paris to port 453
+\`\`\`traceroute jsdelivr.com from Paris --port 453\`\`\``,
+	usage: '/globalping traceroute [target] from [location] [flags]',
+	flags: `  -h, --help              Help for traceroute
+      --port int          Specifies the port to use for the traceroute. Only applicable for TCP protocol (default 80)
+      --protocol string   Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "icmp")`,
+	globalFlags: `  -F, --from string       Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+      --latency           Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
+  -L, --limit int         Limit the number of probes to use (default 1)`,
+};
+
 export const help: Help = {
 	'help': generalHelpTexts,
 	'dns': dnsHelpTexts,
 	'http': httpHelpTexts,
 	'mtr': mtrHelpTexts,
 	'ping': pingHelpTexts,
-	'traceroute': {
-		preamble: 'Traceroute is a tool used to diagnose problems in a network path.',
-		usage: '/globalping traceroute <target> from <location> [options]',
-		options: `--limit			Number of probes - e.g. 1
---protocol		 Protocol to use - TCP | UDP | ICMP
---port 			Port to use - e.g. 33434`,
-		examples: `/globalping traceroute jsdelivr.com from united kingdom
-/globalping traceroute 1.1.1.1 --limit 2
-/globalping traceroute google.com from EU --limit 2 --protocol tcp --port 33434`,
-	},
+	'traceroute': tracerouteHelpTexts,
 };
 

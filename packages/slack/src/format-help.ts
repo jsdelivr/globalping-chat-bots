@@ -1,4 +1,4 @@
-import { dnsHelpTexts, generalHelpTexts, httpHelpTexts, mtrHelpTexts, pingHelpTexts } from '@globalping/bot-utils/src/utils';
+import { dnsHelpTexts, generalHelpTexts, httpHelpTexts, mtrHelpTexts, pingHelpTexts, tracerouteHelpTexts } from '@globalping/bot-utils/src/utils';
 
 
 export function generalHelp() {
@@ -80,4 +80,20 @@ ${pingHelpTexts.examples}
 
 *Global Flags*:
 \`\`\`${pingHelpTexts.globalFlags}\`\`\``;;
+}
+
+export function tracerouteHelp() {
+    return `${tracerouteHelpTexts.preamble}
+
+*Examples:*
+${tracerouteHelpTexts.examples}
+
+*Usage:*
+\`\`\`${tracerouteHelpTexts.usage}\`\`\`
+
+*Flags*:
+\`\`\`${tracerouteHelpTexts.flags}\`\`\`
+
+*Global Flags*:
+\`\`\`${tracerouteHelpTexts.globalFlags}\`\`\``;;
 }
