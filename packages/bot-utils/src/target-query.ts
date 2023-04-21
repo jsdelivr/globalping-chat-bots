@@ -25,7 +25,7 @@ export function parseTargetQuery(cmd: string | undefined, args: string[]): Targe
         targetQuery.resolver = resolver;
     }
 
-    targetQuery.target = argsWithoutResolver[0] ? String(argsWithoutResolver[0]) : '';
+    targetQuery.target = argsWithoutResolver[0] ? fixTarget(cmd, String(argsWithoutResolver[0])) : '';
 
     if (argsWithoutResolver.length > 1) {
         if (argsWithoutResolver[1] === 'from') {
@@ -36,6 +36,18 @@ export function parseTargetQuery(cmd: string | undefined, args: string[]): Targe
     }
 
     return targetQuery;
+}
+
+// fix target if needed
+function fixTarget(cmd: string, text: string): string {
+    // remove http:// if it was added to the target and the command is not http
+    // it could have been added by mistake by the user, and auto added by slack in mentions
+    const httpPrefix = 'http://';
+    if (cmd !== 'http' && text.startsWith(httpPrefix)) {
+        return text.slice(httpPrefix.length);
+    }
+
+    return text;
 }
 
 export function findAndRemoveResolver(args: string[]): [string, string[]] {

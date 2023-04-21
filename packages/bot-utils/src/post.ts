@@ -1,8 +1,8 @@
 import got, { HTTPError } from 'got';
 
+import { PostError } from './errors';
 import type { PostMeasurement, PostMeasurementResponse } from './types';
 import { userAgent } from './user-agent';
-import { PostError } from './utils';
 
 export const postMeasurement = async (optsArr: PostMeasurement[]): Promise<PostMeasurementResponse[]> => {
 	let index = 0;

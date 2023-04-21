@@ -4,6 +4,7 @@ import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
 import * as database from './db';
+import { parseCommandfromMention } from './mention';
 import { routes } from './routes';
 import { channelWelcome, logger, postAPI, welcome } from './utils';
 
@@ -54,29 +55,36 @@ if (process.env.NODE_ENV === 'production') {
 	app = new App(baseAppConfig);
 }
 
-app.command('/globalping', async ({ payload, command, ack, client, respond }) => {
+app.command('/globalping', async ({ payload, ack, client, respond }) => {
 	const logData = { commandText: payload.text, teamDomain: payload.team_domain, channelName: payload.channel_name, userName: payload.user_name, triggerId: payload.trigger_id };
+	logger.info(logData, '/globalping request');
+
 	try {
+		logger.info(logData, '/globalping ack');
 		// Acknowledge command request
 		await ack();
-		logger.debug(`Calling command ${command.text} with payload: ${JSON.stringify(payload)}`);
-		logger.info(logData, '/globalping request');
+	}
+	catch (error) {
+		const err = (error as Error);
+		logger.info({ errorMsg: err.message, ...logData }, '/globalping ack failed');
+		await respond({ text: `Unable to acknowledge request.\n${formatAPIError(err.message)}` });
+	}
 
-		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const { channel_id, user_id, channel_name } = payload;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	const { channel_id, user_id, channel_name, text: commandText } = payload;
 
-		let info;
-		// Check if channel is accessible just to be sure
-		try {
-			info = await client.conversations.info({ channel: channel_id });
-			logger.debug(`Channel info: ${JSON.stringify(info)}`);
-		} catch (error) {
-			logger.debug(`Channel info not accessible: ${JSON.stringify(error)}`);
-			// Continue
-		}
+	let channelConversationsInfo;
+	// Check if channel is accessible just to be sure
+	try {
+		channelConversationsInfo = await client.conversations.info({ channel: channel_id });
+	} catch (error) {
+		const err = (error as Error);
+		logger.info({ errorMsg: err.message, ...logData }, '/globalping channel info not available');
+	}
 
+	try {
 		// If channel is not accessible, respond with errors
-		if (!info) {
+		if (!channelConversationsInfo) {
 			// This is a user DM
 			if (channel_name === 'directmessage' || channel_id.startsWith('D')) {
 				logger.debug('Channel is a DM');
@@ -101,13 +109,13 @@ app.command('/globalping', async ({ payload, command, ack, client, respond }) =>
 		} else {
 			const channelPayload = { channel_id, user_id };
 			logger.info(logData, '/globalping processing starting');
-			await postAPI(client, channelPayload, command.text);
+			await postAPI(client, channelPayload, commandText);
 			logger.info(logData, '/globalping response - OK');
 		}
 	} catch (error) {
 		const errorMsg = getAPIErrorMessage(error);
 		logger.error({ errorMsg, ...logData }, '/globalping failed');
-		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n${formatAPIError(errorMsg)}` });
+		await respond({ text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}` });
 	}
 });
 
@@ -150,6 +158,40 @@ app.event('member_joined_channel', async ({ event, context, say }) => {
 	}
 
 });
+
+app.event('app_mention', async ({ payload, event, context, say, client }) => {
+	let { botUserId } = context;
+	if (botUserId === undefined) {
+		botUserId = '';
+	}
+	const fullText = payload.text;
+	const eventTs = payload.event_ts;
+	const teamId = event.team;
+	const channelId = event.channel;
+	let userId = event.user;
+
+	if (userId === undefined) {
+		userId = '';
+	}
+
+	const logData = { fullText, teamId, channelId, userId, eventTs };
+	logger.info(logData, '@globalping request');
+
+	const commandText = parseCommandfromMention(fullText, botUserId);
+
+	try {
+		// the mention is always received in a channel where the bot is a member
+		const channelPayload = { channel_id: channelId, user_id: userId };
+		logger.info({ commandText, ...logData }, '@globalping processing starting');
+		await postAPI(client, channelPayload, commandText);
+		logger.info(logData, '@globalping response - OK');
+	} catch (error) {
+		const errorMsg = getAPIErrorMessage(error);
+		logger.error({ errorMsg, ...logData }, '@globalping failed');
+		await say({ text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}` });
+	}
+});
+
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 (async () => {
