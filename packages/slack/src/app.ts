@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { errorParse, formatAPIError } from '@globalping/bot-utils';
+import { errorParse, formatAPIError, getAPIErrorMessage } from '@globalping/bot-utils';
 import { App, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
@@ -55,10 +55,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.command('/globalping', async ({ payload, command, ack, client, respond }) => {
+	const logData = { commandText: payload.text, teamDomain: payload.team_domain, channelName: payload.channel_name, userName: payload.user_name, triggerId: payload.trigger_id };
 	try {
 		// Acknowledge command request
 		await ack();
 		logger.debug(`Calling command ${command.text} with payload: ${JSON.stringify(payload)}`);
+		logger.info(logData, '/globalping request');
 
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		const { channel_id, user_id, channel_name } = payload;
@@ -83,24 +85,29 @@ app.command('/globalping', async ({ payload, command, ack, client, respond }) =>
 
 				// If the DM is not the Globalping DM, we cancel the request
 				if (conversation.channel?.id && channel_id !== conversation.channel.id) {
+					logger.error({ errorMsg: 'request in dm', ...logData }, '/globalping response - dm');
 					await respond({ text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.' });
 				} else {
 					throw new Error('Unable to open a DM with the Globalping App.');
 				}
 			} else if (channel_name.startsWith('mpdm-')) {
-				logger.debug('Channel is mpdm');
+				logger.error({ errorMsg: 'request in mpdm', ...logData }, '/globalping response - mpdm');
 				await respond({ text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.' });
 			} else {
 				// If not DM, try checking the properties of the channel
-				logger.debug('Could not get channel info, assuming private channel');
+				logger.error({ errorMsg: 'asked for invite to channel', ...logData }, '/globalping response - channel invite needed');
 				await respond('Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.');
 			}
 		} else {
 			const channelPayload = { channel_id, user_id };
+			logger.info(logData, '/globalping processing starting');
 			await postAPI(client, channelPayload, command.text);
+			logger.info(logData, '/globalping response - OK');
 		}
 	} catch (error) {
-		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n${formatAPIError(error)}` });
+		const errorMsg = getAPIErrorMessage(error);
+		logger.error({ errorMsg, ...logData }, '/globalping failed');
+		await respond({ text: `Unable to successfully process command \`${command.text}\`.\n${formatAPIError(errorMsg)}` });
 	}
 });
 
