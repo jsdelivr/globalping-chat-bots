@@ -52,26 +52,6 @@ describe('Utils', () => {
             expect(q.from).toEqual('london');
             expect(q.resolver).toEqual('1.1.1.1');
         });
-
-        it('with http fixing', () => {
-            const cmd = 'ping';
-            const args = ['http://example.com', 'from', 'milano'];
-
-            const q: TargetQuery = parseTargetQuery(cmd, args);
-
-            expect(q.target).toEqual('example.com');
-            expect(q.from).toEqual('milano');
-        });
-
-        it('no http fixing if cmd is http', () => {
-            const cmd = 'http';
-            const args = ['http://example.com', 'from', 'milano'];
-
-            const q: TargetQuery = parseTargetQuery(cmd, args);
-
-            expect(q.target).toEqual('http://example.com');
-            expect(q.from).toEqual('milano');
-        });
     });
 
     describe('findAndRemoveResolver', () => {
