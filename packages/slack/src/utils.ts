@@ -51,23 +51,24 @@ export const channelWelcome = 'Hello, I\'m Globalping. To learn more about me, r
 interface ChannelPayload {
 	channel_id: string
 	user_id: string
+	thread_ts?: string
 }
 
 export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdText: string) => {
 	const flags = argsToFlags(cmdText);
 
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	const { channel_id, user_id } = payload;
+	const { channel_id, user_id, thread_ts } = payload;
 
 	if (!flags.cmd || flags.help) {
-		await client.chat.postEphemeral({ text: helpCmd(flags.cmd, flags.target), user: user_id, channel: channel_id });
+		await client.chat.postEphemeral({ text: helpCmd(flags.cmd, flags.target), user: user_id, channel: channel_id, thread_ts });
 	} else {
 		const postMeasurements = buildPostMeasurements(flags);
 
 		// We post measurement first to catch any validation errors before committing to processing request message
 		logger.debug(`Posting measurement: ${JSON.stringify(postMeasurements)}`);
 		const measurements = await postMeasurement(postMeasurements);
-		await client.chat.postEphemeral({ text: '```Processing request...```', user: user_id, channel: channel_id });
+		await client.chat.postEphemeral({ text: '```Processing request...```', user: user_id, channel: channel_id, thread_ts });
 		logger.debug(`Post response: ${JSON.stringify(measurements)}`);
 		logger.debug(`Latency mode: ${flags.latency}`);
 
@@ -78,11 +79,11 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 			logger.debug(`Get response: ${JSON.stringify(res)}`);
 			// Only want this to run on first measurement
 			if (first) {
-				await client.chat.postMessage({ channel: channel_id, text: `<@${user_id}>, here are the results for \`${cmdText}\`` });
+				await client.chat.postMessage({ channel: channel_id, thread_ts, text: `<@${user_id}>, here are the results for \`${cmdText}\`` });
 				first = false;
 			}
 
-			measurementsChatResponse(logger, client, channel_id, res, flags.cmd, flags.latency);
+			measurementsChatResponse(logger, client, channel_id, thread_ts, res, flags.cmd, flags.latency);
 		}
 	}
 };
