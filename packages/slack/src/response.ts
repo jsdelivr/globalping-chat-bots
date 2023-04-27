@@ -49,14 +49,14 @@ const responseText = (result: PingResult, cmd: string, latency: boolean | undefi
     return formatResponseText(text);
 };
 
-export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, res: PingMeasurementResponse, cmd: string, latency: boolean | undefined) => {
+export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, thread_ts: string | undefined, res: PingMeasurementResponse, cmd: string, latency: boolean | undefined) => {
     /* eslint-disable no-await-in-loop */
     for (const result of res.results) {
         const tag = getTag(result.probe.tags);
         const text = responseHeader(result, tag) + responseText(result, cmd, latency);
 
         try {
-            await client.chat.postMessage({ text, channel: channel_id });
+            await client.chat.postMessage({ text, channel: channel_id, thread_ts });
         } catch (error) {
             logger.error(error);
             throw error;

@@ -159,7 +159,7 @@ app.event('member_joined_channel', async ({ event, context, say }) => {
 
 });
 
-app.event('app_mention', async ({ payload, event, context, say, client }) => {
+app.event('app_mention', async ({ payload, event, context, client }) => {
 	let { botUserId } = context;
 	if (botUserId === undefined) {
 		botUserId = '';
@@ -168,27 +168,28 @@ app.event('app_mention', async ({ payload, event, context, say, client }) => {
 	const eventTs = payload.event_ts;
 	const teamId = event.team;
 	const channelId = event.channel;
+	const threadTs = event.thread_ts;
 	let userId = event.user;
 
 	if (userId === undefined) {
 		userId = '';
 	}
 
-	const logData = { fullText, teamId, channelId, userId, eventTs };
+	const logData = { fullText, teamId, channelId, userId, eventTs, threadTs };
 	logger.info(logData, '@globalping request');
 
 	const commandText = parseCommandfromMention(fullText, botUserId);
 
 	try {
 		// the mention is always received in a channel where the bot is a member
-		const channelPayload = { channel_id: channelId, user_id: userId };
+		const channelPayload = { channel_id: channelId, user_id: userId, thread_ts: threadTs };
 		logger.info({ commandText, ...logData }, '@globalping processing starting');
 		await postAPI(client, channelPayload, commandText);
 		logger.info(logData, '@globalping response - OK');
 	} catch (error) {
 		const errorMsg = getAPIErrorMessage(error);
 		logger.error({ errorMsg, ...logData }, '@globalping failed');
-		await say({ text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}` });
+		await client.chat.postMessage({ channel: channelId, thread_ts: threadTs, text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}` });
 	}
 });
 
