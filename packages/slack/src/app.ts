@@ -25,7 +25,7 @@ const baseAppConfig = {
 	clientId: process.env.SLACK_CLIENT_ID,
 	clientSecret: process.env.SLACK_CLIENT_SECRET,
 	stateSecret: process.env.SLACK_STATE_SECRET,
-	scopes: ['chat:write', 'chat:write.public', 'commands', 'channels:read', 'groups:read', 'im:read', 'mpim:read', 'im:write', 'im:history', 'users:read'],
+	scopes: ['chat:write', 'chat:write.public', 'commands', 'channels:read', 'groups:read', 'im:read', 'mpim:read', 'im:write', 'im:history', 'users:read', 'app_mentions:read'],
 	logLevel: LogLevel.INFO,
 	logger: {
 		debug: (...msgs: unknown[]) => { logger.debug(JSON.stringify(msgs)); },
