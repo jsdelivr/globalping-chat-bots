@@ -1,10 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import { errorParse, formatAPIError, getAPIErrorMessage } from '@globalping/bot-utils';
-import { App, LogLevel } from '@slack/bolt';
+import { App, GenericMessageEvent, LogLevel } from '@slack/bolt';
 import * as dotenv from 'dotenv';
 
 import * as database from './db';
-import { parseCommandfromMention } from './mention';
+import { handleMention } from './mention';
 import { routes } from './routes';
 import { channelWelcome, logger, postAPI, welcome } from './utils';
 
@@ -175,22 +175,36 @@ app.event('app_mention', async ({ payload, event, context, client }) => {
 		userId = '';
 	}
 
-	const logData = { fullText, teamId, channelId, userId, eventTs, threadTs };
-	logger.info(logData, '@globalping request');
+	await handleMention(fullText, teamId, channelId, userId, eventTs, threadTs, botUserId, client);
+});
 
-	const commandText = parseCommandfromMention(fullText, botUserId);
-
-	try {
-		// the mention is always received in a channel where the bot is a member
-		const channelPayload = { channel_id: channelId, user_id: userId, thread_ts: threadTs };
-		logger.info({ commandText, ...logData }, '@globalping processing starting');
-		await postAPI(client, channelPayload, commandText);
-		logger.info(logData, '@globalping response - OK');
-	} catch (error) {
-		const errorMsg = getAPIErrorMessage(error);
-		logger.error({ errorMsg, ...logData }, '@globalping failed');
-		await client.chat.postMessage({ channel: channelId, thread_ts: threadTs, text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}` });
+app.event('message', async ({ payload, event, context, client }) => {
+	// Filter im events
+	if (event.channel_type !== 'im') {
+		return;
 	}
+
+	const messageEvent = event as GenericMessageEvent;
+
+	let { botUserId } = context;
+	if (botUserId === undefined) {
+		botUserId = '';
+	}
+	let fullText = messageEvent.text;
+	const eventTs = payload.event_ts;
+	const teamId = messageEvent.team;
+	const channelId = event.channel;
+	const threadTs = messageEvent.thread_ts;
+	let userId = messageEvent.user;
+
+	if (userId === undefined) {
+		userId = '';
+	}
+
+	if (fullText === undefined) {
+		fullText = '';
+	}
+	await handleMention(fullText, teamId, channelId, userId, eventTs, threadTs, botUserId, client);
 });
 
 
