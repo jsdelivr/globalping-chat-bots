@@ -6,7 +6,8 @@ import * as dotenv from 'dotenv';
 import * as database from './db';
 import { handleMention } from './mention';
 import { routes } from './routes';
-import { channelWelcome, logger, postAPI, welcome } from './utils';
+import { channelWelcome, logger, postAPI } from './utils';
+import { handleAppHomeMessagesOpened } from './welcome';
 
 dotenv.config();
 
@@ -119,24 +120,12 @@ app.command('/globalping', async ({ payload, ack, client, respond }) => {
 	}
 });
 
-app.event('app_home_opened', async ({ context, event, say }) => {
+app.event('app_home_opened', async ({ context, event, say, client }) => {
 	if (event.tab === 'messages') {
-		logger.debug(`Opening messages tab for user ${event.user}`);
-		// check the message history if there was a prior interaction for this App DM
-		const history = await app.client.conversations.history({
-			token: context.botToken,
-			channel: event.channel,
-			count: 1 // we only need to check if >=1 messages exist
-		});
-		// logger.debug(`History: ${JSON.stringify(history)}`);
+		const { botToken, teamId } = context;
+		const { user, channel, event_ts: eventTs } = event;
 
-		// if there was no prior interaction (= 0 messages), it's safe to send a welcome message
-		if (history?.messages?.length === 0) {
-			logger.debug('No prior interaction, sending welcome message');
-			say({
-				text: welcome(event.user)
-			});
-		}
+		handleAppHomeMessagesOpened(client, user, botToken, channel, eventTs, teamId, say);
 	}
 });
 
