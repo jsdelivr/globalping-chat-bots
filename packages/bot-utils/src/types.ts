@@ -131,6 +131,8 @@ interface SharedResults {
 	}
 	result: {
 		rawOutput: string,
+		rawHeaders: string,
+		rawBody: string,
 		stats: {
 			loss: number
 			min: number

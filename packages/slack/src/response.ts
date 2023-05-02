@@ -1,21 +1,29 @@
-import { getTag, Logger, PingMeasurementResponse, PingResult } from '@globalping/bot-utils';
+import { Flags, getTag, Logger, PingMeasurementResponse, PingResult } from '@globalping/bot-utils';
 import { WebClient } from '@slack/web-api';
 
 const responseHeader = (result: PingResult, tag: string | undefined): string => `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}*\n`;
 
-const reponseTextRegular = (result: PingResult): string => {
+const slackTruncationLimit = 2800;
+
+const reponseTextRegular = (result: PingResult, flags: Flags): string => {
+    const responseText = isBodyOnlyHttpGet(flags) ? result.result.rawBody : result.result.rawOutput;
+
     // Slack has a limit of 3000 characters per block - truncate if necessary
-    const output = result.result.rawOutput.length > 2800 ? `${result.result.rawOutput.slice(0, 2800)}\n... (truncated)` : `${result.result.rawOutput}`;
-    return output;
+    const finalResponseText = responseText.length > slackTruncationLimit ? `${responseText.slice(0, slackTruncationLimit)}\n... (truncated)` : `${responseText}`;
+    return finalResponseText;
 };
+
+function isBodyOnlyHttpGet(flags: Flags): boolean {
+    return flags.cmd === 'http' && flags.method === 'GET' && !flags.full;
+}
 
 const formatResponseText = (text: string): string => `\`\`\`${text}\`\`\``;
 
 
-const latencyText = (result: PingResult, cmd: string): string => {
+const latencyText = (result: PingResult, flags: Flags): string => {
     let text = '';
 
-    switch (cmd) {
+    switch (flags.cmd) {
         case 'ping':
             text += `Min: ${result.result.stats.min} ms\n`;
             text += `Max: ${result.result.stats.max} ms\n`;
@@ -36,24 +44,24 @@ const latencyText = (result: PingResult, cmd: string): string => {
             break;
 
         default:
-            throw new Error(`unknown command: ${cmd}`);
+            throw new Error(`unknown command: ${flags.cmd}`);
             break;
     }
 
     return text;
 };
 
-const responseText = (result: PingResult, cmd: string, latency: boolean | undefined): string => {
-    const text = latency ? latencyText(result, cmd) : reponseTextRegular(result);
+const responseText = (result: PingResult, flags: Flags): string => {
+    const text = flags.latency ? latencyText(result, flags) : reponseTextRegular(result, flags);
 
     return formatResponseText(text);
 };
 
-export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, thread_ts: string | undefined, res: PingMeasurementResponse, cmd: string, latency: boolean | undefined) => {
+export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, thread_ts: string | undefined, res: PingMeasurementResponse, flags: Flags) => {
     /* eslint-disable no-await-in-loop */
     for (const result of res.results) {
         const tag = getTag(result.probe.tags);
-        const text = responseHeader(result, tag) + responseText(result, cmd, latency);
+        const text = responseHeader(result, tag) + responseText(result, flags);
 
         try {
             await client.chat.postMessage({ text, channel: channel_id, thread_ts });

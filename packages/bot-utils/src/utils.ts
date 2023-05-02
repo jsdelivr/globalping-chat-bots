@@ -78,6 +78,8 @@ Using the dig format @resolver. For example:\`\`\`http jsdelivr.com @1.1.1.1 fro
 \`\`\`http https://www.jsdelivr.com:443/package/npm/test?nav=stats from New York --limit 2\`\`\`
 HTTP GET request to google.com from 2 probes from London or Belgium
 \`\`\`http google.com from London,Belgium --limit 2 --method get\`\`\`
+HTTP GET request to google.com from a probe in London. Returns the full output
+\`\`\`http google.com from London --method get --full\`\`\`
 HTTP HEAD request to jsdelivr.com from a probe that is from the AWS network and is located in Montreal using HTTP2. 2 http headers are added to the request.
 \`\`\`http jsdelivr.com from aws+montreal --protocol http2 --header "Accept-Encoding: br,gzip" -H "Accept-Language: *"\`\`\`
 HTTP HEAD request to jsdelivr.com from a probe that is located in Paris, using the /robots.txt path with "test=1" query string
@@ -87,7 +89,8 @@ HTTP HEAD request to example.com from a probe that is located in Berlin, specify
 HTTP GET request google.com from a probe in ASN 123 with a dns resolver 1.1.1.1
 \`\`\`http google.com from 123 --resolver 1.1.1.1\`\`\``,
 	usage: '/globalping http [target] from [location] [flags]',
-	flags: `  -H, --header string        Specifies a HTTP header to be added to the request, in the format "Key: Value". Multiple headers can be added by adding multiple flags
+	flags: `	  --full                 Full output. Uses an HTTP GET request, and outputs the status, headers and body to the output
+  -H, --header string        Specifies a HTTP header to be added to the request, in the format "Key: Value". Multiple headers can be added by adding multiple flags
   -h, --help                 Help for http
       --host string          Specifies the Host header, which is going to be added to the request (default host defined in target)
       --method string        Specifies the HTTP method to use (HEAD or GET) (default "HEAD")

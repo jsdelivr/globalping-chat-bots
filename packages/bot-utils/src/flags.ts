@@ -21,7 +21,7 @@ const ALLOWED_MTR_FLAGS = ['protocol', 'port', 'packets', ...ALLOWED_BASE_FLAGS]
 type MtrFlags = typeof ALLOWED_MTR_FLAGS[number];
 const isMtrFlag = (flag: string): flag is MtrFlags => ALLOWED_MTR_FLAGS.includes(flag as MtrFlags);
 
-const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'resolver', 'method', 'path', 'query', 'host', 'header', 'latency', ...ALLOWED_BASE_FLAGS] as const;
+const ALLOWED_HTTP_FLAGS = ['protocol', 'port', 'resolver', 'method', 'path', 'query', 'host', 'header', 'latency', 'full', ...ALLOWED_BASE_FLAGS] as const;
 type HttpFlags = typeof ALLOWED_HTTP_FLAGS[number];
 const isHttpFlag = (flag: string): flag is HttpFlags => ALLOWED_HTTP_FLAGS.includes(flag as HttpFlags);
 
@@ -42,6 +42,7 @@ export interface Flags {
 	headers?: { [header: string]: string }
 	help?: QueryType | string | boolean
 	latency?: boolean
+	full?: boolean
 }
 
 const checkFlags = (cmd: string, args: Record<string, string>): void => {
@@ -123,7 +124,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	};
 
 
-	const parsedKeys = ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency'];
+	const parsedKeys = ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency', 'full'];
 
 	const parsed = parser(args, {
 		array: parsedKeys,
@@ -163,7 +164,11 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	let port = parsed.port ? Number(parsed.port[0]) : undefined;
 	let protocol = parsed.protocol ? String(parsed.protocol).toUpperCase() : undefined;
 	let query = parsed.query ? String(parsed.query) : undefined;
-	const httpMethod = parsed.method ? String(parsed.method).toUpperCase() : undefined;
+
+	let httpMethod = parsed.method ? String(parsed.method).toUpperCase() : undefined;
+	if (parsed.full) {
+		httpMethod = 'GET';
+	}
 
 	// Throw on any invalid flags
 	if (cmd && parsed.help === undefined) checkFlags(cmd, parsed);
@@ -222,6 +227,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		headers: httpHeaders,
 		...parsed.help && { help: true },
 		...parsed.latency && { latency: true },
+		...parsed.full && { full: true },
 	};
 
 	return flags;
