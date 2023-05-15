@@ -83,7 +83,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 				first = false;
 			}
 
-			measurementsChatResponse(logger, client, channel_id, thread_ts, res, flags.cmd, flags.latency);
+			measurementsChatResponse(logger, client, channel_id, thread_ts, res, flags);
 		}
 	}
 };
