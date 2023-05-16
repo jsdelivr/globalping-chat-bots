@@ -34,6 +34,7 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
   -h, --help          help for globalping
       --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int     Limit the number of probes to use (default 1)
+      --share         Prints a link at the end the results, allowing to vizualize the results online (default false)
 
   Use "globalping [command] --help" for more information about a command.`
 };
@@ -62,7 +63,8 @@ Resolve jsdelivr.com from a probe that is from the AWS network and is located in
       --type string       Specifies the type of DNS query to perform (default "A")`,
 	globalFlags: `  -F, --from string       Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency           Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
-  -L, --limit int         Limit the number of probes to use (default 1)`,
+  -L, --limit int         Limit the number of probes to use (default 1)
+      --share             Prints a link at the end the results, allowing to vizualize the results online (default false)`,
 };
 
 
@@ -101,7 +103,8 @@ HTTP GET request google.com from a probe in ASN 123 with a dns resolver 1.1.1.1
       --resolver string      Specifies the resolver server used for DNS lookup (default is defined by the probe's network)`,
 	globalFlags: `  -F, --from string          Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency              Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
-  -L, --limit int            Limit the number of probes to use (default 1)`,
+  -L, --limit int            Limit the number of probes to use (default 1)
+      --share                Prints a link at the end the results, allowing to vizualize the results online (default false)`,
 };
 
 export const mtrHelpTexts = {
@@ -119,7 +122,8 @@ MTR jsdelivr.com from a probe that is from the AWS network and is located in Mon
   --protocol string   Specifies the protocol used (ICMP, TCP or UDP) (default "icmp")`,
 	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
-  -L, --limit int     Limit the number of probes to use (default 1)`,
+  -L, --limit int     Limit the number of probes to use (default 1)
+      --share         Prints a link at the end the results, allowing to vizualize the results online (default false)`,
 };
 
 export const pingHelpTexts = {
@@ -135,7 +139,8 @@ Ping jsdelivr.com from a probe that is from the AWS network and is located in Mo
       --packets int   Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)`,
 	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
-  -L, --limit int     Limit the number of probes to use (default 1)`,
+  -L, --limit int     Limit the number of probes to use (default 1)
+      --share         Prints a link at the end the results, allowing to vizualize the results online (default false)`,
 };
 
 export const tracerouteHelpTexts = {
@@ -154,7 +159,8 @@ Traceroute jsdelivr.com from a probe that is located in Paris to port 453
       --protocol string   Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "icmp")`,
 	globalFlags: `  -F, --from string       Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency           Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
-  -L, --limit int         Limit the number of probes to use (default 1)`,
+  -L, --limit int         Limit the number of probes to use (default 1)
+      --share             Prints a link at the end the results, allowing to vizualize the results online (default false)`,
 };
 
 export const help: Help = {

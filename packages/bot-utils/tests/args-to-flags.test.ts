@@ -133,5 +133,21 @@ describe('Utils', () => {
             expect(result).toEqual(flags);
         });
 
+        it('convert mtr args to flags with share', () => {
+            const args = 'mtr aws.com from Canada --packets 2 --protocol icmp -L 5 --share';
+            const result = argsToFlags(args);
+            const flags: Flags = {
+                cmd: 'mtr',
+                from: 'canada',
+                limit: 5,
+                packets: 2,
+                protocol: 'ICMP',
+                target: 'aws.com',
+                share: true,
+            };
+
+            expect(result).toEqual(flags);
+        });
+
     });
 });

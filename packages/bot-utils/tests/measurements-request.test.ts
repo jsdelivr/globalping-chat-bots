@@ -36,7 +36,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect ping flag', () => {
 				const args = 'ping google.com from New York --limit 2 --packets 3 --protocol icmp';
-				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "protocol" for "ping"!\nExpected "packets, latency, target, from, limit".');
+				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "protocol" for "ping"!\nExpected "packets, latency, target, from, limit, share".');
 			});
 		});
 
@@ -72,7 +72,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect traceroute flag', () => {
 				const args = 'traceroute google.com from New York --limit 2 --protocol tcp --port 80 --packets 3';
-				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "packets" for "traceroute"!\nExpected "protocol, port, target, from, limit".');
+				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "packets" for "traceroute"!\nExpected "protocol, port, target, from, limit, share".');
 			});
 		});
 
@@ -113,7 +113,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect dns flag', () => {
 				const args = 'dns google.com from New York --limit 2 --query AAAA --protocol tcp --port 80 --test';
-				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "test" for "dns"!\nExpected "query, protocol, port, resolver, trace, latency, target, from, limit".');
+				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "test" for "dns"!\nExpected "query, protocol, port, resolver, trace, latency, target, from, limit, share".');
 			});
 		});
 
@@ -150,7 +150,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect mtr flag', () => {
 				const args = 'mtr google.com from New York --limit 2 --protocol tcp --port 80 --packets 16 --test';
-				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "test" for "mtr"!\nExpected "protocol, port, packets, target, from, limit".');
+				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "test" for "mtr"!\nExpected "protocol, port, packets, target, from, limit, share".');
 			});
 		});
 
@@ -231,7 +231,7 @@ describe('Utils', () => {
 
 			it('should throw if incorrect http flag', () => {
 				const args = 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.com --method get --port 80 --protocol https --header Content-Encoding: gzip --header Content-Type: text/html; charset=utf-8 --test';
-				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "test" for "http"!\nExpected "protocol, port, resolver, method, path, query, host, header, latency, full, target, from, limit".');
+				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "test" for "http"!\nExpected "protocol, port, resolver, method, path, query, host, header, latency, full, target, from, limit, share".');
 			});
 		});
 	});
