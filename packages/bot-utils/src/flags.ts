@@ -4,7 +4,7 @@ import { parseTargetQuery } from './target-query';
 import { ALLOWED_QUERY_TYPES, DnsProtocol, DnsType, HttpMethod, HttpProtocol, isQueryType, MtrProtocol, QueryType, TraceProtocol } from './types';
 import { throwArgError, throwOptError } from './utils';
 
-const ALLOWED_BASE_FLAGS = ['target', 'from', 'limit'] as const;
+const ALLOWED_BASE_FLAGS = ['target', 'from', 'limit', 'share'] as const;
 const ALLOWED_PING_FLAGS = ['packets', 'latency', ...ALLOWED_BASE_FLAGS] as const;
 type PingFlags = typeof ALLOWED_PING_FLAGS[number];
 const isPingFlag = (flag: string): flag is PingFlags => ALLOWED_PING_FLAGS.includes(flag as PingFlags);
@@ -43,6 +43,7 @@ export interface Flags {
 	help?: QueryType | string | boolean
 	latency?: boolean
 	full?: boolean
+	share?: boolean
 }
 
 const checkFlags = (cmd: string, args: Record<string, string>): void => {
@@ -124,7 +125,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	};
 
 
-	const parsedKeys = ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency', 'full'];
+	const parsedKeys = ['from', 'limit', 'packets', 'port', 'protocol', 'type', 'resolver', 'path', 'query', 'host', 'method', 'header', 'help', 'latency', 'full', 'share'];
 
 	const parsed = parser(args, {
 		array: parsedKeys,
@@ -228,6 +229,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		...parsed.help && { help: true },
 		...parsed.latency && { latency: true },
 		...parsed.full && { full: true },
+		...parsed.share && { share: true },
 	};
 
 	return flags;

@@ -1,7 +1,13 @@
 import { Flags, getTag, Logger, PingMeasurementResponse, PingResult } from '@globalping/bot-utils';
 import { WebClient } from '@slack/web-api';
 
-const responseHeader = (result: PingResult, tag: string | undefined): string => `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}*\n`;
+function responseHeader(result: PingResult, tag: string | undefined): string {
+    return `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}*\n`;
+}
+
+function shareMessageFooter(id: string): string {
+    return `>*View the results online: https://www.jsdelivr.com/globalping?measurement=${id} *\n`;
+}
 
 const slackTruncationLimit = 2800;
 
@@ -57,14 +63,25 @@ const responseText = (result: PingResult, flags: Flags): string => {
     return formatResponseText(text);
 };
 
-export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, thread_ts: string | undefined, res: PingMeasurementResponse, flags: Flags) => {
+export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, thread_ts: string | undefined, measurementId: string, res: PingMeasurementResponse, flags: Flags) => {
     /* eslint-disable no-await-in-loop */
-    for (const result of res.results) {
+    for (let i = 0; i < res.results.length; i += 1) {
+        const result = res.results[i];
         const tag = getTag(result.probe.tags);
         const text = responseHeader(result, tag) + responseText(result, flags);
 
         try {
             await client.chat.postMessage({ text, channel: channel_id, thread_ts });
+        } catch (error) {
+            logger.error(error);
+            throw error;
+        }
+    }
+
+    if (flags.share) {
+        const shareText = shareMessageFooter(measurementId);
+        try {
+            await client.chat.postMessage({ text: shareText, channel: channel_id, thread_ts });
         } catch (error) {
             logger.error(error);
             throw error;

@@ -133,5 +133,20 @@ describe('Utils', () => {
             expect(result).toEqual(flags);
         });
 
+        it('convert mtr args to flags', () => {
+            const args = 'mtr aws.com from Canada --packets 2 --protocol icmp -L 5';
+            const result = argsToFlags(args);
+            const flags: Flags = {
+                cmd: 'mtr',
+                from: 'canada',
+                limit: 5,
+                packets: 2,
+                protocol: 'ICMP',
+                target: 'aws.com',
+            };
+
+            expect(result).toEqual(flags);
+        });
+
     });
 });
