@@ -1,11 +1,11 @@
 import { Flags, getTag, Logger, PingMeasurementResponse, PingResult } from '@globalping/bot-utils';
 import { WebClient } from '@slack/web-api';
 
-function responseHeader(result: PingResult, tag: string | undefined): string {
+export function responseHeader(result: PingResult, tag: string | undefined): string {
     return `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}*\n`;
 }
 
-function shareMessageFooter(id: string): string {
+export function shareMessageFooter(id: string): string {
     return `>*View the results online: https://www.jsdelivr.com/globalping?measurement=${id} *\n`;
 }
 
@@ -65,8 +65,7 @@ const responseText = (result: PingResult, flags: Flags): string => {
 
 export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, thread_ts: string | undefined, measurementId: string, res: PingMeasurementResponse, flags: Flags) => {
     /* eslint-disable no-await-in-loop */
-    for (let i = 0; i < res.results.length; i += 1) {
-        const result = res.results[i];
+    for (const result of res.results) {
         const tag = getTag(result.probe.tags);
         const text = responseHeader(result, tag) + responseText(result, flags);
 
