@@ -1,7 +1,7 @@
 import { PingResult } from '@globalping/bot-utils';
 import { describe, expect, it } from 'vitest';
 
-import { responseHeader, shareMessageFooter } from '../response';
+import { fullResultsFooter, responseHeader, shareMessageFooter } from '../response';
 
 describe('Response', () => {
     describe('shareMessageFooter', () => {
@@ -9,6 +9,14 @@ describe('Response', () => {
             const id = 'abc123';
             const text = shareMessageFooter(id);
             expect(text).to.equal('>*View the results online: https://www.jsdelivr.com/globalping?measurement=abc123 *\n');
+        });
+    });
+
+    describe('fullResultsFooter', () => {
+        it('ok', () => {
+            const id = 'abc123';
+            const text = fullResultsFooter(id);
+            expect(text).to.equal('>*Full results available here: https://www.jsdelivr.com/globalping?measurement=abc123 *\n');
         });
     });
 

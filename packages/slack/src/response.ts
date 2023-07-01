@@ -5,8 +5,16 @@ export function responseHeader(result: PingResult, tag: string | undefined): str
     return `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}*\n`;
 }
 
+export function resultsLink(id: string): string {
+    return `https://www.jsdelivr.com/globalping?measurement=${id}`;
+}
+
 export function shareMessageFooter(id: string): string {
-    return `>*View the results online: https://www.jsdelivr.com/globalping?measurement=${id} *\n`;
+    return `>*View the results online: ${resultsLink(id)} *\n`;
+}
+
+export function fullResultsFooter(id: string): string {
+    return `>*Full results available here: ${resultsLink(id)} *\n`;
 }
 
 const slackTruncationLimit = 2800;
@@ -63,9 +71,13 @@ const responseText = (result: PingResult, flags: Flags): string => {
     return formatResponseText(text);
 };
 
+const maxDisplayedResults = 4;
+
 export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, thread_ts: string | undefined, measurementId: string, res: PingMeasurementResponse, flags: Flags) => {
+    const resultsForDisplay = res.results.slice(0, maxDisplayedResults);
+
     /* eslint-disable no-await-in-loop */
-    for (const result of res.results) {
+    for (const result of resultsForDisplay) {
         const tag = getTag(result.probe.tags);
         const text = responseHeader(result, tag) + responseText(result, flags);
 
@@ -77,10 +89,18 @@ export const measurementsChatResponse = async (logger: Logger, client: WebClient
         }
     }
 
-    if (flags.share) {
-        const shareText = shareMessageFooter(measurementId);
+    const resultsTruncated = (resultsForDisplay.length !== res.results.length);
+
+    let footerText;
+    if (resultsTruncated) {
+        footerText = fullResultsFooter(measurementId);
+    } else if (flags.share) {
+        footerText = shareMessageFooter(measurementId);
+    }
+
+    if (footerText !== undefined) {
         try {
-            await client.chat.postMessage({ text: shareText, channel: channel_id, thread_ts });
+            await client.chat.postMessage({ text: footerText, channel: channel_id, thread_ts });
         } catch (error) {
             logger.error(error);
             throw error;
