@@ -1,12 +1,11 @@
-import { BufferedIncomingMessage, CustomRoute, HTTPModuleFunctions } from '@slack/bolt';
+import { CustomRoute } from '@slack/bolt';
 // import { client as discord } from 'discord-bot/src/app';
 import * as fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logger } from './utils';
-import { v4 as uuidv4 } from 'uuid';
 
 import * as database from './db';
+import { githubHandler } from './github/handler';
 // import { logger } from './utils';
 
 export const routes: CustomRoute[] = [
@@ -84,60 +83,7 @@ export const routes: CustomRoute[] = [
 	{
 		path: '/github-bot',
 		method: ['POST'],
-		handler: async (_req, res) => {
-			const reqId = uuidv4();
-			const logData = { reqId };
-			logger.info(logData, '/github-bot request');
-
-			let bufferedReq: BufferedIncomingMessage;
-			let body: any;
-
-			// code based on https://github.com/slackapi/bolt-js/blob/0e827339a85804d868a7ddd7fdd4af9ec5b4e135/src/receivers/HTTPReceiver.ts#L416
-			try {
-				bufferedReq = await HTTPModuleFunctions.parseAndVerifyHTTPRequest(
-					{
-						enabled: false,
-						signingSecret: "",
-					},
-					_req,
-				);
-			} catch (err) {
-				const e = err as any;
-				logger.error({ errorMsg: `Failed to parse the request body: ${e.message}`, ...logData }, '/github-bot failed');
-				res.writeHead(401);
-				res.write({ err: JSON.stringify(e.message) });
-				res.end();
-				return
-			}
-
-			try {
-				body = HTTPModuleFunctions.parseHTTPRequestBody(bufferedReq);
-			} catch (err) {
-				const e = err as any;
-				logger.error({ errorMsg: `Malformed request body: ${e.message}`, ...logData }, '/github-bot failed');
-				res.writeHead(400);
-				res.write({ err: JSON.stringify(e.message) });
-				return;
-			}
-
-			try {
-				logger.info({ reqBody: body, ...logData }, '/github-bot processing');
-
-				res.writeHead(200);
-				res.write(JSON.stringify(body));
-				res.end();
-
-				logger.info(logData, '/github-bot response - OK');
-			} catch (err) {
-				const e = err as any;
-				logger.error({ errorMsg: `Request handling failed: ${e.message}`, ...logData }, '/github-bot failed');
-				res.writeHead(503);
-				res.write({ err: JSON.stringify(e.message) });
-				res.end();
-
-				return
-			}
-		}
+		handler: githubHandler,
 	},
 ];
 
