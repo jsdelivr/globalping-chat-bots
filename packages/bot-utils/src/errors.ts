@@ -48,5 +48,8 @@ export function getAPIErrorMessage(error: unknown): string {
 };
 
 export function formatAPIError(error: unknown): string {
-    return `\`\`\`${getAPIErrorMessage(error)}\`\`\`\nDocumentation and Support: https://github.com/jsdelivr/globalping`;
+    return `\`\`\`
+${getAPIErrorMessage(error)}
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`;
 };

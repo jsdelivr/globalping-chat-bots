@@ -1,29 +1,29 @@
 import { Flags, getTag, Logger, PingMeasurementResponse, PingResult } from '@globalping/bot-utils';
 import { WebClient } from '@slack/web-api';
 
-export function responseHeader(result: PingResult, tag: string | undefined): string {
-    return `>*${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}*\n`;
+export function responseHeader(result: PingResult, tag: string | undefined, boldSeparator: string): string {
+    return `>${boldSeparator}${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}${boldSeparator}\n`;
 }
 
-export function resultsLink(id: string): string {
-    return `https://www.jsdelivr.com/globalping?measurement=${id}`;
+export function resultsLink(id: string, isSlackLink: boolean): string {
+    const url = `https://www.jsdelivr.com/globalping?measurement=${id}`;
+    return isSlackLink ? `<${url}>` : `[${url}](${url})`;
 }
 
-export function shareMessageFooter(id: string): string {
-    return `>*View the results online: ${resultsLink(id)} *\n`;
+export function shareMessageFooter(id: string, boldSeparator: string, isSlackLink: boolean): string {
+    return `>${boldSeparator}View the results online: ${resultsLink(id, isSlackLink)}${boldSeparator}\n`;
 }
 
-export function fullResultsFooter(id: string): string {
-    return `>*Full results available here: ${resultsLink(id)} *\n`;
+export function fullResultsFooter(id: string, boldSeparator: string, isSlackLink: boolean): string {
+    return `>${boldSeparator}Full results available here: ${resultsLink(id, isSlackLink)}${boldSeparator}\n`;
 }
 
-const slackTruncationLimit = 2800;
 
-const reponseTextRegular = (result: PingResult, flags: Flags): string => {
+const reponseTextRegular = (result: PingResult, flags: Flags, truncationLimit: number): string => {
     const responseText = isBodyOnlyHttpGet(flags) ? result.result.rawBody : result.result.rawOutput;
 
     // Slack has a limit of 3000 characters per block - truncate if necessary
-    const finalResponseText = responseText.length > slackTruncationLimit ? `${responseText.slice(0, slackTruncationLimit)}\n... (truncated)` : `${responseText}`;
+    const finalResponseText = responseText.length > truncationLimit ? `${responseText.slice(0, truncationLimit)}\n... (truncated)` : `${responseText}`;
     return finalResponseText;
 };
 
@@ -31,7 +31,9 @@ function isBodyOnlyHttpGet(flags: Flags): boolean {
     return flags.cmd === 'http' && flags.method === 'GET' && !flags.full;
 }
 
-const formatResponseText = (text: string): string => `\`\`\`${text}\`\`\``;
+const formatResponseText = (text: string): string => `\`\`\`
+${text}
+\`\`\``;
 
 
 const latencyText = (result: PingResult, flags: Flags): string => {
@@ -65,10 +67,10 @@ const latencyText = (result: PingResult, flags: Flags): string => {
     return text;
 };
 
-const responseText = (result: PingResult, flags: Flags): string => {
-    const text = flags.latency ? latencyText(result, flags) : reponseTextRegular(result, flags);
+export const responseText = (result: PingResult, flags: Flags, truncationLimit: number): string => {
+    const text = flags.latency ? latencyText(result, flags) : reponseTextRegular(result, flags, truncationLimit);
 
-    return formatResponseText(text);
+    return formatResponseText(text.trim());
 };
 
 const maxDisplayedResults = 4;
@@ -76,10 +78,13 @@ const maxDisplayedResults = 4;
 export const measurementsChatResponse = async (logger: Logger, client: WebClient, channel_id: string, thread_ts: string | undefined, measurementId: string, res: PingMeasurementResponse, flags: Flags) => {
     const resultsForDisplay = res.results.slice(0, maxDisplayedResults);
 
+    const slackBoldSeparator = '*';
+    const slackTruncationLimit = 2800;
+
     /* eslint-disable no-await-in-loop */
     for (const result of resultsForDisplay) {
         const tag = getTag(result.probe.tags);
-        const text = responseHeader(result, tag) + responseText(result, flags);
+        const text = responseHeader(result, tag, slackBoldSeparator) + responseText(result, flags, slackTruncationLimit);
 
         try {
             await client.chat.postMessage({ text, channel: channel_id, thread_ts });
@@ -93,9 +98,9 @@ export const measurementsChatResponse = async (logger: Logger, client: WebClient
 
     let footerText;
     if (resultsTruncated) {
-        footerText = fullResultsFooter(measurementId);
+        footerText = fullResultsFooter(measurementId, slackBoldSeparator, true);
     } else if (flags.share) {
-        footerText = shareMessageFooter(measurementId);
+        footerText = shareMessageFooter(measurementId, slackBoldSeparator, true);
     }
 
     if (footerText !== undefined) {

@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import * as database from './db';
+import { githubHandler } from './github/handler';
 // import { logger } from './utils';
 
 export const routes: CustomRoute[] = [
@@ -12,6 +13,7 @@ export const routes: CustomRoute[] = [
 		path: '/health',
 		method: ['GET'],
 		handler: async (_req, res) => {
+
 			try {
 				// Check if db is accessible
 				await database.knex.raw('select 1+1 as result');
@@ -26,10 +28,12 @@ export const routes: CustomRoute[] = [
 				// logger.debug('Discord bot is accessible');
 
 				res.writeHead(200);
-				res.end('OK');
+				res.write('OK');
+				res.end();
 			} catch (error) {
 				res.writeHead(503);
-				res.end(error);
+				res.write(JSON.stringify(error));
+				res.end();
 			}
 		},
 	},
@@ -43,7 +47,8 @@ export const routes: CustomRoute[] = [
 				}).end();
 			} catch (error) {
 				res.writeHead(503);
-				res.end(error);
+				res.write(JSON.stringify(error));
+				res.end();
 			}
 		},
 	},
@@ -56,7 +61,8 @@ export const routes: CustomRoute[] = [
 				fs.createReadStream(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/favicon.ico')).pipe(res);
 			} catch (error) {
 				res.writeHead(503);
-				res.end(error);
+				res.write(JSON.stringify(error));
+				res.end();
 			}
 		},
 	},
@@ -69,8 +75,15 @@ export const routes: CustomRoute[] = [
 				fs.createReadStream(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/robots.txt')).pipe(res);
 			} catch (error) {
 				res.writeHead(503);
-				res.end(error);
+				res.write(JSON.stringify(error));
+				res.end();
 			}
 		}
-	}
+	},
+	{
+		path: '/github-bot',
+		method: ['POST'],
+		handler: githubHandler,
+	},
 ];
+

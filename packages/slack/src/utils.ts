@@ -4,6 +4,7 @@ import type { WebClient } from '@slack/web-api';
 import * as dotenv from 'dotenv';
 
 import { dnsHelp, generalHelp, httpHelp, mtrHelp, pingHelp, tracerouteHelp } from './format-help';
+import { githubHandle } from './github/common';
 import { measurementsChatResponse } from './response';
 
 dotenv.config();
@@ -11,30 +12,40 @@ dotenv.config();
 export const logger = loggerInit('slack', process.env.LOG_LEVEL ?? 'info');
 
 
-export const helpCmd = (cmd: string, target?: string): string => {
+export const helpCmd = (cmd: string, target: string, platform: string): string => {
+	let boldSeparator = '';
+	let rootCommand = '';
+	if (platform === 'github') {
+		boldSeparator = '**';
+		rootCommand = `@${githubHandle()}`;
+	} else {
+		boldSeparator = '*';
+		rootCommand = '/globalping';
+	}
+
 	switch (cmd) {
 		case 'dns':
-			return dnsHelp();
+			return dnsHelp(boldSeparator, rootCommand);
 		case 'http':
-			return httpHelp();
+			return httpHelp(boldSeparator, rootCommand);
 		case 'mtr':
-			return mtrHelp();
+			return mtrHelp(boldSeparator, rootCommand);
 		case 'ping':
-			return pingHelp();
+			return pingHelp(boldSeparator, rootCommand);
 		case 'traceroute':
-			return tracerouteHelp();
+			return tracerouteHelp(boldSeparator, rootCommand);
 
 		case undefined:
 		case '':
 		case 'help':
 			if (!target) {
-				return generalHelp();
+				return generalHelp(boldSeparator, rootCommand);
 			}
 			// handle case: /globalping help <subcommand>
-			return helpCmd(target);
+			return helpCmd(target, target, platform);
 
 		default:
-			return 'Unknown command! Please call `/globalping help` for a list of commands.';
+			return `Unknown command! Please call \`${rootCommand} help\` for a list of commands.`;
 	}
 };
 
@@ -61,7 +72,7 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 	const { channel_id, user_id, thread_ts } = payload;
 
 	if (!flags.cmd || flags.help) {
-		await client.chat.postEphemeral({ text: helpCmd(flags.cmd, flags.target), user: user_id, channel: channel_id, thread_ts });
+		await client.chat.postEphemeral({ text: helpCmd(flags.cmd, flags.target, 'slack'), user: user_id, channel: channel_id, thread_ts });
 	} else {
 		const postMeasurements = buildPostMeasurements(flags);
 
@@ -87,3 +98,6 @@ export const postAPI = async (client: WebClient, payload: ChannelPayload, cmdTex
 		}
 	}
 };
+
+
+

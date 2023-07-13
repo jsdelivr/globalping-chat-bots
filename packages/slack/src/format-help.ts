@@ -1,99 +1,137 @@
 import { dnsHelpTexts, generalHelpTexts, httpHelpTexts, mtrHelpTexts, pingHelpTexts, tracerouteHelpTexts } from '@globalping/bot-utils/src/utils';
 
 
-export function generalHelp() {
+export function generalHelp(boldSeparator: string, rootCommand: string) {
     return `${generalHelpTexts.preamble}
 
-*Usage:*
-\`\`\`${generalHelpTexts.usage}\`\`\`
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${generalHelpTexts.usage(rootCommand)}
+\`\`\`
 
-*Measurement Commands*:
-\`\`\`${generalHelpTexts.measurementCommands}\`\`\`
+${boldSeparator}Measurement Commands${boldSeparator}:
+\`\`\`
+${generalHelpTexts.measurementCommands}
+\`\`\`
 
-*Additional Commands*:
-\`\`\`${generalHelpTexts.additionalCommands}\`\`\`
+${boldSeparator}Additional Commands${boldSeparator}:
+\`\`\`
+${generalHelpTexts.additionalCommands}
+\`\`\`
 
-*Flags*:
-\`\`\`${generalHelpTexts.flags}\`\`\``;
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${generalHelpTexts.flags}
+\`\`\``;
 }
 
-export function dnsHelp() {
+export function dnsHelp(boldSeparator: string, rootCommand: string) {
     return `${dnsHelpTexts.preamble}
 
-*Examples:*
+${boldSeparator}Examples:${boldSeparator}
 ${dnsHelpTexts.examples}
 
-*Usage:*
-\`\`\`${dnsHelpTexts.usage}\`\`\`
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${dnsHelpTexts.usage(rootCommand)}
+\`\`\`
 
-*Flags*:
-\`\`\`${dnsHelpTexts.flags}\`\`\`
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${dnsHelpTexts.flags}
+\`\`\`
 
-*Global Flags*:
-\`\`\`${dnsHelpTexts.globalFlags}\`\`\``;;
+${boldSeparator}Global Flags${boldSeparator}:
+\`\`\`
+${dnsHelpTexts.globalFlags}
+\`\`\``;;
 }
 
-export function httpHelp() {
+export function httpHelp(boldSeparator: string, rootCommand: string) {
     return `${httpHelpTexts.preamble}
 
-*Examples:*
+${boldSeparator}Examples:${boldSeparator}
 ${httpHelpTexts.examples}
 
-*Usage:*
-\`\`\`${httpHelpTexts.usage}\`\`\`
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${httpHelpTexts.usage(rootCommand)}
+\`\`\`
 
-*Flags*:
-\`\`\`${httpHelpTexts.flags}\`\`\`
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${httpHelpTexts.flags}
+\`\`\`
 
-*Global Flags*:
-\`\`\`${httpHelpTexts.globalFlags}\`\`\``;;
+${boldSeparator}Global Flags${boldSeparator}:
+\`\`\`
+${httpHelpTexts.globalFlags}
+\`\`\``;;
 }
 
 
-export function mtrHelp() {
+export function mtrHelp(boldSeparator: string, rootCommand: string) {
     return `${mtrHelpTexts.preamble}
 
-*Examples:*
+${boldSeparator}Examples:${boldSeparator}
 ${mtrHelpTexts.examples}
 
-*Usage:*
-\`\`\`${mtrHelpTexts.usage}\`\`\`
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${mtrHelpTexts.usage(rootCommand)}
+\`\`\`
 
-*Flags*:
-\`\`\`${mtrHelpTexts.flags}\`\`\`
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${mtrHelpTexts.flags}
+\`\`\`
 
-*Global Flags*:
-\`\`\`${mtrHelpTexts.globalFlags}\`\`\``;;
+${boldSeparator}Global Flags${boldSeparator}:
+\`\`\`
+${mtrHelpTexts.globalFlags}
+\`\`\``;;
 }
 
-export function pingHelp() {
+export function pingHelp(boldSeparator: string, rootCommand: string) {
     return `${pingHelpTexts.preamble}
 
-*Examples:*
+${boldSeparator}Examples:${boldSeparator}
 ${pingHelpTexts.examples}
 
-*Usage:*
-\`\`\`${pingHelpTexts.usage}\`\`\`
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${pingHelpTexts.usage(rootCommand)}
+\`\`\`
 
-*Flags*:
-\`\`\`${pingHelpTexts.flags}\`\`\`
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${pingHelpTexts.flags}
+\`\`\`
 
-*Global Flags*:
-\`\`\`${pingHelpTexts.globalFlags}\`\`\``;;
+${boldSeparator}Global Flags${boldSeparator}:
+\`\`\`
+${pingHelpTexts.globalFlags}
+\`\`\``;;
 }
 
-export function tracerouteHelp() {
+export function tracerouteHelp(boldSeparator: string, rootCommand: string) {
     return `${tracerouteHelpTexts.preamble}
 
-*Examples:*
+${boldSeparator}Examples:${boldSeparator}
 ${tracerouteHelpTexts.examples}
 
-*Usage:*
-\`\`\`${tracerouteHelpTexts.usage}\`\`\`
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${tracerouteHelpTexts.usage(rootCommand)}
+\`\`\`
 
-*Flags*:
-\`\`\`${tracerouteHelpTexts.flags}\`\`\`
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${tracerouteHelpTexts.flags}
+\`\`\`
 
-*Global Flags*:
-\`\`\`${tracerouteHelpTexts.globalFlags}\`\`\``;;
+${boldSeparator}Global Flags${boldSeparator}:
+\`\`\`
+${tracerouteHelpTexts.globalFlags}
+\`\`\``;;
 }
