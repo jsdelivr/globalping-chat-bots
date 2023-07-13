@@ -1,14 +1,14 @@
-import { Octokit } from "octokit";
+import { Octokit } from 'octokit';
 
 let octokit: Octokit;
 
 function initClient() {
-    octokit = new Octokit({ auth: process.env.GH_TOKEN });
+    octokit = new Octokit({ auth: process.env.GITHUB_PERSONAL_ACCESS_TOKEN });
 }
 
 export function getGithubClient(): Octokit {
     if (octokit === undefined) {
-        initClient()
+        initClient();
     }
 
     return octokit;

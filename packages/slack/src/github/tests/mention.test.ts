@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isMentionNotification, parseCommandfromMention, parseFooter, splitMessageFooter } from '../mention';
+import { cleanUpCommandText, isMentionNotification, parseCommandfromMention, parseFooter, splitMessageFooter } from '../mention';
 import { GithubTargetType } from '../types';
 
 describe('Mention', () => {
@@ -88,7 +88,7 @@ Message ID: <myuser/myrepo/issues/1234@github.com>`;
             expect(ghTarget?.type).to.equal(GithubTargetType.Issue);
             expect(ghTarget?.owner).to.equal('myuser');
             expect(ghTarget?.repo).to.equal('myrepo');
-            expect(ghTarget?.id).to.equal('1234');
+            expect(ghTarget?.id).to.equal(1234);
         });
 
         it('valid - issue with comment', () => {
@@ -102,7 +102,7 @@ Message ID: <myuser/myrepo/issues/1234/548794345@github.com>`;
             expect(ghTarget?.type).to.equal(GithubTargetType.Issue);
             expect(ghTarget?.owner).to.equal('myuser');
             expect(ghTarget?.repo).to.equal('myrepo');
-            expect(ghTarget?.id).to.equal('1234');
+            expect(ghTarget?.id).to.equal(1234);
         });
 
         it('valid - PR', () => {
@@ -116,7 +116,7 @@ Message ID: &lt;myuser/myrepo/pull/1234@github.com&gt;`;
             expect(ghTarget?.type).to.equal(GithubTargetType.PullRequest);
             expect(ghTarget?.owner).to.equal('myuser');
             expect(ghTarget?.repo).to.equal('myrepo');
-            expect(ghTarget?.id).to.equal('1234');
+            expect(ghTarget?.id).to.equal(1234);
         });
 
         it('valid - PR comment', () => {
@@ -130,7 +130,7 @@ Message ID: <myuser/myrepo/pull/1234/c212456@github.com>`;
             expect(ghTarget?.type).to.equal(GithubTargetType.PullRequest);
             expect(ghTarget?.owner).to.equal('myuser');
             expect(ghTarget?.repo).to.equal('myrepo');
-            expect(ghTarget?.id).to.equal('1234');
+            expect(ghTarget?.id).to.equal(1234);
         });
 
         it('invalid', () => {
@@ -139,6 +139,20 @@ https://github.com/myuser/myrepo/issues/1234
 You are receiving this because you were mentioned.`;
             const ghTarget = parseFooter(footer);
             expect(ghTarget).to.equal(undefined);
+        });
+    });
+
+    describe('cleanUpCommandText', () => {
+        it('removelink ', async () => {
+            const text = '@globalping http [jsdelivr.com](http://jsdelivr.com) --from france --limit 5';
+            const result = await cleanUpCommandText(text);
+            expect(result).to.equal('@globalping http jsdelivr.com --from france --limit 5');
+        });
+
+        it('noop', async () => {
+            const text = '@globalping http jsdelivr.com --from france --limit 5';
+            const result = await cleanUpCommandText(text);
+            expect(result).to.equal('@globalping http jsdelivr.com --from france --limit 5');
         });
     });
 });

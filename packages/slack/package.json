@@ -21,7 +21,9 @@
 		"mysql": "^2.18.1",
 		"uuid": "^9.0.0",
 		"raw-body": "^2.5.2",
-		"octokit": "^3.0.0"
+		"octokit": "^3.0.0",
+		"remark": "^14.0.3",
+		"strip-markdown": "^5.0.1"
 	},
 	"devDependencies": {
 		"@slack/web-api": "^6.8.1",

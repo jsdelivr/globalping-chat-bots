@@ -26,8 +26,7 @@ export async function githubHandler(req: ParamsIncomingMessage, res: ServerRespo
         const rawBody = await getRawBody(req);
         ghRequest = JSON.parse(rawBody.toString());
     } catch (error) {
-        /* eslint-disable  @typescript-eslint/no-explicit-any */
-        const e = error as any;
+        const e = (error as Error);
         logger.error({ errorMsg: `Failed to parse the request body: ${e.message}`, ...logData }, '/github-bot failed');
         res.writeHead(400);
         res.write(JSON.stringify({ err: e.message }));
@@ -52,8 +51,7 @@ export async function githubHandler(req: ParamsIncomingMessage, res: ServerRespo
 
         logger.info(logData, '/github-bot response - OK');
     } catch (error) {
-        /* eslint-disable  @typescript-eslint/no-explicit-any */
-        const e = error as any;
+        const e = (error as Error);
         logger.error({ errorMsg: `Request handling failed: ${e.message}`, ...logData }, '/github-bot failed');
         res.writeHead(500);
         res.write(JSON.stringify({ err: e.message }));

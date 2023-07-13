@@ -1,10 +1,14 @@
+import { remark } from 'remark';
+import strip from 'strip-markdown';
+
 import { logger } from '../utils';
+import { githubHandle } from './common';
+import { processCommand } from './processing';
 import { GithubNotificationRequest, GithubTarget, GithubTargetType } from './types';
 
 
-export async function handleGithubMention(reqId: string, ghRequest: GithubNotificationRequest): Promise<Error | undefined> {
-    const ghHandle: string = process.env.GITHUB_BOT_HANDLE || 'globalping';
 
+export async function handleGithubMention(reqId: string, ghRequest: GithubNotificationRequest): Promise<Error | undefined> {
     const logData = { reqId };
 
     const fullText = ghRequest.bodyPlain;
@@ -19,14 +23,14 @@ export async function handleGithubMention(reqId: string, ghRequest: GithubNotifi
 
     const [message, footer] = parts;
 
-    if (!isMentionNotification(message)) {
+    if (!isMentionNotification(footer)) {
         const err = new Error('Not a mention notification');
         // not a mention, do nothing
         logger.info(logData, `/github-bot - ${err.message} - Skipping`);
         return err;
     }
 
-    const commandText = parseCommandfromMention(message, ghHandle);
+    let commandText = parseCommandfromMention(message, githubHandle());
     if (commandText === undefined) {
         const err = new Error('Mention not found');
         // Mention not found, do nothing
@@ -34,7 +38,9 @@ export async function handleGithubMention(reqId: string, ghRequest: GithubNotifi
         return err;
     }
 
-    logger.info({ commandText, ...logData }, '/github-bot - Command');
+    logger.info({ commandText, ...logData }, '/github-bot - Command text');
+    commandText = await cleanUpCommandText(commandText);
+    logger.info({ commandText, ...logData }, '/github-bot - Cleaned up command text');
 
     const githubTarget = parseFooter(footer);
     if (githubTarget === undefined) {
@@ -44,7 +50,24 @@ export async function handleGithubMention(reqId: string, ghRequest: GithubNotifi
         return err;
     }
 
+    try {
+        await processCommand(reqId, githubTarget, commandText);
+    } catch (error) {
+        const err = (error as Error);
+        // invalid footer, do nothing
+        logger.info(logData, `/github-bot - ${err.message} - Processing failed`);
+        return err;
+    }
+
     return undefined;
+}
+
+export async function cleanUpCommandText(text: string): Promise<string> {
+    const file = await remark()
+        .use(strip)
+        .process(text);
+
+    return String(file).trim();
 }
 
 export function parseCommandfromMention(text: string, ghHandle: string): (string | undefined) {
@@ -113,7 +136,7 @@ export function parseFooter(footer: string): (GithubTarget | undefined) {
     const owner = messageIdParts[0];
     const repo = messageIdParts[1];
     const typeStr = messageIdParts[2];
-    const idStr = messageIdParts[3];
+    const idPart = messageIdParts[3];
 
     let type: GithubTargetType;
     if (typeStr === 'pull') {
@@ -125,10 +148,16 @@ export function parseFooter(footer: string): (GithubTarget | undefined) {
         return undefined;
     }
 
-    const idParts = idStr.split('@');
-    const id = idParts[0];
-    if (id.length === 0) {
+    const idArr = idPart.split('@');
+    const idStr = idArr[0];
+    if (idStr.length === 0) {
         // no id
+        return undefined;
+    }
+
+    const id = Number(idStr);
+    if (Number.isNaN(id)) {
+        // id is not a number
         return undefined;
     }
 

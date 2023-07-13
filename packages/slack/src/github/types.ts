@@ -12,5 +12,6 @@ export interface GithubTarget {
     type: GithubTargetType
     owner: string
     repo: string
-    id: Number
+    id: number
+
 }

@@ -4,19 +4,21 @@ import { describe, expect, it } from 'vitest';
 import { fullResultsFooter, responseHeader, shareMessageFooter } from '../response';
 
 describe('Response', () => {
+    const boldSeparator = '*';
+
     describe('shareMessageFooter', () => {
         it('ok', () => {
             const id = 'abc123';
-            const text = shareMessageFooter(id);
-            expect(text).to.equal('>*View the results online: https://www.jsdelivr.com/globalping?measurement=abc123 *\n');
+            const text = shareMessageFooter(id, boldSeparator, true);
+            expect(text).to.equal('>*View the results online: <https://www.jsdelivr.com/globalping?measurement=abc123>*\n');
         });
     });
 
     describe('fullResultsFooter', () => {
         it('ok', () => {
             const id = 'abc123';
-            const text = fullResultsFooter(id);
-            expect(text).to.equal('>*Full results available here: https://www.jsdelivr.com/globalping?measurement=abc123 *\n');
+            const text = fullResultsFooter(id, boldSeparator, true);
+            expect(text).to.equal('>*Full results available here: <https://www.jsdelivr.com/globalping?measurement=abc123>*\n');
         });
     });
 
@@ -52,7 +54,7 @@ describe('Response', () => {
                 },
             };
             const tag = undefined;
-            const text = responseHeader(pingResult, tag);
+            const text = responseHeader(pingResult, tag, boldSeparator);
             expect(text).to.equal('>*EU, AT, Vienna, ASN:12345, My Network*\n');
         });
     });
@@ -88,7 +90,7 @@ describe('Response', () => {
                     timings: undefined,
                 },
             };
-            const text = responseHeader(pingResult, 'tag-1');
+            const text = responseHeader(pingResult, 'tag-1', boldSeparator);
             expect(text).to.equal('>*NA, US, (GA), Atlanta, ASN:12345, My Network (tag-1)*\n');
         });
     });
