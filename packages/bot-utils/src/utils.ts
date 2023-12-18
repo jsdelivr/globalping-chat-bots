@@ -30,7 +30,7 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
   ping          Run a ping test
   traceroute    Run a traceroute test`,
 	additionalCommands: '  help          Help about any command',
-	flags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+	flags: `  -F, --from string   Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
   -h, --help          help for globalping
       --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int     Limit the number of probes to use (default 1)
@@ -55,6 +55,10 @@ dns jsdelivr.com @1.1.1.1 from Berlin
 \`\`\`
 dns google.com from New York --limit 2
 \`\`\`
+Resolve google.com using probes from previous measurement
+\`\`\`
+dns google.com from rvasVvKnj48cxNjC
+\`\`\`
 Resolve google.com from 2 probes from London or Belgium with trace enabled
 \`\`\`
 dns google.com from London,Belgium --limit 2 --trace
@@ -78,7 +82,7 @@ dns jsdelivr.com from aws+montreal --latency
       --resolver string   Resolver is the hostname or IP address of the name server to use (default empty)
       --trace             Toggle tracing of the delegation path from the root name servers (default false)
       --type string       Specifies the type of DNS query to perform (default "A")`,
-	globalFlags: `  -F, --from string       Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+	globalFlags: `  -F, --from string       Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency           Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int         Limit the number of probes to use (default 1)
       --share             Prints a link at the end the results, allowing to vizualize the results online (default false)`,
@@ -113,6 +117,10 @@ HTTP GET request to google.com from 2 probes from London or Belgium
 \`\`\`
 http google.com from London,Belgium --limit 2 --method get
 \`\`\`
+HTTP GET request to google.com using probes from previous measurement
+\`\`\`
+http google.com from rvasVvKnj48cxNjC --method get
+\`\`\`
 HTTP GET request to google.com from a probe in London. Returns the full output
 \`\`\`
 http google.com from London --method get --full
@@ -144,7 +152,7 @@ http google.com from 123 --resolver 1.1.1.1
       --protocol string      Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTP")
       --query string         A query-string
       --resolver string      Specifies the resolver server used for DNS lookup (default is defined by the probe's network)`,
-	globalFlags: `  -F, --from string          Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+	globalFlags: `  -F, --from string          Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency              Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int            Limit the number of probes to use (default 1)
       --share                Prints a link at the end the results, allowing to vizualize the results online (default false)`,
@@ -155,6 +163,10 @@ export const mtrHelpTexts = {
 	examples: `MTR google.com from 2 probes in New York
 \`\`\`
 mtr google.com from New York --limit 2
+\`\`\`
+MTR google.com using probes from previous measurement
+\`\`\`
+mtr google.com from rvasVvKnj48cxNjC
 \`\`\`
 MTR 1.1.1.1 from 2 probes from USA or Belgium with 10 packets
 \`\`\`
@@ -169,7 +181,7 @@ mtr jsdelivr.com from aws+montreal --protocol tcp --port 453
   --packets int       Specifies the number of packets to send to each hop (default 3)
   --port int          Specifies the port to use. Only applicable for TCP protocol (default 53)
   --protocol string   Specifies the protocol used (ICMP, TCP or UDP) (default "icmp")`,
-	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+	globalFlags: `  -F, --from string   Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int     Limit the number of probes to use (default 1)
       --share         Prints a link at the end the results, allowing to vizualize the results online (default false)`,
@@ -180,6 +192,10 @@ export const pingHelpTexts = {
 	examples: `Ping google.com from 2 probes in New York
 \`\`\`
 ping google.com from New York --limit 2
+\`\`\`
+Ping google.com using probes from previous measurement
+\`\`\`
+ping google.com from rvasVvKnj48cxNjC
 \`\`\`
 Ping 1.1.1.1 from 2 probes from USA or Belgium with 10 packets
 \`\`\`
@@ -192,7 +208,7 @@ ping jsdelivr.com from aws+montreal --latency
 	usage: (rootCommand: string) => `${rootCommand} ping [target] from [location] [flags]`,
 	flags: `  -h, --help          Help for ping
       --packets int   Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)`,
-	globalFlags: `  -F, --from string   Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+	globalFlags: `  -F, --from string   Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int     Limit the number of probes to use (default 1)
       --share         Prints a link at the end the results, allowing to vizualize the results online (default false)`,
@@ -203,6 +219,10 @@ export const tracerouteHelpTexts = {
 	examples: `Traceroute google.com from 2 probes in New York
 \`\`\`
 traceroute google.com from New York --limit 2
+\`\`\`
+Traceroute google.com using probes from previous measurement
+\`\`\`
+traceroute google.com from rvasVvKnj48cxNjC
 \`\`\`
 Traceroute 1.1.1.1 from 2 probes from USA or Belgium
 \`\`\`
@@ -220,7 +240,7 @@ traceroute jsdelivr.com from Paris --port 453
 	flags: `  -h, --help              Help for traceroute
       --port int          Specifies the port to use for the traceroute. Only applicable for TCP protocol (default 80)
       --protocol string   Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "icmp")`,
-	globalFlags: `  -F, --from string       Comma-separated list of location values to match against. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+	globalFlags: `  -F, --from string       Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
       --latency           Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int         Limit the number of probes to use (default 1)
       --share             Prints a link at the end the results, allowing to vizualize the results online (default false)`,
