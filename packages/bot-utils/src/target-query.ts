@@ -29,7 +29,7 @@ export function parseTargetQuery(cmd: string | undefined, args: string[]): Targe
 
     if (argsWithoutResolver.length > 1) {
         if (argsWithoutResolver[1] === 'from') {
-            targetQuery.from = argsWithoutResolver.slice(2).join(' ').trim().toLowerCase();
+            targetQuery.from = argsWithoutResolver.slice(2).join(' ').trim();
         } else {
             throw new Error('invalid command format');
         }
