@@ -4,12 +4,13 @@ import { PostError } from './errors';
 import type { PostMeasurement, PostMeasurementResponse } from './types';
 import { userAgent } from './user-agent';
 
-export const postMeasurement = async (optsArr: PostMeasurement[]): Promise<PostMeasurementResponse[]> => {
+export const postMeasurement = async (
+	optsArr: PostMeasurement[]
+): Promise<PostMeasurementResponse[]> => {
 	let index = 0;
 	try {
 		const measurementArr: PostMeasurementResponse[] = [];
 		for (const opts of optsArr) {
-
 			// eslint-disable-next-line no-await-in-loop
 			const res = await got.post('https://api.globalping.io/v1/measurements', {
 				headers: {

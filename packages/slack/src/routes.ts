@@ -13,7 +13,6 @@ export const routes: CustomRoute[] = [
 		path: '/health',
 		method: ['GET'],
 		handler: async (_req, res) => {
-
 			try {
 				// Check if db is accessible
 				await database.knex.raw('select 1+1 as result');
@@ -42,9 +41,11 @@ export const routes: CustomRoute[] = [
 		method: ['GET'],
 		handler: async (_req, res) => {
 			try {
-				res.writeHead(301, {
-					Location: 'https://www.jsdelivr.com/globalping'
-				}).end();
+				res
+					.writeHead(301, {
+						Location: 'https://www.jsdelivr.com/globalping',
+					})
+					.end();
 			} catch (error) {
 				res.writeHead(503);
 				res.write(JSON.stringify(error));
@@ -58,7 +59,12 @@ export const routes: CustomRoute[] = [
 		handler: async (_req, res) => {
 			try {
 				res.setHeader('Content-Type', 'image/x-icon');
-				fs.createReadStream(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/favicon.ico')).pipe(res);
+				fs.createReadStream(
+					path.join(
+						path.dirname(fileURLToPath(import.meta.url)),
+						'../public/favicon.ico'
+					)
+				).pipe(res);
 			} catch (error) {
 				res.writeHead(503);
 				res.write(JSON.stringify(error));
@@ -72,13 +78,18 @@ export const routes: CustomRoute[] = [
 		handler: async (_req, res) => {
 			try {
 				res.setHeader('Content-Type', 'text/plain');
-				fs.createReadStream(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/robots.txt')).pipe(res);
+				fs.createReadStream(
+					path.join(
+						path.dirname(fileURLToPath(import.meta.url)),
+						'../public/robots.txt'
+					)
+				).pipe(res);
 			} catch (error) {
 				res.writeHead(503);
 				res.write(JSON.stringify(error));
 				res.end();
 			}
-		}
+		},
 	},
 	{
 		path: '/github-bot',
@@ -86,4 +97,3 @@ export const routes: CustomRoute[] = [
 		handler: githubHandler,
 	},
 ];
-
