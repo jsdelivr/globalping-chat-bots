@@ -13,7 +13,7 @@ describe('Discord utils', () => {
 			protocol: undefined,
 			port: undefined,
 			resolver: undefined,
-			trace: undefined
+			trace: undefined,
 		};
 		expect(expandFlags(flags)).toBe('');
 	});
@@ -28,6 +28,8 @@ describe('Discord utils', () => {
 			protocol: 'icmp',
 			port: 80,
 		};
-		expect(expandFlags(flags)).toBe('--limit 1 --packets 1 --protocol icmp --port 80');
+		expect(expandFlags(flags)).toBe(
+			'--limit 1 --packets 1 --protocol icmp --port 80'
+		);
 	});
 });

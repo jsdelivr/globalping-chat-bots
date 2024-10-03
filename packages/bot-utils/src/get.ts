@@ -45,7 +45,8 @@ class MeasurementsFetcher {
 			}
 
 			return measurementResponse;
-		} if (res.statusCode >= 400) {
+		}
+		if (res.statusCode >= 400) {
 			if (res.statusCode === 500) {
 				throw new Error(JSON.parse(res.body));
 			} else if (res.statusCode === 404) {
@@ -65,7 +66,7 @@ class MeasurementsFetcher {
 		}
 
 		return measurementResponse;
-	};
+	}
 }
 
 export const ApiUrl = 'https://api.globalping.io/v1/measurements';
@@ -73,13 +74,15 @@ export const ApiUrl = 'https://api.globalping.io/v1/measurements';
 // api poll interval in milliseconds
 const apiPollInterval = 1000;
 
-export const getMeasurement = async (id: string): Promise<MeasurementResponse> => {
+export const getMeasurement = async (
+	id: string
+): Promise<MeasurementResponse> => {
 	const measurementsFetcher = new MeasurementsFetcher(ApiUrl);
 
 	let data = await measurementsFetcher.fetchMeasurement(id);
 	while (data.status === 'in-progress') {
 		// eslint-disable-next-line no-promise-executor-return
-		await new Promise(resolve => setTimeout(resolve, apiPollInterval));
+		await new Promise((resolve) => setTimeout(resolve, apiPollInterval));
 		data = await measurementsFetcher.fetchMeasurement(id);
 	}
 	return data;
@@ -93,5 +96,3 @@ export const getTag = (tags: string[]): string | undefined => {
 	}
 	return undefined;
 };
-
-

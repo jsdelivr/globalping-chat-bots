@@ -1,8 +1,14 @@
-import { dnsHelpTexts, generalHelpTexts, httpHelpTexts, mtrHelpTexts, pingHelpTexts, tracerouteHelpTexts } from '@globalping/bot-utils/src/utils';
-
+import {
+	dnsHelpTexts,
+	generalHelpTexts,
+	httpHelpTexts,
+	mtrHelpTexts,
+	pingHelpTexts,
+	tracerouteHelpTexts,
+} from '@globalping/bot-utils/src/utils';
 
 export function generalHelp(boldSeparator: string, rootCommand: string) {
-    return `${generalHelpTexts.preamble}
+	return `${generalHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 \`\`\`
@@ -26,7 +32,7 @@ ${generalHelpTexts.flags}
 }
 
 export function dnsHelp(boldSeparator: string, rootCommand: string) {
-    return `${dnsHelpTexts.preamble}
+	return `${dnsHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${dnsHelpTexts.examples}
@@ -44,11 +50,11 @@ ${dnsHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${dnsHelpTexts.globalFlags}
-\`\`\``;;
+\`\`\``;
 }
 
 export function httpHelp(boldSeparator: string, rootCommand: string) {
-    return `${httpHelpTexts.preamble}
+	return `${httpHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${httpHelpTexts.examples}
@@ -66,12 +72,11 @@ ${httpHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${httpHelpTexts.globalFlags}
-\`\`\``;;
+\`\`\``;
 }
 
-
 export function mtrHelp(boldSeparator: string, rootCommand: string) {
-    return `${mtrHelpTexts.preamble}
+	return `${mtrHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${mtrHelpTexts.examples}
@@ -89,11 +94,11 @@ ${mtrHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${mtrHelpTexts.globalFlags}
-\`\`\``;;
+\`\`\``;
 }
 
 export function pingHelp(boldSeparator: string, rootCommand: string) {
-    return `${pingHelpTexts.preamble}
+	return `${pingHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${pingHelpTexts.examples}
@@ -111,11 +116,11 @@ ${pingHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${pingHelpTexts.globalFlags}
-\`\`\``;;
+\`\`\``;
 }
 
 export function tracerouteHelp(boldSeparator: string, rootCommand: string) {
-    return `${tracerouteHelpTexts.preamble}
+	return `${tracerouteHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${tracerouteHelpTexts.examples}
@@ -133,5 +138,5 @@ ${tracerouteHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${tracerouteHelpTexts.globalFlags}
-\`\`\``;;
+\`\`\``;
 }

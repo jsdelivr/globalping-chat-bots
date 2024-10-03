@@ -29,18 +29,26 @@ const config: Knex.Config = {
 		port: Number(process.env.DB_PORT),
 		user: process.env.DB_USER,
 		password: process.env.DB_PASSWORD,
-		database: process.env.DB_DATABASE
-	}
+		database: process.env.DB_DATABASE,
+	},
 };
 
 // Query builder
 const knex = knexInstance(config);
 
-const checkTables = async (): Promise<boolean> => knex.schema.hasTable('installations');
+const checkTables = async (): Promise<boolean> =>
+	knex.schema.hasTable('installations');
 
-const setInstallation = async (id: string, installation: InstallationStore): Promise<void> => {
+const setInstallation = async (
+	id: string,
+	installation: InstallationStore
+): Promise<void> => {
 	try {
-		await knex.table('installations').insert({ id, installation }).onConflict('id').merge();
+		await knex
+			.table('installations')
+			.insert({ id, installation })
+			.onConflict('id')
+			.merge();
 		logger.debug(`Installation set: ${id}`);
 	} catch (error) {
 		throw new Error(`Failed to set installation: ${error}`);
@@ -49,7 +57,10 @@ const setInstallation = async (id: string, installation: InstallationStore): Pro
 
 const getInstallation = async (id: string): Promise<InstallationStore> => {
 	try {
-		const installation = await knex.table('installations').where('id', id).first();
+		const installation = await knex
+			.table('installations')
+			.where('id', id)
+			.first();
 		if (!installation) {
 			throw new Error(id);
 		}
@@ -75,7 +86,10 @@ const installationStore = {
 		try {
 			// Bolt will pass your handler an installation object
 			// Change the lines below so they save to your database
-			if (installation.isEnterpriseInstall && installation.enterprise !== undefined) {
+			if (
+				installation.isEnterpriseInstall &&
+				installation.enterprise !== undefined
+			) {
 				// handle storing org-wide app installation
 				return setInstallation(installation.enterprise.id, installation);
 			}
@@ -83,7 +97,9 @@ const installationStore = {
 				// single team app installation
 				return setInstallation(installation.team.id, installation);
 			}
-			throw new Error('Failed saving installation to installationStore (no team or enterprise id)');
+			throw new Error(
+				'Failed saving installation to installationStore (no team or enterprise id)'
+			);
 		} catch (error) {
 			logger.error(error);
 			throw error;
@@ -94,7 +110,10 @@ const installationStore = {
 		try {
 			// Bolt will pass your handler an installQuery object
 			// Change the lines below so they fetch from your database
-			if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
+			if (
+				installQuery.isEnterpriseInstall &&
+				installQuery.enterpriseId !== undefined
+			) {
 				// handle org wide app installation lookup
 				return await getInstallation(installQuery.enterpriseId);
 			}
@@ -102,7 +121,9 @@ const installationStore = {
 				// single team app installation lookup
 				return await getInstallation(installQuery.teamId);
 			}
-			throw new Error('Failed fetching installation (no teamId or enterpriseId)');
+			throw new Error(
+				'Failed fetching installation (no teamId or enterpriseId)'
+			);
 		} catch (error) {
 			logger.error(error);
 			throw error;
@@ -113,7 +134,10 @@ const installationStore = {
 		try {
 			// Bolt will pass your handler  an installQuery object
 			// Change the lines below so they delete from your database
-			if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
+			if (
+				installQuery.isEnterpriseInstall &&
+				installQuery.enterpriseId !== undefined
+			) {
 				// org wide app installation deletion
 				return await deleteInstallation(installQuery.enterpriseId);
 			}
@@ -121,7 +145,9 @@ const installationStore = {
 				// single team app installation deletion
 				return await deleteInstallation(installQuery.teamId);
 			}
-			throw new Error('Failed to delete installation (no teamId or enterpriseId)');
+			throw new Error(
+				'Failed to delete installation (no teamId or enterpriseId)'
+			);
 		} catch (error) {
 			logger.error(error);
 			throw error;
@@ -129,5 +155,11 @@ const installationStore = {
 	},
 };
 
-
-export { checkTables, deleteInstallation, getInstallation, installationStore, knex, setInstallation };
+export {
+	checkTables,
+	deleteInstallation,
+	getInstallation,
+	installationStore,
+	knex,
+	setInstallation,
+};

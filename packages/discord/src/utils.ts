@@ -1,5 +1,12 @@
 /* eslint-disable no-await-in-loop */
-import { Flags, getTag, help, loggerInit, MeasurementResponse, throwArgError } from '@globalping/bot-utils';
+import {
+	Flags,
+	getTag,
+	help,
+	loggerInit,
+	MeasurementResponse,
+	throwArgError,
+} from '@globalping/bot-utils';
 import { ChatInputCommandInteraction, codeBlock } from 'discord.js';
 import * as dotenv from 'dotenv';
 
@@ -9,17 +16,29 @@ export const logger = loggerInit('discord', process.env.LOG_LEVEL ?? 'info');
 
 export const getFlags = (interaction: ChatInputCommandInteraction): Flags => {
 	const cmd = interaction.options.getSubcommand();
-	const helpVal = interaction.options.getString('command') ?? (cmd === 'help' ? 'help' : undefined);
+	const helpVal =
+		interaction.options.getString('command') ??
+		(cmd === 'help' ? 'help' : undefined);
 
-	const target = interaction.options.getString('target') ?? (helpVal ? '' : throwArgError(undefined, 'target', 'jsdelivr.com'));
-	const from = interaction.options.getString('from') ?? (helpVal ? '' : throwArgError(undefined, 'from', 'New York'));
-	const rawHeader = interaction.options.getString('header')?.split(':').map(header => header.trim()) ?? undefined;
+	const target =
+		interaction.options.getString('target') ??
+		(helpVal ? '' : throwArgError(undefined, 'target', 'jsdelivr.com'));
+	const from =
+		interaction.options.getString('from') ??
+		(helpVal ? '' : throwArgError(undefined, 'from', 'New York'));
+	const rawHeader =
+		interaction.options
+			.getString('header')
+			?.split(':')
+			.map((header) => header.trim()) ?? undefined;
 
 	return {
 		cmd,
 		target,
 		from,
-		limit: interaction.options.getNumber('limit') ?? undefined as unknown as number, // Force overwrite main interface
+		limit:
+			interaction.options.getNumber('limit') ??
+			(undefined as unknown as number), // Force overwrite main interface
 		packets: interaction.options.getNumber('packets') ?? undefined,
 		protocol: interaction.options.getString('protocol') ?? undefined,
 		port: interaction.options.getNumber('port') ?? undefined,
@@ -29,11 +48,12 @@ export const getFlags = (interaction: ChatInputCommandInteraction): Flags => {
 		method: interaction.options.getString('method') ?? undefined,
 		path: interaction.options.getString('path') ?? undefined,
 		host: interaction.options.getString('host') ?? undefined,
-		headers: rawHeader ? { [String(rawHeader.shift())]: rawHeader.join(' ') } : undefined,
+		headers: rawHeader
+			? { [String(rawHeader.shift())]: rawHeader.join(' ') }
+			: undefined,
 		help: helpVal,
 	};
 };
-
 
 export const expandFlags = (flags: Flags): string => {
 	const entries = Object.entries(flags);
@@ -44,7 +64,14 @@ export const expandFlags = (flags: Flags): string => {
 		if (!skipFlag.has(key) && value !== undefined) {
 			if (key === 'headers') {
 				// Headers have different flag format
-				msg.push(`${Object.entries(value).map(([headerKey, headerValue]) => `--header ${headerKey}: ${headerValue}`).join(' ')}`);
+				msg.push(
+					`${Object.entries(value)
+						.map(
+							([headerKey, headerValue]) =>
+								`--header ${headerKey}: ${headerValue}`
+						)
+						.join(' ')}`
+				);
 			}
 			msg.push(`--${key} ${value}`);
 		}
@@ -52,13 +79,25 @@ export const expandFlags = (flags: Flags): string => {
 	return msg.join(' ');
 };
 
-export const expandResults = async (response: MeasurementResponse, interaction: ChatInputCommandInteraction) => {
+export const expandResults = async (
+	response: MeasurementResponse,
+	interaction: ChatInputCommandInteraction
+) => {
 	const { results } = response;
 	for (const result of results) {
 		const tag = getTag(result.probe.tags);
-		const msg = { content: `> **${result.probe.continent}, ${result.probe.country}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${tag ? ` (${tag})` : ''}**` };
+		const msg = {
+			content: `> **${result.probe.continent}, ${result.probe.country}, ${
+				result.probe.state ? `(${result.probe.state}), ` : ''
+			}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${
+				tag ? ` (${tag})` : ''
+			}**`,
+		};
 		// Discord has a limit of 2000 characters per block - truncate if necessary
-		const rawOutput = result.result.rawOutput.length > 1900 ? `${result.result.rawOutput.slice(0, 1900)}\n... (truncated)` : `${result.result.rawOutput}`;
+		const rawOutput =
+			result.result.rawOutput.length > 1900
+				? `${result.result.rawOutput.slice(0, 1900)}\n... (truncated)`
+				: `${result.result.rawOutput}`;
 		const output = { content: codeBlock('shell', rawOutput) };
 		if (interaction.channel) {
 			await interaction.channel.send(msg);
@@ -71,12 +110,18 @@ export const expandResults = async (response: MeasurementResponse, interaction: 
 };
 
 export const helpCmd = (cmd: string): string => {
-	if (cmd === 'help') return `${help.help.preamble}\n\n**Usage:**\n\`\`\`${help.help.usage}\`\`\`\n**Arguments**:\n\`\`\`${help.help.args}\`\`\`\nMore help can be found here:\n\`\`\`${help.help.endDiscord}\`\`\``;
-	if (cmd === 'ping') return `${help.ping.preamble}\n\n**Usage:**\n\`\`\`${help.ping.usage}\`\`\`\n**Options:**\n\`\`\`${help.ping.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.ping.examples}\`\`\``;
-	if (cmd === 'traceroute') return `${help.traceroute.preamble}\n\n**Usage:**\n\`\`\`${help.traceroute.usage}\`\`\`\n**Options:**\n\`\`\`${help.traceroute.options}\`\`\`\n**Examples:**\n\`\`\`${help.traceroute.examples}\`\`\``;
-	if (cmd === 'dns') return `${help.dns.preamble}\n\n**Usage:**\n\`\`\`${help.dns.usage}\`\`\`\n**Options:**\n\`\`\`${help.dns.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.dns.examples}\`\`\``;
-	if (cmd === 'mtr') return `${help.mtr.preamble}\n\n**Usage:**\n\`\`\`${help.mtr.usage}\`\`\`\n**Options:**\n\`\`\`${help.mtr.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.mtr.examples}\`\`\``;
-	if (cmd === 'http') return `${help.http.preamble}\n\n**Usage:**\n\`\`\`${help.http.usage}\`\`\`\n**Options:**\n\`\`\`${help.http.options}\`\`\`\n**Examples:**\n\`\`\`${help.http.examples}\`\`\``;
+	if (cmd === 'help')
+		return `${help.help.preamble}\n\n**Usage:**\n\`\`\`${help.help.usage}\`\`\`\n**Arguments**:\n\`\`\`${help.help.args}\`\`\`\nMore help can be found here:\n\`\`\`${help.help.endDiscord}\`\`\``;
+	if (cmd === 'ping')
+		return `${help.ping.preamble}\n\n**Usage:**\n\`\`\`${help.ping.usage}\`\`\`\n**Options:**\n\`\`\`${help.ping.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.ping.examples}\`\`\``;
+	if (cmd === 'traceroute')
+		return `${help.traceroute.preamble}\n\n**Usage:**\n\`\`\`${help.traceroute.usage}\`\`\`\n**Options:**\n\`\`\`${help.traceroute.options}\`\`\`\n**Examples:**\n\`\`\`${help.traceroute.examples}\`\`\``;
+	if (cmd === 'dns')
+		return `${help.dns.preamble}\n\n**Usage:**\n\`\`\`${help.dns.usage}\`\`\`\n**Options:**\n\`\`\`${help.dns.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.dns.examples}\`\`\``;
+	if (cmd === 'mtr')
+		return `${help.mtr.preamble}\n\n**Usage:**\n\`\`\`${help.mtr.usage}\`\`\`\n**Options:**\n\`\`\`${help.mtr.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.mtr.examples}\`\`\``;
+	if (cmd === 'http')
+		return `${help.http.preamble}\n\n**Usage:**\n\`\`\`${help.http.usage}\`\`\`\n**Options:**\n\`\`\`${help.http.options}\`\`\`\n**Examples:**\n\`\`\`${help.http.examples}\`\`\``;
 
 	return 'Unknown command! Please call `/globalping help` for a list of commands.';
 };
