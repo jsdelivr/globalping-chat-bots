@@ -4,47 +4,23 @@ import {
 	formatAPIError,
 	getAPIErrorMessage,
 } from '@globalping/bot-utils';
-import { App, GenericMessageEvent, LogLevel } from '@slack/bolt';
-import * as dotenv from 'dotenv';
+import { App, AppOptions, GenericMessageEvent, LogLevel } from '@slack/bolt';
 
-import * as database from './db';
+import { installationStore, knex, userStore } from './db';
 import { handleMention } from './mention';
 import { routes } from './routes';
-import { channelWelcome, logger, postAPI } from './utils';
+import { channelWelcome, getInstallationId, logger, postAPI } from './utils';
 import { handleAppHomeMessagesOpened } from './welcome';
+import { config } from './config';
+import { initOAuthClient } from './auth';
 
-dotenv.config();
-
-if (
-	!process.env.SLACK_SIGNING_SECRET ||
-	!process.env.SLACK_CLIENT_ID ||
-	!process.env.SLACK_CLIENT_SECRET ||
-	!process.env.SLACK_STATE_SECRET
-)
-	throw new Error(
-		'SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production'
-	);
-
-if (
-	!process.env.DB_HOST ||
-	!process.env.DB_PORT ||
-	!process.env.DB_USER ||
-	!process.env.DB_PASSWORD ||
-	!process.env.DB_DATABASE
-)
-	throw new Error(
-		'DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production'
-	);
-
-// We run a discord instance in the slack express receiver
-// if (!process.env.DISCORD_TOKEN && !process.env.DISCORD_APP_ID)
-//	throw new Error('DISCORD_TOKEN and DISCORD_APP_ID environment variable must be set for production.');
-
-const baseAppConfig = {
-	signingSecret: process.env.SLACK_SIGNING_SECRET,
-	clientId: process.env.SLACK_CLIENT_ID,
-	clientSecret: process.env.SLACK_CLIENT_SECRET,
-	stateSecret: process.env.SLACK_STATE_SECRET,
+const baseAppConfig: AppOptions = {
+	signingSecret: config.slackSigningSecret,
+	clientId: config.slackClientId,
+	clientSecret: config.slackClientSecret,
+	stateSecret: config.slackStateSecret,
+	socketMode: config.slackSocketMode,
+	appToken: config.slackAppToken,
 	scopes: [
 		'chat:write',
 		'chat:write.public',
@@ -78,20 +54,19 @@ const baseAppConfig = {
 		getLevel: () => logger.level as LogLevel,
 		setName: () => {},
 	},
-	installationStore: database.installationStore,
+	installationStore: installationStore,
 	installerOptions: {
 		directInstall: true,
 	},
 	customRoutes: routes,
 };
 
-let app: App;
-if (process.env.NODE_ENV === 'production') {
-	app = new App(baseAppConfig);
-} else {
+const app: App = new App(baseAppConfig);
+if (config.env !== 'production') {
 	baseAppConfig.logLevel = LogLevel.DEBUG;
-	app = new App(baseAppConfig);
 }
+
+initOAuthClient(config, logger, userStore, app.client);
 
 app.command('/globalping', async ({ payload, ack, client, respond }) => {
 	const logData = {
@@ -180,7 +155,16 @@ app.command('/globalping', async ({ payload, ack, client, respond }) => {
 				);
 			}
 		} else {
-			const channelPayload = { channel_id, user_id };
+			const channelPayload = {
+				channel_id,
+				user_id,
+				installationId: getInstallationId({
+					isEnterpriseInstall:
+						payload.is_enterprise_install === 'true' ? true : false,
+					enterpriseId: payload.enterprise_id,
+					teamId: payload.team_id,
+				}),
+			};
 			logger.info(logData, '/globalping processing starting');
 			await postAPI(client, channelPayload, commandText);
 			logger.info(logData, '/globalping response - OK');
@@ -216,7 +200,7 @@ app.event('app_home_opened', async ({ context, event, say, client }) => {
 // Needed until this is resolved - https://github.com/slackapi/bolt-js/issues/1203
 app.event('app_uninstalled', async ({ context }) => {
 	// @ts-ignore - They are pretty much the same type
-	await database.installationStore.deleteInstallation(context);
+	await installationStore.deleteInstallation(context);
 });
 
 app.event('member_joined_channel', async ({ event, context, say }) => {
@@ -241,6 +225,7 @@ app.event('app_mention', async ({ payload, event, context, client }) => {
 	const channelId = event.channel;
 	const threadTs = event.thread_ts;
 	let userId = event.user;
+	const installationId = getInstallationId(context);
 
 	if (userId === undefined) {
 		userId = '';
@@ -253,6 +238,7 @@ app.event('app_mention', async ({ payload, event, context, client }) => {
 		userId,
 		eventTs,
 		threadTs,
+		installationId,
 		botUserId,
 		client
 	);
@@ -276,6 +262,7 @@ app.event('message', async ({ payload, event, context, client }) => {
 	const channelId = event.channel;
 	const threadTs = messageEvent.thread_ts;
 	let userId = messageEvent.user;
+	let installationId = getInstallationId(context);
 
 	if (userId === undefined) {
 		userId = '';
@@ -291,6 +278,7 @@ app.event('message', async ({ payload, event, context, client }) => {
 		userId,
 		eventTs,
 		threadTs,
+		installationId,
 		botUserId,
 		client
 	);
@@ -298,15 +286,13 @@ app.event('message', async ({ payload, event, context, client }) => {
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 (async () => {
-	// Moved here due to top-level await restrictions
-	if (process.env.NODE_ENV === 'production' && !(await database.checkTables()))
-		throw new Error(
-			'"installations" table does not exist in database! Run "pnpm run setup-db" to create the necessary table.'
-		);
+	logger.info('Running migrations');
+	await knex.migrate.latest();
+	logger.info('Migrations complete');
 
 	// Start your app
-	await app.start(Number(process.env.PORT) || 3000);
-	if (process.env.NODE_ENV === 'production') {
+	await app.start(config.port);
+	if (config.env === 'production') {
 		logger.info('Slack bot is online [PRODUCTION]');
 	} else {
 		logger.info('⚡️ Bolt app is running! [DEVELOPMENT]');

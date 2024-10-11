@@ -1,14 +1,33 @@
 /* eslint-disable @typescript-eslint/return-await */
 import type { Installation, InstallationQuery } from '@slack/bolt';
-import * as dotenv from 'dotenv';
-import { Knex, knex as knexInstance } from 'knex';
+import { knex as knexInstance } from 'knex';
 
-import { logger } from './utils';
-
-dotenv.config();
+import { getInstallationId, logger } from './utils';
+import { config } from './config';
 
 type AuthVersion = 'v1' | 'v2';
-type InstallationStore = Installation<AuthVersion, boolean>;
+export type InstallationStore = Installation<AuthVersion, boolean>;
+
+export interface AuthToken {
+	access_token: string;
+	token_type: string;
+	expires_in: number;
+	refresh_token: string;
+	expiry: number; // Unix timestamp
+}
+
+export const enum Tables {
+	Installations = 'installations',
+	Users = 'users',
+}
+
+export interface AuthorizeSession {
+	verifier: string;
+	installationId?: string;
+	channelId: string;
+	userId: string;
+	threadTs?: string;
+}
 
 declare module 'knex/types/tables' {
 	interface UserInstallation {
@@ -16,28 +35,31 @@ declare module 'knex/types/tables' {
 		installation: InstallationStore;
 	}
 
+	interface AuthToken {
+		id: string;
+		token: AuthToken;
+	}
+
 	interface Tables {
 		// This is same as specifying `knex<User>('users')`
 		installations: UserInstallation;
+		authTokens: AuthToken;
 	}
 }
-
-const config: Knex.Config = {
+// Query builder
+export const knex = knexInstance({
 	client: 'mysql',
 	connection: {
-		host: process.env.DB_HOST,
-		port: Number(process.env.DB_PORT),
-		user: process.env.DB_USER,
-		password: process.env.DB_PASSWORD,
-		database: process.env.DB_DATABASE,
+		host: config.dbHost,
+		port: config.dbPort,
+		user: config.dbUser,
+		password: config.dbPassword,
+		database: config.dbDatabase,
 	},
-};
-
-// Query builder
-const knex = knexInstance(config);
-
-const checkTables = async (): Promise<boolean> =>
-	knex.schema.hasTable('installations');
+	migrations: {
+		directory: './migrations',
+	},
+});
 
 const setInstallation = async (
 	id: string,
@@ -45,7 +67,7 @@ const setInstallation = async (
 ): Promise<void> => {
 	try {
 		await knex
-			.table('installations')
+			.table(Tables.Installations)
 			.insert({ id, installation })
 			.onConflict('id')
 			.merge();
@@ -58,7 +80,7 @@ const setInstallation = async (
 const getInstallation = async (id: string): Promise<InstallationStore> => {
 	try {
 		const installation = await knex
-			.table('installations')
+			.table(Tables.Installations)
 			.where('id', id)
 			.first();
 		if (!installation) {
@@ -73,14 +95,14 @@ const getInstallation = async (id: string): Promise<InstallationStore> => {
 
 const deleteInstallation = async (id: string): Promise<void> => {
 	try {
-		await knex.table('installations').where('id', id).del();
+		await knex.table(Tables.Installations).where('id', id).del();
 		logger.debug(`Installation deleted: ${id}`);
 	} catch (error) {
 		throw new Error(`Failed to delete installation: ${error}`);
 	}
 };
 
-const installationStore = {
+export const installationStore = {
 	storeInstallation: (installation: InstallationStore) => {
 		logger.debug(`Storing installation: ${JSON.stringify(installation)}`);
 		try {
@@ -110,20 +132,11 @@ const installationStore = {
 		try {
 			// Bolt will pass your handler an installQuery object
 			// Change the lines below so they fetch from your database
-			if (
-				installQuery.isEnterpriseInstall &&
-				installQuery.enterpriseId !== undefined
-			) {
-				// handle org wide app installation lookup
-				return await getInstallation(installQuery.enterpriseId);
+			const id = getInstallationId(installQuery);
+			if (id === undefined) {
+				throw new Error('Failed fetching installation (no id)');
 			}
-			if (installQuery.teamId !== undefined) {
-				// single team app installation lookup
-				return await getInstallation(installQuery.teamId);
-			}
-			throw new Error(
-				'Failed fetching installation (no teamId or enterpriseId)'
-			);
+			return await getInstallation(id);
 		} catch (error) {
 			logger.error(error);
 			throw error;
@@ -134,20 +147,11 @@ const installationStore = {
 		try {
 			// Bolt will pass your handler  an installQuery object
 			// Change the lines below so they delete from your database
-			if (
-				installQuery.isEnterpriseInstall &&
-				installQuery.enterpriseId !== undefined
-			) {
-				// org wide app installation deletion
-				return await deleteInstallation(installQuery.enterpriseId);
+			const id = getInstallationId(installQuery);
+			if (id === undefined) {
+				throw new Error('Failed deleting installation (no id)');
 			}
-			if (installQuery.teamId !== undefined) {
-				// single team app installation deletion
-				return await deleteInstallation(installQuery.teamId);
-			}
-			throw new Error(
-				'Failed to delete installation (no teamId or enterpriseId)'
-			);
+			return await deleteInstallation(id);
 		} catch (error) {
 			logger.error(error);
 			throw error;
@@ -155,11 +159,89 @@ const installationStore = {
 	},
 };
 
-export {
-	checkTables,
-	deleteInstallation,
-	getInstallation,
-	installationStore,
-	knex,
-	setInstallation,
+export type UserStore = typeof userStore;
+
+export const userStore = {
+	updateToken: async (id: string, token: AuthToken | null) => {
+		try {
+			const res = await knex
+				.table(Tables.Users)
+				.insert({ id, token })
+				.onConflict('id')
+				.merge();
+			logger.debug(`Token set: ${res}`);
+		} catch (error) {
+			const err = new Error(`Failed to set token: ${error}`);
+			logger.error(err);
+			throw err;
+		}
+	},
+	getToken: async (id: string) => {
+		try {
+			const token = await knex.table(Tables.Users).where('id', id).first();
+			if (!token) {
+				return null;
+			}
+			return JSON.parse(token.token as string) as AuthToken;
+		} catch (error) {
+			const err = new Error(`Failed to get token: ${error}`);
+			logger.error(err);
+			throw err;
+		}
+	},
+	updateAuthorizeSession: async (
+		id: string,
+		authorizeSesssion: AuthorizeSession | null
+	) => {
+		try {
+			await knex
+				.table(Tables.Users)
+				.insert({ id, authorize_session: authorizeSesssion })
+				.onConflict('id')
+				.merge();
+		} catch (error) {
+			const err = new Error(`Failed to set authorize session: ${error}`);
+			logger.error(err);
+			throw err;
+		}
+	},
+	getUserForAuthorization: async (id: string) => {
+		try {
+			const res = await knex
+				.table(Tables.Users)
+				.select('token', 'authorize_session')
+				.where('id', id)
+				.first();
+			if (!res) {
+				return {
+					token: null,
+					session: null,
+					installation: null,
+				};
+			}
+			const token = res.token ? JSON.parse(res.token as string) : null;
+			const session = res.authorize_session
+				? JSON.parse(res.authorize_session as string)
+				: null;
+			let installation: InstallationStore | null = null;
+			if (session && session.installationId) {
+				try {
+					installation = await getInstallation(session.installationId);
+				} catch (error) {
+					logger.error(
+						`Failed to get installation for authorize session: ${error}`
+					);
+				}
+			}
+			return {
+				token,
+				session: session,
+				installation,
+			};
+		} catch (error) {
+			const err = new Error(`Failed to get authorize session: ${error}`);
+			logger.error(err);
+			throw err;
+		}
+	},
 };

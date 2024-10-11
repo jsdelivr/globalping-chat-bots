@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../utils';
 import { handleGithubMention } from './mention';
 import { GithubNotificationRequest } from './types';
+import { config } from '../config';
 
 export async function githubHandler(
 	req: ParamsIncomingMessage,
@@ -15,7 +16,7 @@ export async function githubHandler(
 	const logData = { reqId };
 	logger.info(logData, '/github-bot request');
 
-	if (req.headers['api-key'] !== process.env.GITHUB_BOT_API_KEY) {
+	if (req.headers['api-key'] !== config.githubBotApiKey) {
 		res.writeHead(401);
 		res.write(JSON.stringify({ err: 'Invalid API Key' }));
 		res.end();

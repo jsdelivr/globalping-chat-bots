@@ -28,6 +28,7 @@ export async function handleMention(
 	userId: string,
 	eventTs: string,
 	threadTs: string | undefined,
+	installationId: string | undefined,
 	botUserId: string,
 	client: WebClient
 ) {
@@ -42,6 +43,7 @@ export async function handleMention(
 			channel_id: channelId,
 			user_id: userId,
 			thread_ts: threadTs,
+			installationId,
 		};
 		logger.info({ commandText, ...logData }, '@globalping processing starting');
 		await postAPI(client, channelPayload, commandText);

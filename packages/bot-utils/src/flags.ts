@@ -92,6 +92,15 @@ export interface Flags {
 	latency?: boolean;
 	full?: boolean;
 	share?: boolean;
+
+	// auth flags
+	withToken?: string;
+}
+
+export const enum AuthSubcommand {
+	Login = 'login',
+	Logout = 'logout',
+	Status = 'status',
 }
 
 const checkFlags = (cmd: string, args: Record<string, string>): void => {
@@ -222,6 +231,25 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	const argsForTargetQueryParser = parsed._.slice(1)
 		.map((arg) => arg.toString())
 		.filter((arg) => arg !== '');
+
+	if (cmd === 'auth' || argsForTargetQueryParser[0] === 'auth') {
+		let target = '';
+		if (argsForTargetQueryParser[0] === 'auth') {
+			target = argsForTargetQueryParser[1];
+		} else {
+			target = argsForTargetQueryParser[0];
+		}
+		return {
+			cmd: 'auth',
+			help: parsed.help ? true : false,
+			target,
+			from: '',
+			limit: 1,
+			withToken: parsed['with-token']
+				? String(parsed['with-token'])
+				: undefined,
+		};
+	}
 
 	const targetQuery = parseTargetQuery(cmd, argsForTargetQueryParser);
 	let { target, from, resolver } = targetQuery;
