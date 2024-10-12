@@ -1,13 +1,13 @@
 import { CustomRoute } from '@slack/bolt';
+import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage';
 import * as fs from 'node:fs';
+import { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { CALLBACK_PATH, oauth } from './auth';
 import { knex } from './db';
 import { githubHandler } from './github/handler';
-import { CALLBACK_PATH, oauth } from './auth';
-import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage';
-import { IncomingMessage, ServerResponse } from 'node:http';
 
 export const routes: CustomRoute[] = [
 	{

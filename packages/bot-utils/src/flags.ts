@@ -234,14 +234,10 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 
 	if (cmd === 'auth' || argsForTargetQueryParser[0] === 'auth') {
 		let target = '';
-		if (argsForTargetQueryParser[0] === 'auth') {
-			target = argsForTargetQueryParser[1];
-		} else {
-			target = argsForTargetQueryParser[0];
-		}
+		target = argsForTargetQueryParser[0] === 'auth' ? argsForTargetQueryParser[1] : argsForTargetQueryParser[0];
 		return {
 			cmd: 'auth',
-			help: parsed.help ? true : false,
+			help: !!parsed.help,
 			target,
 			from: '',
 			limit: 1,

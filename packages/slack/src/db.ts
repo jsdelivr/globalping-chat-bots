@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/return-await */
+import { AuthToken } from '@globalping/bot-utils';
 import type { Installation, InstallationQuery } from '@slack/bolt';
 import { knex as knexInstance } from 'knex';
 
-import { getInstallationId, logger } from './utils';
 import { config } from './config';
-import { AuthToken } from '@globalping/bot-utils';
+import { getInstallationId, logger } from './utils';
 
 type AuthVersion = 'v1' | 'v2';
 export type InstallationStore = Installation<AuthVersion, boolean>;
@@ -152,8 +152,6 @@ export const installationStore = {
 	},
 };
 
-export type UserStore = typeof userStore;
-
 export const userStore = {
 	updateToken: async (id: string, token: AuthToken | null) => {
 		try {
@@ -228,7 +226,7 @@ export const userStore = {
 			}
 			return {
 				token,
-				session: session,
+				session,
 				installation,
 			};
 		} catch (error) {
@@ -238,3 +236,5 @@ export const userStore = {
 		}
 	},
 };
+
+export type UserStore = typeof userStore;

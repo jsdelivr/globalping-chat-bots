@@ -1,51 +1,6 @@
 import * as dotenv from 'dotenv';
+
 dotenv.config();
-
-function validateConfig(config: Config) {
-	if (process.env.NODE_ENV === 'test') {
-		return;
-	}
-
-	if (
-		!config.slackSigningSecret ||
-		!config.slackClientId ||
-		!config.slackClientSecret ||
-		!config.slackStateSecret
-	) {
-		throw new Error(
-			'SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production'
-		);
-	}
-
-	if (
-		!config.dbHost ||
-		!config.dbPort ||
-		!config.dbUser ||
-		!config.dbPassword ||
-		!config.dbDatabase
-	) {
-		throw new Error(
-			'DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production'
-		);
-	}
-
-	if (!config.serverHost) {
-		throw new Error(
-			'SERVER_HOST environment variable must be set for production'
-		);
-	}
-
-	if (
-		!config.dashboardUrl ||
-		!config.authUrl ||
-		!config.authClientId ||
-		!config.authClientSecret
-	) {
-		throw new Error(
-			'DASHBOARD_URL AUTH_URL, AUTH_CLIENT_ID and AUTH_CLIENT_SECRET environment variable must be set for production'
-		);
-	}
-}
 
 export const config = {
 	env: process.env.NODE_ENV || 'development',
@@ -79,5 +34,40 @@ export const config = {
 };
 
 export type Config = typeof config;
+
+function validateConfig(c: Config) {
+	if (process.env.NODE_ENV === 'test') {
+		return;
+	}
+
+	if (
+		!c.slackSigningSecret ||
+		!c.slackClientId ||
+		!c.slackClientSecret ||
+		!c.slackStateSecret
+	) {
+		throw new Error(
+			'SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production'
+		);
+	}
+
+	if (!c.dbHost || !c.dbPort || !c.dbUser || !c.dbPassword || !c.dbDatabase) {
+		throw new Error(
+			'DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production'
+		);
+	}
+
+	if (!c.serverHost) {
+		throw new Error(
+			'SERVER_HOST environment variable must be set for production'
+		);
+	}
+
+	if (!c.dashboardUrl || !c.authUrl || !c.authClientId || !c.authClientSecret) {
+		throw new Error(
+			'DASHBOARD_URL AUTH_URL, AUTH_CLIENT_ID and AUTH_CLIENT_SECRET environment variable must be set for production'
+		);
+	}
+}
 
 validateConfig(config);

@@ -3,10 +3,10 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import getRawBody from 'raw-body';
 import { v4 as uuidv4 } from 'uuid';
 
+import { config } from '../config';
 import { logger } from '../utils';
 import { handleGithubMention } from './mention';
 import { GithubNotificationRequest } from './types';
-import { config } from '../config';
 
 export async function githubHandler(
 	req: ParamsIncomingMessage,

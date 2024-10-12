@@ -1,11 +1,12 @@
-import { randomBytes, createHash } from 'crypto';
+import { AuthToken } from '@globalping/bot-utils';
 import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage';
+import { createHash, randomBytes } from 'node:crypto';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { parse } from 'node:url';
-import { Logger, SlackClient } from './utils';
+
 import { Config } from './config';
 import { AuthorizeSession, InstallationStore, UserStore } from './db';
-import { AuthToken } from '@globalping/bot-utils';
+import { Logger, SlackClient } from './utils';
 
 export const CALLBACK_PATH = '/slack/oauth/callback';
 export const enum AuthorizeErrorType {
@@ -15,15 +16,29 @@ export const enum AuthorizeErrorType {
 	InvalidGrant = 'invalid_grant',
 }
 
-export let oauth: OAuthClient;
+export interface AuthorizeResponse {
+	url: string;
+}
 
-export function initOAuthClient(
-	config: Config,
-	logger: Logger,
-	usersStore: UserStore,
-	slackClient: SlackClient
-) {
-	oauth = new OAuthClient(config, logger, usersStore, slackClient);
+export interface AuthorizeError {
+	error: string;
+	error_description: string;
+}
+
+export interface IntrospectionResponse {
+	active: boolean;
+
+	scope?: string;
+	client_id?: string;
+	username?: string;
+	token_type?: string;
+	exp?: number;
+	iat?: number;
+	nbf?: number;
+	sub?: string;
+	aud?: string;
+	iss?: string;
+	jti?: string;
 }
 
 export class OAuthClient {
@@ -44,13 +59,13 @@ export class OAuthClient {
 
 		await this.usersStore.updateAuthorizeSession(userId, {
 			verifier,
-			userId: userId,
-			channelId: channelId,
-			threadTs: threadTs,
+			userId,
+			channelId,
+			threadTs,
 			installationId,
 		});
 
-		const url = new URL(this.config.authUrl + '/oauth/authorize');
+		const url = new URL(`${this.config.authUrl}/oauth/authorize`);
 		url.searchParams.append('client_id', this.config.authClientId);
 		url.searchParams.append('code_challenge', generateS256Challenge(verifier));
 		url.searchParams.append('code_challenge_method', 'S256');
@@ -85,8 +100,8 @@ export class OAuthClient {
 			// Revoke old token
 			try {
 				await this.revokeToken(oldToken.refresh_token);
-			} catch (error) {
-				this.logger.error(error, 'Failed to revoke old token');
+			} catch (error_) {
+				this.logger.error(error_, 'Failed to revoke old token');
 			}
 		}
 		await this.usersStore.updateToken(userId, {
@@ -113,8 +128,8 @@ export class OAuthClient {
 			error = await this.revokeToken(token.refresh_token);
 			if (!error) {
 				// Delete token
-				const _error = await this.usersStore.updateToken(userId, null);
-				this.logger.error(_error, 'Failed to delete token', userId);
+				const e = await this.usersStore.updateToken(userId, null);
+				this.logger.error(e, 'Failed to delete token', userId);
 			}
 		}
 		return error;
@@ -134,7 +149,7 @@ export class OAuthClient {
 				},
 			];
 		}
-		const url = new URL(this.config.authUrl + '/oauth/token/introspect');
+		const url = new URL(`${this.config.authUrl}/oauth/token/introspect`);
 		const body = new URLSearchParams();
 		body.append('token', token.access_token);
 		const b = body.toString();
@@ -165,7 +180,7 @@ export class OAuthClient {
 		const now = Date.now() / 1000;
 		if (token.expiry < now) {
 			this.logger.debug({ userId, token }, 'token expired, refreshing');
-			const [t, _] = await this.refreshToken(userId, token.refresh_token);
+			const [t] = await this.refreshToken(userId, token.refresh_token);
 			return t;
 		}
 		return token;
@@ -179,14 +194,13 @@ export class OAuthClient {
 			return 'Your access token has been rejected by the API. Try signing in with a new token.';
 		}
 		try {
-			const [newToken, _] = await oauth.refreshToken(
-				userId,
-				token.refresh_token
-			);
+			const [newToken] = await this.refreshToken(userId, token.refresh_token);
 			if (newToken) {
 				return 'Access token successfully refreshed. Try repeating the measurement.';
 			}
-		} catch (_) {}
+		} catch {
+			// Ignore
+		}
 		return 'You have been signed out by the API. Please try signing in again.';
 	}
 
@@ -194,7 +208,7 @@ export class OAuthClient {
 		code: string,
 		session: AuthorizeSession
 	): Promise<AuthorizeError | null> {
-		const url = new URL(this.config.authUrl + '/oauth/token');
+		const url = new URL(`${this.config.authUrl}/oauth/token`);
 		const body = new URLSearchParams();
 		body.append('client_id', this.config.authClientId);
 		body.append('client_secret', this.config.authClientSecret);
@@ -226,7 +240,7 @@ export class OAuthClient {
 	}
 
 	async revokeToken(token: string): Promise<AuthorizeError | null> {
-		const url = new URL(this.config.authUrl + '/oauth/token/revoke');
+		const url = new URL(`${this.config.authUrl}/oauth/token/revoke`);
 		const body = new URLSearchParams();
 		body.append('token', token);
 		const b = body.toString();
@@ -257,7 +271,7 @@ export class OAuthClient {
 			return;
 		}
 
-		const query = parse(req.url || '', true).query;
+		const { query } = parse(req.url || '', true);
 		const callbackError = query.error;
 		const errorDescription = query.error_description;
 		const code = query.code as string;
@@ -266,7 +280,7 @@ export class OAuthClient {
 		if (!userId) {
 			this.logger.error(callbackError, '/oauth/callback missing userId');
 			res.writeHead(302, {
-				Location: this.config.dashboardUrl + '/authorize/error',
+				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
 			res.end();
 			return;
@@ -277,13 +291,13 @@ export class OAuthClient {
 		let installation: InstallationStore | null;
 
 		try {
-			const res = await this.usersStore.getUserForAuthorization(userId);
-			oldToken = res.token;
-			session = res.session;
-			installation = res.installation;
-		} catch (error) {
+			const user = await this.usersStore.getUserForAuthorization(userId);
+			oldToken = user.token;
+			session = user.session;
+			installation = user.installation;
+		} catch {
 			res.writeHead(302, {
-				Location: this.config.dashboardUrl + '/authorize/error',
+				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
 			res.end();
 			return;
@@ -292,7 +306,7 @@ export class OAuthClient {
 		if (!session) {
 			this.logger.error({ userId }, '/oauth/callback missing session');
 			res.writeHead(302, {
-				Location: this.config.dashboardUrl + '/authorize/error',
+				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
 			res.end();
 			return;
@@ -322,7 +336,7 @@ export class OAuthClient {
 				'/oauth/callback failed'
 			);
 			res.writeHead(302, {
-				Location: this.config.dashboardUrl + '/authorize/error',
+				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
 			res.end();
 			return;
@@ -345,7 +359,7 @@ export class OAuthClient {
 					);
 				}
 			}
-		} catch (error) {
+		} catch {
 			exchangeError = {
 				error: AuthorizeErrorType.InternalError,
 				error_description: 'Failed to exchange code',
@@ -381,7 +395,7 @@ export class OAuthClient {
 		userId: string,
 		refreshToken: string
 	): Promise<[AuthToken | null, AuthorizeError | null]> {
-		const url = new URL(this.config.authUrl + '/oauth/token');
+		const url = new URL(`${this.config.authUrl}/oauth/token`);
 		const body = new URLSearchParams();
 		body.append('client_id', this.config.authClientId);
 		body.append('client_secret', this.config.authClientSecret);
@@ -402,8 +416,8 @@ export class OAuthClient {
 			const error = (await res.json()) as AuthorizeError;
 			if (error.error === AuthorizeErrorType.InvalidGrant) {
 				// Delete token
-				const _error = await this.usersStore.updateToken(userId, null);
-				this.logger.error(_error, 'Failed to delete token', userId);
+				const e = await this.usersStore.updateToken(userId, null);
+				this.logger.error(e, 'Failed to delete token', userId);
 			}
 			return [null, error];
 		}
@@ -426,27 +440,14 @@ function generateS256Challenge(verifier: string): string {
 	return hash.digest('base64url');
 }
 
-export interface AuthorizeResponse {
-	url: string;
-}
+// eslint-disable-next-line import/no-mutable-exports
+export let oauth: OAuthClient;
 
-export interface AuthorizeError {
-	error: string;
-	error_description: string;
-}
-
-export interface IntrospectionResponse {
-	active: boolean;
-
-	scope?: string;
-	client_id?: string;
-	username?: string;
-	token_type?: string;
-	exp?: number;
-	iat?: number;
-	nbf?: number;
-	sub?: string;
-	aud?: string;
-	iss?: string;
-	jti?: string;
+export function initOAuthClient(
+	config: Config,
+	logger: Logger,
+	usersStore: UserStore,
+	slackClient: SlackClient
+) {
+	oauth = new OAuthClient(config, logger, usersStore, slackClient);
 }

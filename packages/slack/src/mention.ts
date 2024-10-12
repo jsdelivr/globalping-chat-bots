@@ -1,7 +1,8 @@
 import { formatAPIError, getAPIErrorMessage } from '@globalping/bot-utils';
 import { WebClient } from '@slack/web-api';
 
-import { logger, postAPI } from './utils';
+import { postAPI } from './post';
+import { logger } from './utils';
 
 export function parseCommandfromMention(
 	text: string,

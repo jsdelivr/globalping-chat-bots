@@ -1,4 +1,5 @@
 import { Octokit } from 'octokit';
+
 import { config } from '../config';
 
 let octokit: Octokit;

@@ -6,13 +6,14 @@ import {
 } from '@globalping/bot-utils';
 import { App, AppOptions, GenericMessageEvent, LogLevel } from '@slack/bolt';
 
+import { initOAuthClient } from './auth';
+import { config } from './config';
 import { installationStore, knex, userStore } from './db';
 import { handleMention } from './mention';
+import { postAPI } from './post';
 import { routes } from './routes';
-import { channelWelcome, getInstallationId, logger, postAPI } from './utils';
+import { channelWelcome, getInstallationId, logger } from './utils';
 import { handleAppHomeMessagesOpened } from './welcome';
-import { config } from './config';
-import { initOAuthClient } from './auth';
 
 const baseAppConfig: AppOptions = {
 	signingSecret: config.slackSigningSecret,
@@ -54,7 +55,7 @@ const baseAppConfig: AppOptions = {
 		getLevel: () => logger.level as LogLevel,
 		setName: () => {},
 	},
-	installationStore: installationStore,
+	installationStore,
 	installerOptions: {
 		directInstall: true,
 	},
@@ -159,8 +160,7 @@ app.command('/globalping', async ({ payload, ack, client, respond }) => {
 				channel_id,
 				user_id,
 				installationId: getInstallationId({
-					isEnterpriseInstall:
-						payload.is_enterprise_install === 'true' ? true : false,
+					isEnterpriseInstall: payload.is_enterprise_install === 'true',
 					enterpriseId: payload.enterprise_id,
 					teamId: payload.team_id,
 				}),
@@ -262,7 +262,7 @@ app.event('message', async ({ payload, event, context, client }) => {
 	const channelId = event.channel;
 	const threadTs = messageEvent.thread_ts;
 	let userId = messageEvent.user;
-	let installationId = getInstallationId(context);
+	const installationId = getInstallationId(context);
 
 	if (userId === undefined) {
 		userId = '';

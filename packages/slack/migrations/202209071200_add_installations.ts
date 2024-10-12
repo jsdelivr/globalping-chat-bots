@@ -1,7 +1,8 @@
 import { Knex } from 'knex';
+
 import { Tables } from '../src/db';
 
-exports.up = async (knex: Knex) => {
+export const up = async (knex: Knex) => {
 	if (!(await knex.schema.hasTable(Tables.Installations))) {
 		console.log('Creating installations table');
 		await knex.schema.createTable(Tables.Installations, (table) => {
@@ -11,7 +12,7 @@ exports.up = async (knex: Knex) => {
 	}
 };
 
-exports.down = async (knex: Knex) => {
+export const down = async (knex: Knex) => {
 	if (await knex.schema.hasTable(Tables.Installations)) {
 		console.log('Dropping installations table');
 		await knex.schema.dropTable(Tables.Installations);

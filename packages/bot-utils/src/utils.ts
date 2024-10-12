@@ -260,24 +260,24 @@ Available Commands:
   logout      Log out from your Globalping account
   status      Check the current authentication status`,
 	usage: (rootCommand: string) => `${rootCommand} auth [command]`,
-	flags: `  -h, --help   Help for auth`,
+	flags: '  -h, --help   Help for auth',
 };
 
 export const authLoginHelpTexts = {
-	preamble: `Log in to your Globalping account for higher measurements limits.`,
+	preamble: 'Log in to your Globalping account for higher measurements limits.',
 	usage: (rootCommand: string) => `${rootCommand} auth login  [flags]`,
 	flags: `  -h, --help         Help for login
       --with-token   Authenticate with a token instead of the default browser-based flow`,
 };
 
 export const authStatusHelpTexts = {
-	preamble: `Check the current authentication status.`,
+	preamble: 'Check the current authentication status.',
 	usage: (rootCommand: string) => `${rootCommand} auth status`,
-	flags: `  -h, --help   Help for status`,
+	flags: '  -h, --help   Help for status',
 };
 
 export const authLogoutHelpTexts = {
-	preamble: `Log out from your Globalping account.`,
+	preamble: 'Log out from your Globalping account.',
 	usage: (rootCommand: string) => `${rootCommand} auth logout`,
-	flags: `  -h, --help   Help for logout`,
+	flags: '  -h, --help   Help for logout',
 };
