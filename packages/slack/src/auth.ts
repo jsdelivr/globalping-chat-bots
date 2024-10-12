@@ -4,12 +4,8 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { parse } from 'node:url';
 import { Logger, SlackClient } from './utils';
 import { Config } from './config';
-import {
-	AuthorizeSession,
-	AuthToken,
-	InstallationStore,
-	UserStore,
-} from './db';
+import { AuthorizeSession, InstallationStore, UserStore } from './db';
+import { AuthToken } from '@globalping/bot-utils';
 
 export const CALLBACK_PATH = '/slack/oauth/callback';
 export const enum AuthorizeErrorType {
@@ -127,7 +123,7 @@ export class OAuthClient {
 	async Introspect(
 		userId: string
 	): Promise<[IntrospectionResponse | null, AuthorizeError | null]> {
-		const token = await this.getToken(userId);
+		const token = await this.GetToken(userId);
 		this.logger.debug({ userId, token }, 'Introspect token');
 		if (!token) {
 			return [
@@ -158,6 +154,40 @@ export class OAuthClient {
 		}
 		const introspection = (await res.json()) as IntrospectionResponse;
 		return [introspection, null];
+	}
+
+	// NOTE: Does not handle concurrent refreshes
+	async GetToken(userId: string): Promise<AuthToken | null> {
+		const token = await this.usersStore.getToken(userId);
+		if (!token) {
+			return null;
+		}
+		const now = Date.now() / 1000;
+		if (token.expiry < now) {
+			this.logger.debug({ userId, token }, 'token expired, refreshing');
+			const [t, _] = await this.refreshToken(userId, token.refresh_token);
+			return t;
+		}
+		return token;
+	}
+
+	async TryToRefreshToken(
+		userId: string,
+		token: AuthToken
+	): Promise<string | null> {
+		if (!token.refresh_token) {
+			return 'Your access token has been rejected by the API. Try signing in with a new token.';
+		}
+		try {
+			const [newToken, _] = await oauth.refreshToken(
+				userId,
+				token.refresh_token
+			);
+			if (newToken) {
+				return 'Access token successfully refreshed. Try repeating the measurement.';
+			}
+		} catch (_) {}
+		return 'You have been signed out by the API. Please try signing in again.';
 	}
 
 	async exchange(
@@ -383,21 +413,6 @@ export class OAuthClient {
 		await this.usersStore.updateToken(userId, token);
 
 		return [token, null];
-	}
-
-	// NOTE: Does not handle concurrent refreshes
-	async getToken(userId: string): Promise<AuthToken | null> {
-		const token = await this.usersStore.getToken(userId);
-		if (!token) {
-			return null;
-		}
-		const now = Date.now() / 1000;
-		if (token.expiry < now) {
-			this.logger.debug({ userId, token }, 'token expired, refreshing');
-			const [t, _] = await this.refreshToken(userId, token.refresh_token);
-			return t;
-		}
-		return token;
 	}
 }
 

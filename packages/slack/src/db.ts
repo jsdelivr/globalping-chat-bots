@@ -4,17 +4,10 @@ import { knex as knexInstance } from 'knex';
 
 import { getInstallationId, logger } from './utils';
 import { config } from './config';
+import { AuthToken } from '@globalping/bot-utils';
 
 type AuthVersion = 'v1' | 'v2';
 export type InstallationStore = Installation<AuthVersion, boolean>;
-
-export interface AuthToken {
-	access_token: string;
-	token_type: string;
-	expires_in: number;
-	refresh_token: string;
-	expiry: number; // Unix timestamp
-}
 
 export const enum Tables {
 	Installations = 'installations',

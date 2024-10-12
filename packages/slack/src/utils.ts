@@ -6,6 +6,8 @@ import {
 	loggerInit,
 	postMeasurement,
 	AuthSubcommand,
+	PostError,
+	PostMeasurementResponse,
 } from '@globalping/bot-utils';
 import type { WebClient } from '@slack/web-api';
 
@@ -148,7 +150,25 @@ export const postAPI = async (
 
 	// We post measurement first to catch any validation errors before committing to processing request message
 	logger.debug(`Posting measurement: ${JSON.stringify(postMeasurements)}`);
-	const measurements = await postMeasurement(postMeasurements);
+	let measurements: PostMeasurementResponse[];
+
+	const token = await oauth.GetToken(user_id);
+	try {
+		measurements = await postMeasurement(postMeasurements, token || undefined);
+	} catch (error) {
+		if (
+			error instanceof PostError &&
+			(error.response.statusCode === 401 ||
+				error.response.statusCode === 403) &&
+			token
+		) {
+			const errMsg = await oauth.TryToRefreshToken(user_id, token);
+			if (errMsg) {
+				error = new Error(errMsg);
+			}
+		}
+		throw error;
+	}
 	await client.chat.postEphemeral({
 		text: '```Processing request...```',
 		user: user_id,
