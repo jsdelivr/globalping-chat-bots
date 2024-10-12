@@ -78,42 +78,6 @@ export class OAuthClient {
 		};
 	}
 
-	async LoginWithToken(
-		userId: string,
-		accessToken: string
-	): Promise<[IntrospectionResponse | null, AuthorizeError | null]> {
-		const [introspection, error] = await this.Introspect(userId);
-		if (error) {
-			return [null, error];
-		}
-		if (!introspection?.active) {
-			return [
-				null,
-				{
-					error: 'invalid_token',
-					error_description: 'Token is invalid',
-				},
-			];
-		}
-		const oldToken = await this.usersStore.getToken(userId);
-		if (oldToken) {
-			// Revoke old token
-			try {
-				await this.revokeToken(oldToken.refresh_token);
-			} catch (error_) {
-				this.logger.error(error_, 'Failed to revoke old token');
-			}
-		}
-		await this.usersStore.updateToken(userId, {
-			access_token: accessToken,
-			expires_in: 0,
-			refresh_token: '',
-			token_type: 'Bearer',
-			expiry: Number.MAX_SAFE_INTEGER,
-		});
-		return [introspection, null];
-	}
-
 	async Logout(userId: string): Promise<AuthorizeError | null> {
 		const token = await this.usersStore.getToken(userId);
 		let error: AuthorizeError | null = null;

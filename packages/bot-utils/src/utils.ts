@@ -266,8 +266,7 @@ Available Commands:
 export const authLoginHelpTexts = {
 	preamble: 'Log in to your Globalping account for higher measurements limits.',
 	usage: (rootCommand: string) => `${rootCommand} auth login  [flags]`,
-	flags: `  -h, --help         Help for login
-      --with-token   Authenticate with a token instead of the default browser-based flow`,
+	flags: '  -h, --help         Help for login',
 };
 
 export const authStatusHelpTexts = {

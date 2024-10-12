@@ -44,7 +44,7 @@ export const postAPI = async (
 	if (flags.cmd === 'auth') {
 		switch (flags.target) {
 			case AuthSubcommand.Login:
-				await authLogin(client, payload, flags.withToken);
+				await authLogin(client, payload);
 				return;
 			case AuthSubcommand.Logout:
 				await authLogout(client, payload);
@@ -123,11 +123,7 @@ export const postAPI = async (
 	}
 };
 
-async function authLogin(
-	client: WebClient,
-	payload: ChannelPayload,
-	token?: string
-) {
+async function authLogin(client: WebClient, payload: ChannelPayload) {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const { channel_id, user_id, thread_ts, installationId } = payload;
 	const userInfoRes = await client.users.info({ user: user_id });
@@ -146,23 +142,6 @@ async function authLogin(
 	if (!canAuthenticate) {
 		await client.chat.postEphemeral({
 			text: 'You do not have permission to authenticate',
-			user: user_id,
-			channel: channel_id,
-			thread_ts,
-		});
-		return;
-	}
-	if (token) {
-		const [introspection, error] = await oauth.LoginWithToken(user_id, token);
-		let text = '';
-		if (error) {
-			text = `${error.error}: ${error.error_description}`;
-		}
-		if (introspection && introspection.active) {
-			text = `Logged in as ${introspection?.username}`;
-		}
-		await client.chat.postEphemeral({
-			text,
 			user: user_id,
 			channel: channel_id,
 			thread_ts,
