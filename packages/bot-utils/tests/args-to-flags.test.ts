@@ -155,5 +155,67 @@ describe('Utils', () => {
 
 			expect(result).toEqual(flags);
 		});
+
+		it('convert auth flags', () => {
+			let result = argsToFlags('auth');
+			let expectedFlags: Flags = {
+				cmd: 'auth',
+				target: '',
+				from: '',
+				limit: 1,
+				help: false,
+			};
+			expect(result).toEqual(expectedFlags);
+
+			result = argsToFlags('auth login');
+			expectedFlags = {
+				cmd: 'auth',
+				target: 'login',
+				from: '',
+				limit: 1,
+				help: false,
+			};
+			expect(result).toEqual(expectedFlags);
+
+			result = argsToFlags('auth logout');
+			expectedFlags = {
+				cmd: 'auth',
+				target: 'logout',
+				from: '',
+				limit: 1,
+				help: false,
+			};
+			expect(result).toEqual(expectedFlags);
+
+			result = argsToFlags('auth status');
+			expectedFlags = {
+				cmd: 'auth',
+				target: 'status',
+				from: '',
+				limit: 1,
+				help: false,
+			};
+			expect(result).toEqual(expectedFlags);
+
+			result = argsToFlags('help auth');
+			expectedFlags = {
+				cmd: 'auth',
+				target: '',
+				from: '',
+				limit: 1,
+				help: true,
+			};
+			expect(result).toEqual(expectedFlags);
+
+			result = argsToFlags('help auth login');
+			expectedFlags = {
+				cmd: 'auth',
+				target: 'login',
+				from: '',
+				limit: 1,
+				help: true,
+			};
+			expect(result).toEqual(expectedFlags);
+		});
 	});
 });

@@ -45,7 +45,7 @@ export class OAuthClient {
 	constructor(
 		private config: Config,
 		private logger: Logger,
-		private usersStore: UserStore,
+		private userStore: UserStore,
 		private slackClient: SlackClient
 	) {}
 
@@ -57,7 +57,7 @@ export class OAuthClient {
 	): Promise<AuthorizeResponse> {
 		const verifier = generateVerifier();
 
-		await this.usersStore.updateAuthorizeSession(userId, {
+		await this.userStore.updateAuthorizeSession(userId, {
 			verifier,
 			userId,
 			channelId,
@@ -79,7 +79,7 @@ export class OAuthClient {
 	}
 
 	async Logout(userId: string): Promise<AuthorizeError | null> {
-		const token = await this.usersStore.getToken(userId);
+		const token = await this.userStore.getToken(userId);
 		let error: AuthorizeError | null = null;
 		if (!token) {
 			return {
@@ -88,11 +88,10 @@ export class OAuthClient {
 			};
 		}
 		if (token && token.refresh_token) {
-			console.log('Revoking token');
 			error = await this.revokeToken(token.refresh_token);
 			if (!error) {
 				// Delete token
-				const e = await this.usersStore.updateToken(userId, null);
+				const e = await this.userStore.updateToken(userId, null);
 				this.logger.error(e, 'Failed to delete token', userId);
 			}
 		}
@@ -137,7 +136,7 @@ export class OAuthClient {
 
 	// NOTE: Does not handle concurrent refreshes
 	async GetToken(userId: string): Promise<AuthToken | null> {
-		const token = await this.usersStore.getToken(userId);
+		const token = await this.userStore.getToken(userId);
 		if (!token) {
 			return null;
 		}
@@ -198,7 +197,7 @@ export class OAuthClient {
 		const token = (await res.json()) as AuthToken;
 		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
 
-		await this.usersStore.updateToken(session.userId, token);
+		await this.userStore.updateToken(session.userId, token);
 
 		return null;
 	}
@@ -255,7 +254,7 @@ export class OAuthClient {
 		let installation: InstallationStore | null;
 
 		try {
-			const user = await this.usersStore.getUserForAuthorization(userId);
+			const user = await this.userStore.getUserForAuthorization(userId);
 			oldToken = user.token;
 			session = user.session;
 			installation = user.installation;
@@ -278,7 +277,7 @@ export class OAuthClient {
 
 		try {
 			// Delete session
-			await this.usersStore.updateAuthorizeSession(userId, null);
+			await this.userStore.updateAuthorizeSession(userId, null);
 		} catch (error) {
 			this.logger.error(error, '/oauth/callback failed to delete session');
 		}
@@ -380,7 +379,7 @@ export class OAuthClient {
 			const error = (await res.json()) as AuthorizeError;
 			if (error.error === AuthorizeErrorType.InvalidGrant) {
 				// Delete token
-				const e = await this.usersStore.updateToken(userId, null);
+				const e = await this.userStore.updateToken(userId, null);
 				this.logger.error(e, 'Failed to delete token', userId);
 			}
 			return [null, error];
@@ -388,7 +387,7 @@ export class OAuthClient {
 
 		const token = (await res.json()) as AuthToken;
 		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
-		await this.usersStore.updateToken(userId, token);
+		await this.userStore.updateToken(userId, token);
 
 		return [token, null];
 	}
