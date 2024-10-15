@@ -1,4 +1,8 @@
 import {
+	authHelpTexts,
+	authLoginHelpTexts,
+	authLogoutHelpTexts,
+	authStatusHelpTexts,
 	dnsHelpTexts,
 	generalHelpTexts,
 	httpHelpTexts,
@@ -138,5 +142,61 @@ ${tracerouteHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${tracerouteHelpTexts.globalFlags}
+\`\`\``;
+}
+
+export function authHelp(boldSeparator: string, rootCommand: string) {
+	return `${authHelpTexts.preamble}
+
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${authHelpTexts.usage(rootCommand)}
+\`\`\`
+
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${authHelpTexts.flags}
+\`\`\``;
+}
+
+export function authLoginHelp(boldSeparator: string, rootCommand: string) {
+	return `${authLoginHelpTexts.preamble}
+
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${authLoginHelpTexts.usage(rootCommand)}
+\`\`\`
+
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${authLoginHelpTexts.flags}
+\`\`\``;
+}
+
+export function authStatusHelp(boldSeparator: string, rootCommand: string) {
+	return `${authStatusHelpTexts.preamble}
+
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${authStatusHelpTexts.usage(rootCommand)}
+\`\`\`
+
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${authStatusHelpTexts.flags}
+\`\`\``;
+}
+
+export function authLogoutHelp(boldSeparator: string, rootCommand: string) {
+	return `${authLogoutHelpTexts.preamble}
+
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${authLogoutHelpTexts.usage(rootCommand)}
+\`\`\`
+
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${authLogoutHelpTexts.flags}
 \`\`\``;
 }

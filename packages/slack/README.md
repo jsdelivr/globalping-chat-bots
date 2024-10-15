@@ -64,8 +64,6 @@ DB_PASSWORD=
 DB_DATABASE=
 ```
 
-Note before running the app for the first time, run `pnpm run setup-db` which will generate the table `installations` for you which will be used by the Slack App.
-
 ### Development
 
 For development, you will need to install [`ngrok`](https://ngrok.com/) to proxy your local instance to a public URL that your `\globalping` command can interact with.

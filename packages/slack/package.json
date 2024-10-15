@@ -7,27 +7,26 @@
 		"start": "NODE_ENV=production tsx src/app.ts",
 		"start-pretty": "tsx src/app.ts | pino-pretty",
 		"dev": "tsx src/app.ts",
-		"watch": "tsx watch src/app.ts",
-		"setup-db": "tsx scripts/setup-db.ts"
+		"watch": "tsx watch src/app.ts"
 	},
 	"author": "Ayuhito <hello@ayuhito.com>",
 	"license": "MIT",
 	"dependencies": {
 		"@globalping/bot-utils": "workspace:*",
-		"@slack/bolt": "^3.13.1",
+		"@slack/bolt": "^3.22.0",
 		"discord-bot": "workspace:*",
 		"dotenv": "^16.0.3",
-		"knex": "^2.4.2",
+		"knex": "^2.5.1",
 		"mysql": "^2.18.1",
-		"uuid": "^9.0.0",
-		"raw-body": "^2.5.2",
 		"octokit": "^3.0.0",
+		"raw-body": "^2.5.2",
 		"remark": "^14.0.3",
-		"strip-markdown": "^5.0.1"
+		"strip-markdown": "^5.0.1",
+		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
-		"@slack/web-api": "^6.8.1",
-		"pino-pretty": "^10.0.0",
-		"@types/uuid": "^9.0.2"
+		"@slack/web-api": "^6.13.0",
+		"@types/uuid": "^9.0.2",
+		"pino-pretty": "^10.0.0"
 	}
 }

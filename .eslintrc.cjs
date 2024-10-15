@@ -9,5 +9,9 @@ module.exports = {
 	rules: {
 		'no-console': 'off',
 		'unicorn/prefer-top-level-await': 'off',
+		'unicorn/no-null': 'off',
+		'unicorn/prefer-module': 'off',
+		'unicorn/filename-case': 'off',
+		'unicorn/consistent-destructuring': 'off',
 	},
 };

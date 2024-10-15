@@ -1,3 +1,5 @@
+import { config } from '../config';
+
 export function githubHandle(): string {
-	return process.env.GITHUB_BOT_HANDLE || 'globalping';
+	return config.githubBotHandle;
 }

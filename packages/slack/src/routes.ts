@@ -1,12 +1,13 @@
 import { CustomRoute } from '@slack/bolt';
-// import { client as discord } from 'discord-bot/src/app';
+import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage';
 import * as fs from 'node:fs';
+import { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import * as database from './db';
+import { CALLBACK_PATH, oauth } from './auth';
+import { knex } from './db';
 import { githubHandler } from './github/handler';
-// import { logger } from './utils';
 
 export const routes: CustomRoute[] = [
 	{
@@ -15,12 +16,8 @@ export const routes: CustomRoute[] = [
 		handler: async (_req, res) => {
 			try {
 				// Check if db is accessible
-				await database.knex.raw('select 1+1 as result');
+				await knex.raw('select 1+1 as result');
 				// logger.debug('Database is accessible');
-
-				if (!(await database.checkTables()))
-					throw new Error('Tables not found');
-				// logger.debug('Tables are accessible');
 
 				/*	if (!discord.ws.ping)
 						throw new Error('Discord bot down.'); */
@@ -95,5 +92,13 @@ export const routes: CustomRoute[] = [
 		path: '/github-bot',
 		method: ['POST'],
 		handler: githubHandler,
+	},
+	{
+		path: CALLBACK_PATH,
+		method: ['GET'],
+		handler: (
+			req: ParamsIncomingMessage,
+			res: ServerResponse<IncomingMessage>
+		) => oauth.OnCallback(req, res),
 	},
 ];

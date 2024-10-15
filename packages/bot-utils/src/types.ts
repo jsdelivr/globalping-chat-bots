@@ -5,6 +5,7 @@ export const ALLOWED_QUERY_TYPES = [
 	'dns',
 	'mtr',
 	'http',
+	'auth',
 ] as const;
 export type QueryType = (typeof ALLOWED_QUERY_TYPES)[number];
 export const isQueryType = (type: string): type is QueryType =>
@@ -253,3 +254,11 @@ export interface PingMeasurementResponse extends SharedMeasurementResponse {
 }
 
 export type MeasurementResponse = PingMeasurementResponse;
+
+export interface AuthToken {
+	access_token: string;
+	token_type: string;
+	expires_in: number;
+	refresh_token: string;
+	expiry: number; // Unix timestamp
+}
