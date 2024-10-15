@@ -16,7 +16,7 @@ export const enum Tables {
 
 export interface AuthorizeSession {
 	verifier: string;
-	installationId?: string;
+	installationId: string;
 	channelId: string;
 	userId: string;
 	threadTs?: string;
@@ -126,9 +126,6 @@ export const installationStore = {
 			// Bolt will pass your handler an installQuery object
 			// Change the lines below so they fetch from your database
 			const id = getInstallationId(installQuery);
-			if (id === undefined) {
-				throw new Error('Failed fetching installation (no id)');
-			}
 			return await getInstallation(id);
 		} catch (error) {
 			logger.error(error);
@@ -141,9 +138,6 @@ export const installationStore = {
 			// Bolt will pass your handler  an installQuery object
 			// Change the lines below so they delete from your database
 			const id = getInstallationId(installQuery);
-			if (id === undefined) {
-				throw new Error('Failed deleting installation (no id)');
-			}
 			return await deleteInstallation(id);
 		} catch (error) {
 			logger.error(error);

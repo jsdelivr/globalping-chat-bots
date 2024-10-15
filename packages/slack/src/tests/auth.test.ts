@@ -33,20 +33,21 @@ describe('Auth', () => {
 
 	describe('Authorize', () => {
 		it('should create a session and return a valid url', async () => {
-			const userId = 'U123';
+			const userId = 'T123_U123';
 			const channelId = 'C123';
 			const threadTs = '123';
 			const installationId = 'I123';
 
-			const res = await oauth.Authorize(
-				userId,
-				channelId,
-				threadTs,
-				installationId
-			);
+			const res = await oauth.Authorize({
+				installationId,
+				user_id: userId,
+				channel_id: channelId,
+				thread_ts: threadTs,
+			});
 
+			const expecteLocalUserId = `${installationId}_${userId}`;
 			expect(userStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
-				userId,
+				expecteLocalUserId,
 				{
 					verifier: expect.any(String),
 					userId,
@@ -63,13 +64,13 @@ describe('Auth', () => {
 			expect(url.searchParams.get('code_challenge')?.length).toBe(43);
 			expect(url.searchParams.get('code_challenge_method')).toBe('S256');
 			expect(url.searchParams.get('scope')).toBe('measurements');
-			expect(url.searchParams.get('state')).toBe(userId);
+			expect(url.searchParams.get('state')).toBe(expecteLocalUserId);
 		});
 	});
 
 	describe('Logout', () => {
 		it('should remove and revoke the token', async () => {
-			const userId = 'U123';
+			const localUserId = 'T123_U123';
 			const token: AuthToken = {
 				access_token: 'tok3n',
 				refresh_token: 'refresh_tok3n',
@@ -85,10 +86,10 @@ describe('Auth', () => {
 
 			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(token);
 
-			const err = await oauth.Logout(userId);
+			const err = await oauth.Logout(localUserId);
 
-			expect(userStoreMock.getToken).toHaveBeenCalledWith(userId);
-			expect(userStoreMock.updateToken).toHaveBeenCalledWith(userId, null);
+			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
+			expect(userStoreMock.updateToken).toHaveBeenCalledWith(localUserId, null);
 			expect(fetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/revoke`,
 				{
@@ -107,7 +108,7 @@ describe('Auth', () => {
 
 	describe('Introspect', () => {
 		it('should successfully return the response', async () => {
-			const userId = 'U123';
+			const localUserId = 'T123_U123';
 
 			const token: AuthToken = {
 				access_token: 'tok3n',
@@ -129,9 +130,9 @@ describe('Auth', () => {
 
 			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(token);
 
-			const [introspection, error] = await oauth.Introspect(userId);
+			const [introspection, error] = await oauth.Introspect(localUserId);
 
-			expect(userStoreMock.getToken).toHaveBeenCalledWith(userId);
+			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
 			expect(fetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/introspect`,
 				{
@@ -152,7 +153,7 @@ describe('Auth', () => {
 	describe('GetToken', () => {
 		it('should refresh and return the token', async () => {
 			const now = new Date();
-			const userId = 'U123';
+			const localUserId = 'T123_U123';
 			const token: AuthToken = {
 				access_token: 'tok3n',
 				refresh_token: 'refresh_tok3n',
@@ -179,11 +180,11 @@ describe('Auth', () => {
 
 			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(token);
 
-			const newToken = await oauth.GetToken(userId);
+			const newToken = await oauth.GetToken(localUserId);
 
-			expect(userStoreMock.getToken).toHaveBeenCalledWith(userId);
+			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
 			expect(userStoreMock.updateToken).toHaveBeenCalledWith(
-				userId,
+				localUserId,
 				expectedToken
 			);
 
@@ -203,7 +204,7 @@ describe('Auth', () => {
 	describe('TryToRefreshToken', () => {
 		it('should refresh the token and return an error message', async () => {
 			const now = new Date();
-			const userId = 'U123';
+			const localUserId = 'T123_U123';
 			const token: AuthToken = {
 				access_token: 'tok3n',
 				refresh_token: 'refresh_tok3n',
@@ -228,10 +229,10 @@ describe('Auth', () => {
 				json: async () => expectedToken,
 			} as Response);
 
-			const errorMsg = await oauth.TryToRefreshToken(userId, token);
+			const errorMsg = await oauth.TryToRefreshToken(localUserId, token);
 
 			expect(userStoreMock.updateToken).toHaveBeenCalledWith(
-				userId,
+				localUserId,
 				expectedToken
 			);
 
@@ -257,6 +258,7 @@ describe('Auth', () => {
 			const channelId = 'C123';
 			const threadTs = '123';
 			const installationId = 'I123';
+			const localUserId = `${installationId}_${userId}`;
 
 			const now = new Date();
 
@@ -303,7 +305,7 @@ describe('Auth', () => {
 			} as Response);
 
 			const req = {
-				url: `/oauth/callback?code=${code}&state=${userId}`,
+				url: `/oauth/callback?code=${code}&state=${localUserId}`,
 			} as ParamsIncomingMessage;
 			const res = {
 				writeHead: vi.fn(),
@@ -313,15 +315,18 @@ describe('Auth', () => {
 			await oauth.OnCallback(req, res);
 
 			expect(userStoreMock.getUserForAuthorization).toHaveBeenCalledWith(
-				userId
+				localUserId
 			);
 
 			expect(userStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
-				userId,
+				localUserId,
 				null
 			);
 
-			expect(userStoreMock.updateToken).toHaveBeenCalledWith(userId, newToken);
+			expect(userStoreMock.updateToken).toHaveBeenCalledWith(
+				localUserId,
+				newToken
+			);
 
 			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
 				method: 'POST',

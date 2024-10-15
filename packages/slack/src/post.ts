@@ -12,13 +12,13 @@ import type { WebClient } from '@slack/web-api';
 
 import { AuthorizeErrorType, oauth } from './auth';
 import { measurementsChatResponse } from './response';
-import { helpCmd, logger } from './utils';
+import { getLocalUserId, helpCmd, logger } from './utils';
 
 interface ChannelPayload {
+	installationId: string;
 	channel_id: string;
 	user_id: string;
 	thread_ts?: string;
-	installationId?: string;
 }
 
 export const postAPI = async (
@@ -69,7 +69,8 @@ export const postAPI = async (
 	logger.debug(`Posting measurement: ${JSON.stringify(postMeasurements)}`);
 	let measurements: PostMeasurementResponse[];
 
-	const token = await oauth.GetToken(user_id);
+	const localUserId = getLocalUserId(payload);
+	const token = await oauth.GetToken(localUserId);
 	try {
 		measurements = await postMeasurement(postMeasurements, token || undefined);
 	} catch (error) {
@@ -80,7 +81,7 @@ export const postAPI = async (
 				error.response.statusCode === 403) &&
 			token
 		) {
-			const errMsg = await oauth.TryToRefreshToken(user_id, token);
+			const errMsg = await oauth.TryToRefreshToken(localUserId, token);
 			if (errMsg) {
 				e = new Error(errMsg);
 			}
@@ -124,17 +125,15 @@ export const postAPI = async (
 };
 
 async function authLogin(client: WebClient, payload: ChannelPayload) {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	const { channel_id, user_id, thread_ts, installationId } = payload;
-	const userInfoRes = await client.users.info({ user: user_id });
+	const userInfoRes = await client.users.info({ user: payload.user_id });
 	const { user } = userInfoRes;
 	if (!user) {
 		logger.error('Failed to get user info');
 		await client.chat.postEphemeral({
 			text: 'Failed to get user information',
-			user: user_id,
-			channel: channel_id,
-			thread_ts,
+			user: payload.user_id,
+			channel: payload.channel_id,
+			thread_ts: payload.thread_ts,
 		});
 		return;
 	}
@@ -142,18 +141,13 @@ async function authLogin(client: WebClient, payload: ChannelPayload) {
 	if (!canAuthenticate) {
 		await client.chat.postEphemeral({
 			text: 'You do not have permission to authenticate',
-			user: user_id,
-			channel: channel_id,
-			thread_ts,
+			user: payload.user_id,
+			channel: payload.channel_id,
+			thread_ts: payload.thread_ts,
 		});
 		return;
 	}
-	const res = await oauth.Authorize(
-		user_id,
-		channel_id,
-		thread_ts,
-		installationId
-	);
+	const res = await oauth.Authorize(payload);
 	await client.chat.postEphemeral({
 		blocks: [
 			{
@@ -164,16 +158,16 @@ async function authLogin(client: WebClient, payload: ChannelPayload) {
 				},
 			},
 		],
-		user: user_id,
-		channel: channel_id,
-		thread_ts,
+		user: payload.user_id,
+		channel: payload.channel_id,
+		thread_ts: payload.thread_ts,
 	});
 }
 
 async function authStatus(client: WebClient, payload: ChannelPayload) {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	const { channel_id, user_id, thread_ts } = payload;
-	const [introspection, error] = await oauth.Introspect(user_id);
+	const [introspection, error] = await oauth.Introspect(
+		getLocalUserId(payload)
+	);
 	let text = '';
 	if (error) {
 		text =
@@ -187,24 +181,22 @@ async function authStatus(client: WebClient, payload: ChannelPayload) {
 			: 'Not logged in.';
 	await client.chat.postEphemeral({
 		text,
-		user: user_id,
-		channel: channel_id,
-		thread_ts,
+		user: payload.user_id,
+		channel: payload.channel_id,
+		thread_ts: payload.thread_ts,
 	});
 }
 
 async function authLogout(client: WebClient, payload: ChannelPayload) {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	const { channel_id, user_id, thread_ts } = payload;
-	const error = await oauth.Logout(user_id);
+	const error = await oauth.Logout(getLocalUserId(payload));
 	let text = '';
 	text = error
 		? `${error.error}: ${error.error_description}`
 		: 'You are now logged out.';
 	await client.chat.postEphemeral({
 		text,
-		user: user_id,
-		channel: channel_id,
-		thread_ts,
+		user: payload.user_id,
+		channel: payload.channel_id,
+		thread_ts: payload.thread_ts,
 	});
 }

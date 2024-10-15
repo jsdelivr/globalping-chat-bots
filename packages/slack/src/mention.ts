@@ -29,7 +29,7 @@ export async function handleMention(
 	userId: string,
 	eventTs: string,
 	threadTs: string | undefined,
-	installationId: string | undefined,
+	installationId: string,
 	botUserId: string,
 	client: WebClient
 ) {

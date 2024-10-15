@@ -90,9 +90,23 @@ export const getInstallationId = (p: {
 	isEnterpriseInstall: boolean;
 	enterpriseId?: string;
 	teamId?: string;
-}): string | undefined => {
+}): string => {
 	if (p.isEnterpriseInstall && p.enterpriseId) {
 		return p.enterpriseId;
 	}
+	if (!p.teamId) {
+		throw new Error('No teamId provided');
+	}
 	return p.teamId;
+};
+
+// Slack's user id is not globally unique, so we need to use the combination of installation id and user id
+export const getLocalUserId = (p: {
+	installationId: string;
+	user_id: string;
+}): string => {
+	if (!p.user_id) {
+		throw new Error('No user_id provided');
+	}
+	return `${p.installationId}_${p.user_id}`;
 };

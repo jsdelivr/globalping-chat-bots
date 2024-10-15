@@ -6,7 +6,7 @@ import { parse } from 'node:url';
 
 import { Config } from './config';
 import { AuthorizeSession, InstallationStore, UserStore } from './db';
-import { Logger, SlackClient } from './utils';
+import { getLocalUserId, Logger, SlackClient } from './utils';
 
 export const CALLBACK_PATH = '/slack/oauth/callback';
 export const enum AuthorizeErrorType {
@@ -49,20 +49,21 @@ export class OAuthClient {
 		private slackClient: SlackClient
 	) {}
 
-	async Authorize(
-		userId: string,
-		channelId: string,
-		threadTs?: string,
-		installationId?: string
-	): Promise<AuthorizeResponse> {
+	async Authorize(opts: {
+		installationId: string;
+		channel_id: string;
+		user_id: string;
+		thread_ts?: string;
+	}): Promise<AuthorizeResponse> {
 		const verifier = generateVerifier();
 
-		await this.userStore.updateAuthorizeSession(userId, {
+		const localUserId = getLocalUserId(opts);
+		await this.userStore.updateAuthorizeSession(localUserId, {
 			verifier,
-			userId,
-			channelId,
-			threadTs,
-			installationId,
+			installationId: opts.installationId,
+			userId: opts.user_id,
+			channelId: opts.channel_id,
+			threadTs: opts.thread_ts,
 		});
 
 		const url = new URL(`${this.config.authUrl}/oauth/authorize`);
@@ -71,15 +72,15 @@ export class OAuthClient {
 		url.searchParams.append('code_challenge_method', 'S256');
 		url.searchParams.append('response_type', 'code');
 		url.searchParams.append('scope', 'measurements');
-		url.searchParams.append('state', userId);
+		url.searchParams.append('state', localUserId);
 
 		return {
 			url: url.toString(),
 		};
 	}
 
-	async Logout(userId: string): Promise<AuthorizeError | null> {
-		const token = await this.userStore.getToken(userId);
+	async Logout(localUserId: string): Promise<AuthorizeError | null> {
+		const token = await this.userStore.getToken(localUserId);
 		let error: AuthorizeError | null = null;
 		if (!token) {
 			return {
@@ -91,18 +92,17 @@ export class OAuthClient {
 			error = await this.revokeToken(token.refresh_token);
 			if (!error) {
 				// Delete token
-				const e = await this.userStore.updateToken(userId, null);
-				this.logger.error(e, 'Failed to delete token', userId);
+				await this.userStore.updateToken(localUserId, null);
 			}
 		}
 		return error;
 	}
 
 	async Introspect(
-		userId: string
+		localUserId: string
 	): Promise<[IntrospectionResponse | null, AuthorizeError | null]> {
-		const token = await this.GetToken(userId);
-		this.logger.debug({ userId, token }, 'Introspect token');
+		const token = await this.GetToken(localUserId);
+		this.logger.debug({ userId: localUserId, token }, 'Introspect token');
 		if (!token) {
 			return [
 				null,
@@ -169,14 +169,15 @@ export class OAuthClient {
 
 	async exchange(
 		code: string,
-		session: AuthorizeSession
+		verifier: string,
+		localUserId: string
 	): Promise<AuthorizeError | null> {
 		const url = new URL(`${this.config.authUrl}/oauth/token`);
 		const body = new URLSearchParams();
 		body.append('client_id', this.config.authClientId);
 		body.append('client_secret', this.config.authClientSecret);
 		body.append('code', code);
-		body.append('code_verifier', session.verifier);
+		body.append('code_verifier', verifier);
 		body.append('grant_type', 'authorization_code');
 		body.append('redirect_uri', this.config.serverHost + CALLBACK_PATH);
 		const b = body.toString();
@@ -197,7 +198,7 @@ export class OAuthClient {
 		const token = (await res.json()) as AuthToken;
 		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
 
-		await this.userStore.updateToken(session.userId, token);
+		await this.userStore.updateToken(localUserId, token);
 
 		return null;
 	}
@@ -238,9 +239,9 @@ export class OAuthClient {
 		const callbackError = query.error;
 		const errorDescription = query.error_description;
 		const code = query.code as string;
-		const userId = query.state as string;
+		const localUserId = query.state as string;
 
-		if (!userId) {
+		if (!localUserId) {
 			this.logger.error(callbackError, '/oauth/callback missing userId');
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
@@ -254,7 +255,7 @@ export class OAuthClient {
 		let installation: InstallationStore | null;
 
 		try {
-			const user = await this.userStore.getUserForAuthorization(userId);
+			const user = await this.userStore.getUserForAuthorization(localUserId);
 			oldToken = user.token;
 			session = user.session;
 			installation = user.installation;
@@ -267,7 +268,10 @@ export class OAuthClient {
 		}
 
 		if (!session) {
-			this.logger.error({ userId }, '/oauth/callback missing session');
+			this.logger.error(
+				{ userId: localUserId },
+				'/oauth/callback missing session'
+			);
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
@@ -277,7 +281,7 @@ export class OAuthClient {
 
 		try {
 			// Delete session
-			await this.userStore.updateAuthorizeSession(userId, null);
+			await this.userStore.updateAuthorizeSession(localUserId, null);
 		} catch (error) {
 			this.logger.error(error, '/oauth/callback failed to delete session');
 		}
@@ -295,7 +299,12 @@ export class OAuthClient {
 				this.logger.error(error, '/oauth/callback failed to post ephemeral');
 			}
 			this.logger.error(
-				{ error: callbackError, errorDescription, code, sessionId: userId },
+				{
+					error: callbackError,
+					errorDescription,
+					code,
+					userId: localUserId,
+				},
 				'/oauth/callback failed'
 			);
 			res.writeHead(302, {
@@ -306,7 +315,7 @@ export class OAuthClient {
 		}
 		let exchangeError: AuthorizeError | null;
 		try {
-			exchangeError = await this.exchange(code, session);
+			exchangeError = await this.exchange(code, session.verifier, localUserId);
 
 			// Revoke old token if exists
 			if (!exchangeError && oldToken && oldToken.refresh_token) {
@@ -315,7 +324,7 @@ export class OAuthClient {
 				} catch (error) {
 					this.logger.error(
 						{
-							user_id: session.userId,
+							user_id: localUserId,
 							error,
 						},
 						'/oauth/callback failed to revoke token'
@@ -355,7 +364,7 @@ export class OAuthClient {
 	}
 
 	async refreshToken(
-		userId: string,
+		localUserId: string,
 		refreshToken: string
 	): Promise<[AuthToken | null, AuthorizeError | null]> {
 		const url = new URL(`${this.config.authUrl}/oauth/token`);
@@ -379,15 +388,14 @@ export class OAuthClient {
 			const error = (await res.json()) as AuthorizeError;
 			if (error.error === AuthorizeErrorType.InvalidGrant) {
 				// Delete token
-				const e = await this.userStore.updateToken(userId, null);
-				this.logger.error(e, 'Failed to delete token', userId);
+				await this.userStore.updateToken(localUserId, null);
 			}
 			return [null, error];
 		}
 
 		const token = (await res.json()) as AuthToken;
 		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
-		await this.userStore.updateToken(userId, token);
+		await this.userStore.updateToken(localUserId, token);
 
 		return [token, null];
 	}
