@@ -2,7 +2,12 @@ import { AuthToken } from '@globalping/bot-utils';
 import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { IntrospectionResponse, OAuthClient } from '../auth';
+import {
+	AuthorizeError,
+	AuthorizeErrorType,
+	IntrospectionResponse,
+	OAuthClient,
+} from '../auth';
 import { Config } from '../config';
 import { AuthorizeSession, InstallationStore } from '../db';
 import { mockLogger, mockSlackClient, mockUserStore } from './utils';
@@ -104,6 +109,22 @@ describe('Auth', () => {
 
 			expect(err).toBeNull();
 		});
+
+		it('should return no error - no token', async () => {
+			const localUserId = 'T123_U123';
+
+			const fetchSpy = vi.spyOn(global, 'fetch');
+
+			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(null);
+
+			const err = await oauth.Logout(localUserId);
+
+			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
+			expect(userStoreMock.updateToken).toHaveBeenCalledTimes(0);
+			expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+			expect(err).toBeNull();
+		});
 	});
 
 	describe('Introspect', () => {
@@ -198,6 +219,49 @@ describe('Auth', () => {
 			});
 
 			expect(newToken).toEqual(expectedToken);
+		});
+
+		it('should return an error - token could not be refreshed', async () => {
+			const now = new Date();
+			const localUserId = 'T123_U123';
+			const token: AuthToken = {
+				access_token: 'tok3n',
+				refresh_token: 'refresh_tok3n',
+				expires_in: 3600,
+				token_type: 'Bearer',
+				expiry: now.getTime() / 1000 - 3600,
+			};
+
+			const expectedError: AuthorizeError = {
+				error: AuthorizeErrorType.InvalidGrant,
+				error_description: 'Invalid token',
+			};
+
+			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
+
+			const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+				ok: true,
+				status: 400,
+				json: async () => expectedError,
+			} as Response);
+
+			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(token);
+
+			const newToken = await oauth.GetToken(localUserId);
+
+			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
+			expect(userStoreMock.updateToken).toHaveBeenCalledTimes(0);
+
+			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'Content-Length': '100',
+				},
+				body: 'client_id=client_id&client_secret=client_secret&refresh_token=refresh_tok3n&grant_type=refresh_token',
+			});
+
+			expect(newToken).toEqual(null);
 		});
 	});
 

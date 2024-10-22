@@ -83,10 +83,7 @@ export class OAuthClient {
 		const token = await this.userStore.getToken(localUserId);
 		let error: AuthorizeError | null = null;
 		if (!token) {
-			return {
-				error: AuthorizeErrorType.NotAuthorized,
-				error_description: 'You are not authorized',
-			};
+			return null;
 		}
 		if (token && token.refresh_token) {
 			error = await this.revokeToken(token.refresh_token);
@@ -386,10 +383,6 @@ export class OAuthClient {
 
 		if (res.status !== 200) {
 			const error = (await res.json()) as AuthorizeError;
-			if (error.error === AuthorizeErrorType.InvalidGrant) {
-				// Delete token
-				await this.userStore.updateToken(localUserId, null);
-			}
 			return [null, error];
 		}
 

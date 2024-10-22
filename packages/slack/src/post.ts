@@ -125,26 +125,7 @@ export const postAPI = async (
 };
 
 async function authLogin(client: WebClient, payload: ChannelPayload) {
-	const userInfoRes = await client.users.info({ user: payload.user_id });
-	const { user } = userInfoRes;
-	if (!user) {
-		logger.error('Failed to get user info');
-		await client.chat.postEphemeral({
-			text: 'Failed to get user information',
-			user: payload.user_id,
-			channel: payload.channel_id,
-			thread_ts: payload.thread_ts,
-		});
-		return;
-	}
-	const canAuthenticate = user.is_admin || user.is_owner;
-	if (!canAuthenticate) {
-		await client.chat.postEphemeral({
-			text: 'You do not have permission to authenticate',
-			user: payload.user_id,
-			channel: payload.channel_id,
-			thread_ts: payload.thread_ts,
-		});
+	if (!(await canUseAuthCommand(client, payload))) {
 		return;
 	}
 	const res = await oauth.Authorize(payload);
@@ -165,6 +146,9 @@ async function authLogin(client: WebClient, payload: ChannelPayload) {
 }
 
 async function authStatus(client: WebClient, payload: ChannelPayload) {
+	if (!(await canUseAuthCommand(client, payload))) {
+		return;
+	}
 	const [introspection, error] = await oauth.Introspect(
 		getLocalUserId(payload)
 	);
@@ -188,6 +172,9 @@ async function authStatus(client: WebClient, payload: ChannelPayload) {
 }
 
 async function authLogout(client: WebClient, payload: ChannelPayload) {
+	if (!(await canUseAuthCommand(client, payload))) {
+		return;
+	}
 	const error = await oauth.Logout(getLocalUserId(payload));
 	let text = '';
 	text = error
@@ -199,4 +186,33 @@ async function authLogout(client: WebClient, payload: ChannelPayload) {
 		channel: payload.channel_id,
 		thread_ts: payload.thread_ts,
 	});
+}
+
+async function canUseAuthCommand(
+	client: WebClient,
+	payload: ChannelPayload
+): Promise<boolean> {
+	const userInfoRes = await client.users.info({ user: payload.user_id });
+	const { user } = userInfoRes;
+	if (!user) {
+		logger.error('Failed to get user info');
+		await client.chat.postEphemeral({
+			text: 'Failed to get user information',
+			user: payload.user_id,
+			channel: payload.channel_id,
+			thread_ts: payload.thread_ts,
+		});
+		return false;
+	}
+	const canAuthenticate = user.is_admin || user.is_owner;
+	if (!canAuthenticate) {
+		await client.chat.postEphemeral({
+			text: 'Only workspace owners or administrators can use this command.',
+			user: payload.user_id,
+			channel: payload.channel_id,
+			thread_ts: payload.thread_ts,
+		});
+		return false;
+	}
+	return true;
 }
