@@ -91,7 +91,7 @@ export const postAPI = async (
 		throw e;
 	}
 	await client.chat.postEphemeral({
-		text: '```Processing request...```',
+		text: '```Processing the request...```',
 		user: user_id,
 		channel: channel_id,
 		thread_ts,

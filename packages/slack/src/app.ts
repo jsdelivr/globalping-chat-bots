@@ -92,7 +92,7 @@ app.command(
 				'/globalping ack failed'
 			);
 			await respond({
-				text: `Unable to acknowledge request.\n${formatAPIError(err.message)}`,
+				text: `Unable to acknowledge the request.\n${formatAPIError(err.message)}`,
 			});
 		}
 
