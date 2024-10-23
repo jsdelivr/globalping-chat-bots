@@ -9,8 +9,8 @@ import {
 	OAuthClient,
 } from '../auth';
 import { Config } from '../config';
-import { AuthorizeSession, InstallationStore } from '../db';
-import { mockLogger, mockSlackClient, mockUserStore } from './utils';
+import { AuthorizeSession, Installation } from '../db';
+import { mockLogger, mockSlackClient, mockInstallationStore } from './utils';
 
 describe('Auth', () => {
 	const config: Config = {
@@ -22,13 +22,13 @@ describe('Auth', () => {
 	} as Config;
 
 	const loggerMock = mockLogger();
-	const userStoreMock = mockUserStore();
+	const installationStoreMock = mockInstallationStore();
 	const slackClientMock = mockSlackClient();
 
 	const oauth: OAuthClient = new OAuthClient(
 		config,
 		loggerMock,
-		userStoreMock,
+		installationStoreMock,
 		slackClientMock
 	);
 
@@ -38,27 +38,25 @@ describe('Auth', () => {
 
 	describe('Authorize', () => {
 		it('should create a session and return a valid url', async () => {
-			const userId = 'T123_U123';
+			const userId = 'U123';
 			const channelId = 'C123';
 			const threadTs = '123';
 			const installationId = 'I123';
 
 			const res = await oauth.Authorize({
-				installationId,
+				installationId: installationId,
 				user_id: userId,
 				channel_id: channelId,
 				thread_ts: threadTs,
 			});
 
-			const expecteLocalUserId = `${installationId}_${userId}`;
-			expect(userStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
-				expecteLocalUserId,
+			expect(installationStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
+				installationId,
 				{
 					verifier: expect.any(String),
 					userId,
 					channelId,
 					threadTs,
-					installationId,
 				}
 			);
 
@@ -69,13 +67,13 @@ describe('Auth', () => {
 			expect(url.searchParams.get('code_challenge')?.length).toBe(43);
 			expect(url.searchParams.get('code_challenge_method')).toBe('S256');
 			expect(url.searchParams.get('scope')).toBe('measurements');
-			expect(url.searchParams.get('state')).toBe(expecteLocalUserId);
+			expect(url.searchParams.get('state')).toBe(installationId);
 		});
 	});
 
 	describe('Logout', () => {
 		it('should remove and revoke the token', async () => {
-			const localUserId = 'T123_U123';
+			const installationId = 'I123';
 			const token: AuthToken = {
 				access_token: 'tok3n',
 				refresh_token: 'refresh_tok3n',
@@ -89,12 +87,17 @@ describe('Auth', () => {
 				status: 200,
 			} as Response);
 
-			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
 
-			const err = await oauth.Logout(localUserId);
+			const err = await oauth.Logout(installationId);
 
-			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
-			expect(userStoreMock.updateToken).toHaveBeenCalledWith(localUserId, null);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
+				installationId
+			);
+			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
+				installationId,
+				null
+			);
 			expect(fetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/revoke`,
 				{
@@ -111,16 +114,18 @@ describe('Auth', () => {
 		});
 
 		it('should return no error - no token', async () => {
-			const localUserId = 'T123_U123';
+			const insallationId = 'I123';
 
 			const fetchSpy = vi.spyOn(global, 'fetch');
 
-			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(null);
+			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(null);
 
-			const err = await oauth.Logout(localUserId);
+			const err = await oauth.Logout(insallationId);
 
-			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
-			expect(userStoreMock.updateToken).toHaveBeenCalledTimes(0);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
+				insallationId
+			);
+			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
 			expect(fetchSpy).toHaveBeenCalledTimes(0);
 
 			expect(err).toBeNull();
@@ -129,7 +134,7 @@ describe('Auth', () => {
 
 	describe('Introspect', () => {
 		it('should successfully return the response', async () => {
-			const localUserId = 'T123_U123';
+			const installationId = 'I123';
 
 			const token: AuthToken = {
 				access_token: 'tok3n',
@@ -149,11 +154,13 @@ describe('Auth', () => {
 				json: async () => expectedIntrospection,
 			} as Response);
 
-			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
 
-			const [introspection, error] = await oauth.Introspect(localUserId);
+			const [introspection, error] = await oauth.Introspect(installationId);
 
-			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
+				installationId
+			);
 			expect(fetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/introspect`,
 				{
@@ -174,7 +181,7 @@ describe('Auth', () => {
 	describe('GetToken', () => {
 		it('should refresh and return the token', async () => {
 			const now = new Date();
-			const localUserId = 'T123_U123';
+			const installationId = 'I123';
 			const token: AuthToken = {
 				access_token: 'tok3n',
 				refresh_token: 'refresh_tok3n',
@@ -199,13 +206,15 @@ describe('Auth', () => {
 				json: async () => expectedToken,
 			} as Response);
 
-			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
 
-			const newToken = await oauth.GetToken(localUserId);
+			const newToken = await oauth.GetToken(installationId);
 
-			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
-			expect(userStoreMock.updateToken).toHaveBeenCalledWith(
-				localUserId,
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
+				installationId
+			);
+			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
+				installationId,
 				expectedToken
 			);
 
@@ -223,7 +232,7 @@ describe('Auth', () => {
 
 		it('should return an error - token could not be refreshed', async () => {
 			const now = new Date();
-			const localUserId = 'T123_U123';
+			const installationId = 'I123';
 			const token: AuthToken = {
 				access_token: 'tok3n',
 				refresh_token: 'refresh_tok3n',
@@ -245,12 +254,14 @@ describe('Auth', () => {
 				json: async () => expectedError,
 			} as Response);
 
-			vi.spyOn(userStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
 
-			const newToken = await oauth.GetToken(localUserId);
+			const newToken = await oauth.GetToken(installationId);
 
-			expect(userStoreMock.getToken).toHaveBeenCalledWith(localUserId);
-			expect(userStoreMock.updateToken).toHaveBeenCalledTimes(0);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
+				installationId
+			);
+			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
 
 			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
 				method: 'POST',
@@ -268,7 +279,7 @@ describe('Auth', () => {
 	describe('TryToRefreshToken', () => {
 		it('should refresh the token and return an error message', async () => {
 			const now = new Date();
-			const localUserId = 'T123_U123';
+			const installationId = 'I123';
 			const token: AuthToken = {
 				access_token: 'tok3n',
 				refresh_token: 'refresh_tok3n',
@@ -293,10 +304,10 @@ describe('Auth', () => {
 				json: async () => expectedToken,
 			} as Response);
 
-			const errorMsg = await oauth.TryToRefreshToken(localUserId, token);
+			const errorMsg = await oauth.TryToRefreshToken(installationId, token);
 
-			expect(userStoreMock.updateToken).toHaveBeenCalledWith(
-				localUserId,
+			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
+				installationId,
 				expectedToken
 			);
 
@@ -322,7 +333,6 @@ describe('Auth', () => {
 			const channelId = 'C123';
 			const threadTs = '123';
 			const installationId = 'I123';
-			const localUserId = `${installationId}_${userId}`;
 
 			const now = new Date();
 
@@ -339,12 +349,11 @@ describe('Auth', () => {
 				userId,
 				channelId,
 				threadTs,
-				installationId,
 			};
 
 			const installation = {
 				bot: { token: 'installation_token' },
-			} as InstallationStore;
+			} as Installation;
 
 			const newToken: AuthToken = {
 				access_token: 'new_tok3n',
@@ -356,7 +365,10 @@ describe('Auth', () => {
 
 			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
 
-			vi.spyOn(userStoreMock, 'getUserForAuthorization').mockResolvedValue({
+			vi.spyOn(
+				installationStoreMock,
+				'getInstallationForAuthorization'
+			).mockResolvedValue({
 				token,
 				session: authorizeSession,
 				installation,
@@ -369,7 +381,7 @@ describe('Auth', () => {
 			} as Response);
 
 			const req = {
-				url: `/oauth/callback?code=${code}&state=${localUserId}`,
+				url: `/oauth/callback?code=${code}&state=${installationId}`,
 			} as ParamsIncomingMessage;
 			const res = {
 				writeHead: vi.fn(),
@@ -378,17 +390,17 @@ describe('Auth', () => {
 
 			await oauth.OnCallback(req, res);
 
-			expect(userStoreMock.getUserForAuthorization).toHaveBeenCalledWith(
-				localUserId
-			);
+			expect(
+				installationStoreMock.getInstallationForAuthorization
+			).toHaveBeenCalledWith(installationId);
 
-			expect(userStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
-				localUserId,
+			expect(installationStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
+				installationId,
 				null
 			);
 
-			expect(userStoreMock.updateToken).toHaveBeenCalledWith(
-				localUserId,
+			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
+				installationId,
 				newToken
 			);
 

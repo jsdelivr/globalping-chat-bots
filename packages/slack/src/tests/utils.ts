@@ -1,23 +1,26 @@
 import { vi } from 'vitest';
 
-import { UserStore } from '../db';
 import { Logger, SlackClient } from '../utils';
+import { InstallationStore } from '../db';
 
-export const mockLogger = (): Logger => ({
+export const mockLogger = (): Logger =>
+	({
 		info: vi.fn(),
 		error: vi.fn(),
 		debug: vi.fn(),
 	} as any);
 
-export const mockSlackClient = (): SlackClient => ({
+export const mockSlackClient = (): SlackClient =>
+	({
 		chat: {
 			postEphemeral: vi.fn(),
 		},
 	} as any);
 
-export const mockUserStore = (): UserStore => ({
-		updateToken: vi.fn(),
+export const mockInstallationStore = (): InstallationStore =>
+	({
 		getToken: vi.fn(),
+		updateToken: vi.fn(),
 		updateAuthorizeSession: vi.fn(),
-		getUserForAuthorization: vi.fn(),
+		getInstallationForAuthorization: vi.fn(),
 	} as any);

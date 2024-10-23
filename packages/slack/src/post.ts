@@ -12,7 +12,7 @@ import type { WebClient } from '@slack/web-api';
 
 import { AuthorizeErrorType, oauth } from './auth';
 import { measurementsChatResponse } from './response';
-import { getLocalUserId, helpCmd, logger } from './utils';
+import { helpCmd, logger } from './utils';
 
 interface ChannelPayload {
 	installationId: string;
@@ -69,8 +69,7 @@ export const postAPI = async (
 	logger.debug(`Posting measurement: ${JSON.stringify(postMeasurements)}`);
 	let measurements: PostMeasurementResponse[];
 
-	const localUserId = getLocalUserId(payload);
-	const token = await oauth.GetToken(localUserId);
+	const token = await oauth.GetToken(payload.installationId);
 	try {
 		measurements = await postMeasurement(postMeasurements, token || undefined);
 	} catch (error) {
@@ -81,7 +80,10 @@ export const postAPI = async (
 				error.response.statusCode === 403) &&
 			token
 		) {
-			const errMsg = await oauth.TryToRefreshToken(localUserId, token);
+			const errMsg = await oauth.TryToRefreshToken(
+				payload.installationId,
+				token
+			);
 			if (errMsg) {
 				e = new Error(errMsg);
 			}
@@ -149,9 +151,7 @@ async function authStatus(client: WebClient, payload: ChannelPayload) {
 	if (!(await canUseAuthCommand(client, payload))) {
 		return;
 	}
-	const [introspection, error] = await oauth.Introspect(
-		getLocalUserId(payload)
-	);
+	const [introspection, error] = await oauth.Introspect(payload.installationId);
 	let text = '';
 	if (error) {
 		text =
@@ -175,7 +175,7 @@ async function authLogout(client: WebClient, payload: ChannelPayload) {
 	if (!(await canUseAuthCommand(client, payload))) {
 		return;
 	}
-	const error = await oauth.Logout(getLocalUserId(payload));
+	const error = await oauth.Logout(payload.installationId);
 	let text = '';
 	text = error
 		? `${error.error}: ${error.error_description}`
