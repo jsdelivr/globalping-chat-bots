@@ -5,7 +5,7 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { parse } from 'node:url';
 
 import { Config } from './config';
-import { AuthorizeSession, InstallationStore, Installation } from './db';
+import { AuthorizeSession, Installation, InstallationStore } from './db';
 import { Logger, SlackClient } from './utils';
 
 export const CALLBACK_PATH = '/slack/oauth/callback';
@@ -251,12 +251,13 @@ export class OAuthClient {
 		let installation: Installation | null;
 
 		try {
-			const res = await this.installationStore.getInstallationForAuthorization(
-				installationId
-			);
-			oldToken = res.token;
-			session = res.session;
-			installation = res.installation;
+			const installationRes =
+				await this.installationStore.getInstallationForAuthorization(
+					installationId
+				);
+			oldToken = installationRes.token;
+			session = installationRes.session;
+			installation = installationRes.installation;
 		} catch {
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,

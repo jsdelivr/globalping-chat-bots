@@ -53,7 +53,7 @@ export const knex = knexInstance({
 
 export const installationStore = {
 	storeInstallation: async (installation: Installation) => {
-		logger.debug({ installation }, `Storing installation`);
+		logger.debug({ installation }, 'Storing installation');
 		try {
 			// Bolt will pass your handler an installation object
 			// Change the lines below so they save to your database
@@ -76,7 +76,7 @@ export const installationStore = {
 				.insert({ id, installation })
 				.onConflict('id')
 				.merge();
-			logger.debug({ id }, `Installation set`);
+			logger.debug({ id }, 'Installation set');
 		} catch (error) {
 			const err = new Error(`Failed to set installation: ${error}`);
 			logger.error(err);
@@ -84,7 +84,7 @@ export const installationStore = {
 		}
 	},
 	fetchInstallation: async (installQuery: InstallationQuery<boolean>) => {
-		logger.debug({ installQuery }, `Fetching installation`);
+		logger.debug({ installQuery }, 'Fetching installation');
 		try {
 			// Bolt will pass your handler an installQuery object
 			// Change the lines below so they fetch from your database
@@ -99,7 +99,7 @@ export const installationStore = {
 			}
 			logger.debug(
 				{ installation: res.installation },
-				`Installation retrieved`
+				'Installation retrieved'
 			);
 			return JSON.parse(res.installation as unknown as string);
 		} catch (error) {
@@ -109,13 +109,13 @@ export const installationStore = {
 		}
 	},
 	deleteInstallation: async (installQuery: InstallationQuery<boolean>) => {
-		logger.debug({ installQuery }, `Deleting installation`);
+		logger.debug({ installQuery }, 'Deleting installation');
 		try {
 			// Bolt will pass your handler  an installQuery object
 			// Change the lines below so they delete from your database
 			const id = getInstallationId(installQuery);
 			await knex.table(Tables.Installations).where('id', id).del();
-			logger.debug({ id }, `Installation deleted`);
+			logger.debug({ id }, 'Installation deleted');
 		} catch (error) {
 			const err = new Error(`Failed to delete installation: ${error}`);
 			logger.error(err);
@@ -150,7 +150,7 @@ export const installationStore = {
 				.update({
 					token: token ? (JSON.stringify(token) as any) : null,
 				});
-			logger.debug({ id }, `Token set`);
+			logger.debug({ id }, 'Token set');
 		} catch (error) {
 			const err = new Error(`Failed to set token: ${error}`);
 			logger.error(err);
@@ -191,7 +191,7 @@ export const installationStore = {
 				};
 			}
 			// Note: When upgrading the MySQL version, the JSON.parse() call may not be needed
-			let installation = res.installation
+			const installation = res.installation
 				? JSON.parse(res.installation as unknown as string)
 				: null;
 			const token = res.token

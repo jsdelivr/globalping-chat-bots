@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
-import { Logger, SlackClient } from '../utils';
 import { InstallationStore } from '../db';
+import { Logger, SlackClient } from '../utils';
 
 export const mockLogger = (): Logger =>
 	({

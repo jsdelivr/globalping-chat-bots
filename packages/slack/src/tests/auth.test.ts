@@ -10,7 +10,7 @@ import {
 } from '../auth';
 import { Config } from '../config';
 import { AuthorizeSession, Installation } from '../db';
-import { mockLogger, mockSlackClient, mockInstallationStore } from './utils';
+import { mockInstallationStore,mockLogger, mockSlackClient } from './utils';
 
 describe('Auth', () => {
 	const config: Config = {
@@ -44,7 +44,7 @@ describe('Auth', () => {
 			const installationId = 'I123';
 
 			const res = await oauth.Authorize({
-				installationId: installationId,
+				installationId,
 				user_id: userId,
 				channel_id: channelId,
 				thread_ts: threadTs,
