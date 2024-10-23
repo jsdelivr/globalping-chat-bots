@@ -4,47 +4,24 @@ import {
 	formatAPIError,
 	getAPIErrorMessage,
 } from '@globalping/bot-utils';
-import { App, GenericMessageEvent, LogLevel } from '@slack/bolt';
-import * as dotenv from 'dotenv';
+import { App, AppOptions, GenericMessageEvent, LogLevel } from '@slack/bolt';
 
-import * as database from './db';
+import { initOAuthClient } from './auth';
+import { config } from './config';
+import { installationStore, knex } from './db';
 import { handleMention } from './mention';
+import { postAPI } from './post';
 import { routes } from './routes';
-import { channelWelcome, logger, postAPI } from './utils';
+import { channelWelcome, getInstallationId, logger } from './utils';
 import { handleAppHomeMessagesOpened } from './welcome';
 
-dotenv.config();
-
-if (
-	!process.env.SLACK_SIGNING_SECRET ||
-	!process.env.SLACK_CLIENT_ID ||
-	!process.env.SLACK_CLIENT_SECRET ||
-	!process.env.SLACK_STATE_SECRET
-)
-	throw new Error(
-		'SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production'
-	);
-
-if (
-	!process.env.DB_HOST ||
-	!process.env.DB_PORT ||
-	!process.env.DB_USER ||
-	!process.env.DB_PASSWORD ||
-	!process.env.DB_DATABASE
-)
-	throw new Error(
-		'DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production'
-	);
-
-// We run a discord instance in the slack express receiver
-// if (!process.env.DISCORD_TOKEN && !process.env.DISCORD_APP_ID)
-//	throw new Error('DISCORD_TOKEN and DISCORD_APP_ID environment variable must be set for production.');
-
-const baseAppConfig = {
-	signingSecret: process.env.SLACK_SIGNING_SECRET,
-	clientId: process.env.SLACK_CLIENT_ID,
-	clientSecret: process.env.SLACK_CLIENT_SECRET,
-	stateSecret: process.env.SLACK_STATE_SECRET,
+const baseAppConfig: AppOptions = {
+	signingSecret: config.slackSigningSecret,
+	clientId: config.slackClientId,
+	clientSecret: config.slackClientSecret,
+	stateSecret: config.slackStateSecret,
+	socketMode: config.slackSocketMode,
+	appToken: config.slackAppToken,
 	scopes: [
 		'chat:write',
 		'chat:write.public',
@@ -78,123 +55,129 @@ const baseAppConfig = {
 		getLevel: () => logger.level as LogLevel,
 		setName: () => {},
 	},
-	installationStore: database.installationStore,
+	installationStore,
 	installerOptions: {
 		directInstall: true,
 	},
 	customRoutes: routes,
 };
 
-let app: App;
-if (process.env.NODE_ENV === 'production') {
-	app = new App(baseAppConfig);
-} else {
+const app: App = new App(baseAppConfig);
+if (config.env !== 'production') {
 	baseAppConfig.logLevel = LogLevel.DEBUG;
-	app = new App(baseAppConfig);
 }
 
-app.command('/globalping', async ({ payload, ack, client, respond }) => {
-	const logData = {
-		commandText: payload.text,
-		teamDomain: payload.team_domain,
-		channelName: payload.channel_name,
-		userName: payload.user_name,
-		triggerId: payload.trigger_id,
-	};
-	logger.info(logData, '/globalping request');
+initOAuthClient(config, logger, installationStore, app.client);
 
-	try {
-		logger.info(logData, '/globalping ack');
-		// Acknowledge command request
-		await ack();
-	} catch (error) {
-		const err = error as Error;
-		logger.info(
-			{ errorMsg: err.message, ...logData },
-			'/globalping ack failed'
-		);
-		await respond({
-			text: `Unable to acknowledge request.\n${formatAPIError(err.message)}`,
-		});
-	}
+app.command(
+	'/globalping',
+	async ({ payload, ack, client, respond, context }) => {
+		const logData = {
+			commandText: payload.text,
+			teamDomain: payload.team_domain,
+			channelName: payload.channel_name,
+			userName: payload.user_name,
+			triggerId: payload.trigger_id,
+		};
+		logger.info(logData, '/globalping request');
 
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	const { channel_id, user_id, channel_name, text: commandText } = payload;
+		try {
+			logger.info(logData, '/globalping ack');
+			// Acknowledge command request
+			await ack();
+		} catch (error) {
+			const err = error as Error;
+			logger.info(
+				{ errorMsg: err.message, ...logData },
+				'/globalping ack failed'
+			);
+			await respond({
+				text: `Unable to acknowledge the request.\n${formatAPIError(err.message)}`,
+			});
+		}
 
-	let channelConversationsInfo;
-	// Check if channel is accessible just to be sure
-	try {
-		channelConversationsInfo = await client.conversations.info({
-			channel: channel_id,
-		});
-	} catch (error) {
-		const err = error as Error;
-		logger.info(
-			{ errorMsg: err.message, ...logData },
-			'/globalping channel info not available'
-		);
-	}
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		const { channel_id, user_id, channel_name, text: commandText } = payload;
 
-	try {
-		// If channel is not accessible, respond with errors
-		if (!channelConversationsInfo) {
-			// This is a user DM
-			if (channel_name === 'directmessage' || channel_id.startsWith('D')) {
-				logger.debug('Channel is a DM');
-				const conversation = await client.conversations.open({
-					users: user_id,
-				});
-				logger.debug(`Open conversation: ${JSON.stringify(conversation)}`);
+		let channelConversationsInfo;
+		// Check if channel is accessible just to be sure
+		try {
+			channelConversationsInfo = await client.conversations.info({
+				channel: channel_id,
+			});
+		} catch (error) {
+			const err = error as Error;
+			logger.info(
+				{ errorMsg: err.message, ...logData },
+				'/globalping channel info not available'
+			);
+		}
 
-				// If the DM is not the Globalping DM, we cancel the request
-				if (
-					conversation.channel?.id &&
-					channel_id !== conversation.channel.id
-				) {
+		try {
+			// If channel is not accessible, respond with errors
+			if (!channelConversationsInfo) {
+				// This is a user DM
+				if (channel_name === 'directmessage' || channel_id.startsWith('D')) {
+					logger.debug('Channel is a DM');
+					const conversation = await client.conversations.open({
+						users: user_id,
+					});
+					logger.debug(`Open conversation: ${JSON.stringify(conversation)}`);
+
+					// If the DM is not the Globalping DM, we cancel the request
+					if (
+						conversation.channel?.id &&
+						channel_id !== conversation.channel.id
+					) {
+						logger.error(
+							{ errorMsg: 'request in dm', ...logData },
+							'/globalping response - dm'
+						);
+						await respond({
+							text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
+						});
+					} else {
+						throw new Error('Unable to open a DM with the Globalping App.');
+					}
+				} else if (channel_name.startsWith('mpdm-')) {
 					logger.error(
-						{ errorMsg: 'request in dm', ...logData },
-						'/globalping response - dm'
+						{ errorMsg: 'request in mpdm', ...logData },
+						'/globalping response - mpdm'
 					);
 					await respond({
 						text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
 					});
 				} else {
-					throw new Error('Unable to open a DM with the Globalping App.');
+					// If not DM, try checking the properties of the channel
+					logger.error(
+						{ errorMsg: 'asked for invite to channel', ...logData },
+						'/globalping response - channel invite needed'
+					);
+					await respond(
+						'Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.'
+					);
 				}
-			} else if (channel_name.startsWith('mpdm-')) {
-				logger.error(
-					{ errorMsg: 'request in mpdm', ...logData },
-					'/globalping response - mpdm'
-				);
-				await respond({
-					text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
-				});
 			} else {
-				// If not DM, try checking the properties of the channel
-				logger.error(
-					{ errorMsg: 'asked for invite to channel', ...logData },
-					'/globalping response - channel invite needed'
-				);
-				await respond(
-					'Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.'
-				);
+				const channelPayload = {
+					channel_id,
+					user_id,
+					installationId: getInstallationId(context),
+				};
+				logger.info(logData, '/globalping processing starting');
+				await postAPI(client, channelPayload, commandText);
+				logger.info(logData, '/globalping response - OK');
 			}
-		} else {
-			const channelPayload = { channel_id, user_id };
-			logger.info(logData, '/globalping processing starting');
-			await postAPI(client, channelPayload, commandText);
-			logger.info(logData, '/globalping response - OK');
+		} catch (error) {
+			const errorMsg = getAPIErrorMessage(error);
+			logger.error({ errorMsg, ...logData }, '/globalping failed');
+			await respond({
+				text: `Failed to process command \`${commandText}\`.\n${formatAPIError(
+					errorMsg
+				)}`,
+			});
 		}
-	} catch (error) {
-		const errorMsg = getAPIErrorMessage(error);
-		logger.error({ errorMsg, ...logData }, '/globalping failed');
-		await respond({
-			text: `Failed to process command \`${commandText}\`.\n${formatAPIError(
-				errorMsg
-			)}`,
-		});
 	}
-});
+);
 
 app.event('app_home_opened', async ({ context, event, say, client }) => {
 	if (event.tab === 'messages') {
@@ -216,7 +199,7 @@ app.event('app_home_opened', async ({ context, event, say, client }) => {
 // Needed until this is resolved - https://github.com/slackapi/bolt-js/issues/1203
 app.event('app_uninstalled', async ({ context }) => {
 	// @ts-ignore - They are pretty much the same type
-	await database.installationStore.deleteInstallation(context);
+	await installationStore.deleteInstallation(context);
 });
 
 app.event('member_joined_channel', async ({ event, context, say }) => {
@@ -241,6 +224,7 @@ app.event('app_mention', async ({ payload, event, context, client }) => {
 	const channelId = event.channel;
 	const threadTs = event.thread_ts;
 	let userId = event.user;
+	const installationId = getInstallationId(context);
 
 	if (userId === undefined) {
 		userId = '';
@@ -253,6 +237,7 @@ app.event('app_mention', async ({ payload, event, context, client }) => {
 		userId,
 		eventTs,
 		threadTs,
+		installationId,
 		botUserId,
 		client
 	);
@@ -276,6 +261,7 @@ app.event('message', async ({ payload, event, context, client }) => {
 	const channelId = event.channel;
 	const threadTs = messageEvent.thread_ts;
 	let userId = messageEvent.user;
+	const installationId = getInstallationId(context);
 
 	if (userId === undefined) {
 		userId = '';
@@ -291,6 +277,7 @@ app.event('message', async ({ payload, event, context, client }) => {
 		userId,
 		eventTs,
 		threadTs,
+		installationId,
 		botUserId,
 		client
 	);
@@ -298,15 +285,13 @@ app.event('message', async ({ payload, event, context, client }) => {
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 (async () => {
-	// Moved here due to top-level await restrictions
-	if (process.env.NODE_ENV === 'production' && !(await database.checkTables()))
-		throw new Error(
-			'"installations" table does not exist in database! Run "pnpm run setup-db" to create the necessary table.'
-		);
+	logger.info('Running migrations');
+	await knex.migrate.latest();
+	logger.info('Migrations complete');
 
 	// Start your app
-	await app.start(Number(process.env.PORT) || 3000);
-	if (process.env.NODE_ENV === 'production') {
+	await app.start(config.port);
+	if (config.env === 'production') {
 		logger.info('Slack bot is online [PRODUCTION]');
 	} else {
 		logger.info('⚡️ Bolt app is running! [DEVELOPMENT]');

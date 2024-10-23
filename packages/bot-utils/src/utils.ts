@@ -18,18 +18,6 @@ export const throwOptError = (
 	);
 };
 
-interface Help {
-	[key: string]: {
-		preamble?: string;
-		usage(rootCommand: string): string;
-		args?: string;
-		options?: string;
-		examples?: string;
-		end?: string;
-		endDiscord?: string;
-	};
-}
-
 export const generalHelpTexts = {
 	preamble: `Globalping is a platform that allows anyone to run networking commands such as ping, traceroute, dig and mtr on probes distributed all around the world.
 The Globalping bot allows you to interact with the API in a simple and human-friendly way to debug networking issues like anycast routing and script automated tests and benchmarks.`,
@@ -39,7 +27,8 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
   mtr           Run an MTR test, similar to traceroute
   ping          Run a ping test
   traceroute    Run a traceroute test`,
-	additionalCommands: '  help          Help about any command',
+	additionalCommands: `  auth          Authenticate with the Globalping API
+  help          Help about any command`,
 	flags: `  -F, --from string   Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
   -h, --help          help for globalping
       --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
@@ -263,11 +252,31 @@ traceroute jsdelivr.com from Paris --port 453
       --share             Prints a link at the end the results, allowing to vizualize the results online (default false)`,
 };
 
-export const help: Help = {
-	help: generalHelpTexts,
-	dns: dnsHelpTexts,
-	http: httpHelpTexts,
-	mtr: mtrHelpTexts,
-	ping: pingHelpTexts,
-	traceroute: tracerouteHelpTexts,
+export const authHelpTexts = {
+	preamble: `Authenticate with the Globalping API for higher measurements limits.
+
+Available Commands:
+  login       Log in to your Globalping account
+  logout      Log out from your Globalping account
+  status      Check the current authentication status`,
+	usage: (rootCommand: string) => `${rootCommand} auth [command]`,
+	flags: '  -h, --help   Help for auth',
+};
+
+export const authLoginHelpTexts = {
+	preamble: 'Log in to your Globalping account for higher measurements limits.',
+	usage: (rootCommand: string) => `${rootCommand} auth login  [flags]`,
+	flags: '  -h, --help         Help for login',
+};
+
+export const authStatusHelpTexts = {
+	preamble: 'Check the current authentication status.',
+	usage: (rootCommand: string) => `${rootCommand} auth status`,
+	flags: '  -h, --help   Help for status',
+};
+
+export const authLogoutHelpTexts = {
+	preamble: 'Log out from your Globalping account.',
+	usage: (rootCommand: string) => `${rootCommand} auth logout`,
+	flags: '  -h, --help   Help for logout',
 };

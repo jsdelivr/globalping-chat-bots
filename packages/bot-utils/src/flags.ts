@@ -94,6 +94,12 @@ export interface Flags {
 	share?: boolean;
 }
 
+export const enum AuthSubcommand {
+	Login = 'login',
+	Logout = 'logout',
+	Status = 'status',
+}
+
 const checkFlags = (cmd: string, args: Record<string, string>): void => {
 	const skipFlags = new Set(['--', '_', 'help']);
 	const flags = Object.keys(args).filter((item) => !skipFlags.has(item));
@@ -222,6 +228,20 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	const argsForTargetQueryParser = parsed._.slice(1)
 		.map((arg) => arg.toString())
 		.filter((arg) => arg !== '');
+
+	if (cmd === 'auth' || argsForTargetQueryParser[0] === 'auth') {
+		const target =
+			argsForTargetQueryParser[0] === 'auth'
+				? argsForTargetQueryParser[1] || ''
+				: argsForTargetQueryParser[0] || '';
+		return {
+			cmd: 'auth',
+			help: !!parsed.help,
+			target,
+			from: '',
+			limit: 1,
+		};
+	}
 
 	const targetQuery = parseTargetQuery(cmd, argsForTargetQueryParser);
 	let { target, from, resolver } = targetQuery;

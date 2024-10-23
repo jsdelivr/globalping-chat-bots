@@ -1,9 +1,11 @@
 import { Octokit } from 'octokit';
 
+import { config } from '../config';
+
 let octokit: Octokit;
 
 function initClient() {
-	octokit = new Octokit({ auth: process.env.GITHUB_PERSONAL_ACCESS_TOKEN });
+	octokit = new Octokit({ auth: config.githubPersonalAccessToken });
 }
 
 export function getGithubClient(): Octokit {

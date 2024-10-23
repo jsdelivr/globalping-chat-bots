@@ -1,23 +1,32 @@
 import got, { HTTPError } from 'got';
 
 import { PostError } from './errors';
-import type { PostMeasurement, PostMeasurementResponse } from './types';
+import type {
+	AuthToken,
+	PostMeasurement,
+	PostMeasurementResponse,
+} from './types';
 import { userAgent } from './user-agent';
 
 export const postMeasurement = async (
-	optsArr: PostMeasurement[]
+	optsArr: PostMeasurement[],
+	token?: AuthToken
 ): Promise<PostMeasurementResponse[]> => {
 	let index = 0;
 	try {
 		const measurementArr: PostMeasurementResponse[] = [];
+		const headers: { [key: string]: string } = {
+			'Content-Type': 'application/json',
+			'User-Agent': userAgent(),
+			'Accept-Encoding': 'br',
+		};
+		if (token) {
+			headers.Authorization = `Bearer ${token.access_token}`;
+		}
 		for (const opts of optsArr) {
 			// eslint-disable-next-line no-await-in-loop
 			const res = await got.post('https://api.globalping.io/v1/measurements', {
-				headers: {
-					'Content-Type': 'application/json',
-					'User-Agent': userAgent(),
-					'Accept-Encoding': 'br',
-				},
+				headers,
 				json: opts,
 			});
 

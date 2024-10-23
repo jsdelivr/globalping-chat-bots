@@ -1,7 +1,8 @@
 import { formatAPIError, getAPIErrorMessage } from '@globalping/bot-utils';
 import { WebClient } from '@slack/web-api';
 
-import { logger, postAPI } from './utils';
+import { postAPI } from './post';
+import { logger } from './utils';
 
 export function parseCommandfromMention(
 	text: string,
@@ -28,6 +29,7 @@ export async function handleMention(
 	userId: string,
 	eventTs: string,
 	threadTs: string | undefined,
+	installationId: string,
 	botUserId: string,
 	client: WebClient
 ) {
@@ -42,6 +44,7 @@ export async function handleMention(
 			channel_id: channelId,
 			user_id: userId,
 			thread_ts: threadTs,
+			installationId,
 		};
 		logger.info({ commandText, ...logData }, '@globalping processing starting');
 		await postAPI(client, channelPayload, commandText);
