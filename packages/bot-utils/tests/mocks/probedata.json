@@ -18,7 +18,10 @@
 					"longitude": -74.006,
 					"latitude": 40.7143,
 					"network": "ColoCrossing",
-					"resolvers": ["8.8.8.8", "8.8.4.4"]
+					"resolvers": [
+						"8.8.8.8",
+						"8.8.4.4"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.3",
@@ -54,7 +57,9 @@
 					"longitude": 117.1767,
 					"latitude": 39.1422,
 					"network": "Shenzhen Tencent Computer Systems Company Limited",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.253",
@@ -80,7 +85,9 @@
 					"longitude": 121.4581,
 					"latitude": 31.2222,
 					"network": "Shenzhen Tencent Computer Systems Company Limited",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.3",
@@ -106,7 +113,9 @@
 					"longitude": 121.4581,
 					"latitude": 31.2222,
 					"network": "Shenzhen Tencent Computer Systems Company Limited",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.253",
@@ -142,7 +151,9 @@
 					"longitude": 139.6917,
 					"latitude": 35.6895,
 					"network": "Microsoft Corporation",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.253",
@@ -227,7 +238,10 @@
 					"longitude": -78.8784,
 					"latitude": 42.8865,
 					"network": "B2 Net Solutions Inc.",
-					"resolvers": ["8.8.8.8", "8.8.4.4"]
+					"resolvers": [
+						"8.8.8.8",
+						"8.8.4.4"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.3",
@@ -368,7 +382,9 @@
 					"longitude": -73.9877,
 					"latitude": 40.7425,
 					"network": "Network Management Ltd",
-					"resolvers": ["8.8.8.8"]
+					"resolvers": [
+						"8.8.8.8"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.253",
@@ -483,7 +499,10 @@
 					"longitude": -0.1257,
 					"latitude": 51.5085,
 					"network": "Shock Hosting LLC",
-					"resolvers": ["1.1.1.1", "1.0.0.1"]
+					"resolvers": [
+						"1.1.1.1",
+						"1.0.0.1"
+					]
 				},
 				"result": {
 					"answers": [
@@ -530,7 +549,10 @@
 					"longitude": -46.6361,
 					"latitude": -23.5475,
 					"network": "G-Core Labs S.A.",
-					"resolvers": ["8.8.8.8", "8.8.4.4"]
+					"resolvers": [
+						"8.8.8.8",
+						"8.8.4.4"
+					]
 				},
 				"result": {
 					"hops": [
@@ -847,7 +869,9 @@
 					"longitude": -46.6361,
 					"latitude": -23.5475,
 					"network": "G-Core Labs S.A.",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"hops": [
@@ -1174,7 +1198,9 @@
 					"longitude": 151.2073,
 					"latitude": -33.8678,
 					"network": "Google LLC",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.253",
@@ -1219,7 +1245,9 @@
 								"jMax": 4.6,
 								"jAvg": 3.2
 							},
-							"asn": [13335],
+							"asn": [
+								13335
+							],
 							"timings": [
 								{
 									"rtt": 7.754
@@ -1248,7 +1276,9 @@
 								"jMax": 49.9,
 								"jAvg": 25.9
 							},
-							"asn": [13335],
+							"asn": [
+								13335
+							],
 							"timings": [
 								{
 									"rtt": 51.722
@@ -1277,7 +1307,9 @@
 								"jMax": 1.4,
 								"jAvg": 1.1
 							},
-							"asn": [397273],
+							"asn": [
+								397273
+							],
 							"timings": [
 								{
 									"rtt": 1.382
@@ -1305,7 +1337,9 @@
 								"jMax": 1,
 								"jAvg": 1
 							},
-							"asn": [397273],
+							"asn": [
+								397273
+							],
 							"timings": [
 								{
 									"rtt": 1.04
@@ -1370,7 +1404,9 @@
 					"longitude": 151.194,
 					"latitude": -33.9092,
 					"network": "G-Core Labs S.A.",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"resolvedAddress": "172.69.60.3",
@@ -1389,7 +1425,9 @@
 								"jMax": 2.9,
 								"jAvg": 1.5
 							},
-							"asn": [199524],
+							"asn": [
+								199524
+							],
 							"timings": [
 								{
 									"rtt": 0.552
@@ -1517,7 +1555,9 @@
 								"jMax": 0.6,
 								"jAvg": 0.4
 							},
-							"asn": [13335],
+							"asn": [
+								13335
+							],
 							"timings": [
 								{
 									"rtt": 1.894
@@ -2084,7 +2124,9 @@
 					"longitude": 144.9633,
 					"latitude": -37.814,
 					"network": "Google LLC",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"resolvedAddress": "108.162.250.5",
@@ -2132,7 +2174,9 @@
 								"jMax": 5.9,
 								"jAvg": 3.1
 							},
-							"asn": [13335],
+							"asn": [
+								13335
+							],
 							"timings": [
 								{
 									"rtt": 14.932
@@ -2164,7 +2208,9 @@
 								"jMax": 80.2,
 								"jAvg": 43.3
 							},
-							"asn": [13335],
+							"asn": [
+								13335
+							],
 							"timings": [
 								{
 									"rtt": 95.084
@@ -2669,7 +2715,9 @@
 					"longitude": 121.4581,
 					"latitude": 31.2222,
 					"network": "Shenzhen Tencent Computer Systems Company Limited",
-					"resolvers": ["private"]
+					"resolvers": [
+						"private"
+					]
 				},
 				"result": {
 					"resolvedAddress": "216.24.57.253",

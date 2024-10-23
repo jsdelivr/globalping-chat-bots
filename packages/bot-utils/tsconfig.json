@@ -1,7 +1,13 @@
 {
-	"include": ["**/*.ts", "**/*.json"],
-	"exclude": ["node_modules"],
+	"include": [
+		"**/*.ts",
+		"**/*.json"
+	],
+	"exclude": [
+		"node_modules"
+	],
 	"compilerOptions": {
+
 		/* Projects */
 		// "incremental": true,
 

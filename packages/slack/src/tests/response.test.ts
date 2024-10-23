@@ -5,7 +5,7 @@ import {
 	fullResultsFooter,
 	responseHeader,
 	shareMessageFooter,
-} from '../response';
+} from '../response.js';
 
 describe('Response', () => {
 	const boldSeparator = '*';
@@ -14,9 +14,7 @@ describe('Response', () => {
 		it('ok', () => {
 			const id = 'abc123';
 			const text = shareMessageFooter(id, boldSeparator, true);
-			expect(text).to.equal(
-				'>*View the results online: <https://www.jsdelivr.com/globalping?measurement=abc123>*\n'
-			);
+			expect(text).to.equal('>*View the results online: <https://www.jsdelivr.com/globalping?measurement=abc123>*\n');
 		});
 	});
 
@@ -24,9 +22,7 @@ describe('Response', () => {
 		it('ok', () => {
 			const id = 'abc123';
 			const text = fullResultsFooter(id, boldSeparator, true);
-			expect(text).to.equal(
-				'>*Full results available here: <https://www.jsdelivr.com/globalping?measurement=abc123>*\n'
-			);
+			expect(text).to.equal('>*Full results available here: <https://www.jsdelivr.com/globalping?measurement=abc123>*\n');
 		});
 	});
 
@@ -83,7 +79,7 @@ describe('Response', () => {
 					latitude: 0,
 					network: 'My Network',
 					resolvers: [],
-					tags: ['tag-1', 'tag-2'],
+					tags: [ 'tag-1', 'tag-2' ],
 				},
 				result: {
 					rawOutput: '',
@@ -99,9 +95,7 @@ describe('Response', () => {
 				},
 			};
 			const text = responseHeader(pingResult, 'tag-1', boldSeparator);
-			expect(text).to.equal(
-				'>*NA, US, (GA), Atlanta, ASN:12345, My Network (tag-1)*\n'
-			);
+			expect(text).to.equal('>*NA, US, (GA), Atlanta, ASN:12345, My Network (tag-1)*\n');
 		});
 	});
 });

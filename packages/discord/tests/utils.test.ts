@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { expandFlags } from '../src/utils';
+import { expandFlags } from '../src/utils.js';
 
 describe('Discord utils', () => {
 	it('should expand flags (empty)', () => {
@@ -28,8 +28,6 @@ describe('Discord utils', () => {
 			protocol: 'icmp',
 			port: 80,
 		};
-		expect(expandFlags(flags)).toBe(
-			'--limit 1 --packets 1 --protocol icmp --port 80'
-		);
+		expect(expandFlags(flags)).toBe('--limit 1 --packets 1 --protocol icmp --port 80');
 	});
 });

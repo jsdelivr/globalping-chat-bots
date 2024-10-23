@@ -17,31 +17,34 @@ import {
 	responseHeader,
 	responseText,
 	shareMessageFooter,
-} from '../response';
-import { helpCmd, logger } from '../utils';
-import { getGithubClient } from './client';
-import { GithubTarget } from './types';
+} from '../response.js';
+import { helpCmd, logger } from '../utils.js';
+import { getGithubClient } from './client.js';
+import { GithubTarget } from './types.js';
 
 export const processCommand = async (
 	reqId: string,
 	githubTarget: GithubTarget,
-	cmdText: string
+	cmdText: string,
 ) => {
 	const logData = { reqId };
 
 	const githubClient = getGithubClient();
 
 	let flags: Flags;
+
 	try {
 		flags = argsToFlags(cmdText);
 	} catch (error) {
 		const errorMsg = getAPIErrorMessage(error);
 		logger.error({ errorMsg, ...logData }, '/github-bot - argsToFlags failed');
+
 		await postComment(
 			githubClient,
 			githubTarget,
-			`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`
+			`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`,
 		);
+
 		throw error;
 	}
 
@@ -55,19 +58,22 @@ export const processCommand = async (
 	const postMeasurements = buildPostMeasurements(flags);
 
 	let measurements: PostMeasurementResponse[];
+
 	try {
 		measurements = await postMeasurement(postMeasurements);
 	} catch (error) {
 		const errorMsg = getAPIErrorMessage(error);
 		logger.error(
 			{ errorMsg, ...logData },
-			'/github-bot - postMeasurement failed'
+			'/github-bot - postMeasurement failed',
 		);
+
 		await postComment(
 			githubClient,
 			githubTarget,
-			`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`
+			`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`,
 		);
+
 		throw error;
 	}
 
@@ -83,13 +89,15 @@ export const processCommand = async (
 			const errorMsg = getAPIErrorMessage(error);
 			logger.error(
 				{ errorMsg, ...logData },
-				'/github-bot - getMeasurement failed'
+				'/github-bot - getMeasurement failed',
 			);
+
 			await postComment(
 				githubClient,
 				githubTarget,
-				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`
+				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`,
 			);
+
 			throw error;
 		}
 
@@ -100,7 +108,7 @@ export const processCommand = async (
 			res,
 			flags,
 			cmdText,
-			firstMeasurement
+			firstMeasurement,
 		);
 
 		if (firstMeasurement) {
@@ -109,10 +117,10 @@ export const processCommand = async (
 	}
 };
 
-async function postComment(
+async function postComment (
 	githubClient: Octokit,
 	githubTarget: GithubTarget,
-	body: string
+	body: string,
 ) {
 	await githubClient.rest.issues.createComment({
 		owner: githubTarget.owner,
@@ -124,14 +132,14 @@ async function postComment(
 
 const maxDisplayedResults = 4;
 
-async function measurementsResponse(
+async function measurementsResponse (
 	githubClient: Octokit,
 	githubTarget: GithubTarget,
 	measurementId: string,
 	res: PingMeasurementResponse,
 	flags: Flags,
 	cmdText: string,
-	firstMeasurement: boolean
+	firstMeasurement: boolean,
 ) {
 	const resultsForDisplay = res.results.slice(0, maxDisplayedResults);
 
@@ -150,8 +158,8 @@ async function measurementsResponse(
 	for (const result of resultsForDisplay) {
 		const tag = getTag(result.probe.tags);
 		const text = `${
-			responseHeader(result, tag, githubBoldSeparator) +
-			responseText(result, flags, githubTruncationLimit)
+			responseHeader(result, tag, githubBoldSeparator)
+			+ responseText(result, flags, githubTruncationLimit)
 		}\r\n`;
 		fullText += text;
 	}
@@ -159,6 +167,7 @@ async function measurementsResponse(
 	const resultsTruncated = resultsForDisplay.length !== res.results.length;
 
 	let footerText;
+
 	if (resultsTruncated) {
 		footerText = fullResultsFooter(measurementId, githubBoldSeparator, false);
 	} else if (flags.share) {

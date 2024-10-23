@@ -1,4 +1,4 @@
-import { Flags } from './flags';
+import { Flags } from './flags.js';
 import {
 	ALLOWED_DNS_PROTOCOLS,
 	ALLOWED_DNS_TYPES,
@@ -15,13 +15,13 @@ import {
 	isTraceProtocol,
 	Locations,
 	PostMeasurement,
-} from './types';
-import { throwArgError } from './utils';
+} from './types.js';
+import { throwArgError } from './utils.js';
 
-function buildLocations(from: string): Locations[] {
+function buildLocations (from: string): Locations[] {
 	return from
 		.split(',')
-		.map((f) => f.trim())
+		.map(f => f.trim())
 		.map((l): Locations => ({ magic: l }));
 }
 
@@ -43,15 +43,12 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 		headers,
 	} = args;
 	const locations = buildLocations(from);
-	if (locations.length > 10)
-		throw new Error('You can only query up to 10 different locations at once!');
+
+	if (locations.length > 10) { throw new Error('You can only query up to 10 different locations at once!'); }
 
 	const postArray: PostMeasurement[] = [];
 
-	if (locations.length === 0)
-		throw new Error(
-			'Empty location! Run "/globalping help" for more information.'
-		);
+	if (locations.length === 0) { throw new Error('Empty location! Run "/globalping help" for more information.'); }
 
 	switch (cmd) {
 		case 'ping': {
@@ -62,12 +59,13 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 				limit,
 				locations,
 				measurementOptions: {
-					...(packets && { packets }),
+					...packets && { packets },
 				},
 			});
 
 			break;
 		}
+
 		case 'traceroute': {
 			postArray.push({
 				type: 'traceroute',
@@ -76,21 +74,22 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 				limit,
 				locations,
 				measurementOptions: {
-					...(protocol && {
+					...protocol && {
 						protocol: isTraceProtocol(protocol)
 							? protocol
 							: throwArgError(
-									protocol,
-									'protocol',
-									[...ALLOWED_TRACE_PROTOCOLS].join(', ')
-							  ),
-					}),
-					...(port && { port }),
+								protocol,
+								'protocol',
+								[ ...ALLOWED_TRACE_PROTOCOLS ].join(', '),
+							),
+					},
+					...port && { port },
 				},
 			});
 
 			break;
 		}
+
 		case 'dns': {
 			postArray.push({
 				type: 'dns',
@@ -99,34 +98,35 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 				limit,
 				locations,
 				measurementOptions: {
-					...(query && {
+					...query && {
 						query: {
 							type: isDnsType(query)
 								? query
 								: throwArgError(
-										query,
-										'query',
-										[...ALLOWED_DNS_TYPES].join(', ')
-								  ),
+									query,
+									'query',
+									[ ...ALLOWED_DNS_TYPES ].join(', '),
+								),
 						},
-					}),
-					...(protocol && {
+					},
+					...protocol && {
 						protocol: isDnsProtocol(protocol)
 							? protocol
 							: throwArgError(
-									protocol,
-									'protocol',
-									[...ALLOWED_DNS_PROTOCOLS].join(', ')
-							  ),
-					}),
-					...(port && { port }),
-					...(resolver && { resolver }),
-					...(trace && { trace }),
+								protocol,
+								'protocol',
+								[ ...ALLOWED_DNS_PROTOCOLS ].join(', '),
+							),
+					},
+					...port && { port },
+					...resolver && { resolver },
+					...trace && { trace },
 				},
 			});
 
 			break;
 		}
+
 		case 'mtr': {
 			postArray.push({
 				type: 'mtr',
@@ -135,22 +135,23 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 				limit,
 				locations,
 				measurementOptions: {
-					...(protocol && {
+					...protocol && {
 						protocol: isMtrProtocol(protocol)
 							? protocol
 							: throwArgError(
-									protocol,
-									'protocol',
-									[...ALLOWED_MTR_PROTOCOLS].join(', ')
-							  ),
-					}),
-					...(port && { port }),
-					...(packets && { packets }),
+								protocol,
+								'protocol',
+								[ ...ALLOWED_MTR_PROTOCOLS ].join(', '),
+							),
+					},
+					...port && { port },
+					...packets && { packets },
 				},
 			});
 
 			break;
 		}
+
 		case 'http': {
 			postArray.push({
 				type: 'http',
@@ -159,30 +160,30 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 				limit,
 				locations,
 				measurementOptions: {
-					...(port && { port }),
-					...(resolver && { resolver }),
-					...(protocol && {
+					...port && { port },
+					...resolver && { resolver },
+					...protocol && {
 						protocol: isHttpProtocol(protocol)
 							? protocol
 							: throwArgError(
-									protocol,
-									'protocol',
-									[...ALLOWED_HTTP_PROTOCOLS].join(', ')
-							  ),
-					}),
+								protocol,
+								'protocol',
+								[ ...ALLOWED_HTTP_PROTOCOLS ].join(', '),
+							),
+					},
 					request: {
-						...(path && { path }),
-						...(query && { query }),
-						...(method && {
+						...path && { path },
+						...query && { query },
+						...method && {
 							method: isHttpMethod(method)
 								? method
 								: throwArgError(
-										method,
-										'method',
-										[...ALLOWED_HTTP_METHODS].join(', ')
-								  ),
-						}),
-						...(host && { host }),
+									method,
+									'method',
+									[ ...ALLOWED_HTTP_METHODS ].join(', '),
+								),
+						},
+						...host && { host },
 						headers,
 					},
 				},
@@ -190,12 +191,14 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 
 			break;
 		}
+
 		default: {
 			throwArgError(
 				String(cmd),
 				'command',
-				[...ALLOWED_QUERY_TYPES].join(', ')
+				[ ...ALLOWED_QUERY_TYPES ].join(', '),
 			);
+
 			throw new Error('Unknown error.');
 		}
 	}

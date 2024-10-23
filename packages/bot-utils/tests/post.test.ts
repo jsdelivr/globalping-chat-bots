@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { postMeasurement } from '../src/post';
-import { postMeasurementHandlers, setupAPIServer } from './mocks/index';
+import { postMeasurement } from '../src/post.js';
+import { postMeasurementHandlers, setupAPIServer } from './mocks/index.js';
 
 describe('Post', () => {
 	setupAPIServer(postMeasurementHandlers);

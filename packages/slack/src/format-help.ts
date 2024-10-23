@@ -9,9 +9,10 @@ import {
 	mtrHelpTexts,
 	pingHelpTexts,
 	tracerouteHelpTexts,
-} from '@globalping/bot-utils/src/utils';
+// eslint-disable-next-line n/no-missing-import
+} from '@globalping/bot-utils/src/utils.js';
 
-export function generalHelp(boldSeparator: string, rootCommand: string) {
+export function generalHelp (boldSeparator: string, rootCommand: string) {
 	return `${generalHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
@@ -35,7 +36,7 @@ ${generalHelpTexts.flags}
 \`\`\``;
 }
 
-export function dnsHelp(boldSeparator: string, rootCommand: string) {
+export function dnsHelp (boldSeparator: string, rootCommand: string) {
 	return `${dnsHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
@@ -57,7 +58,7 @@ ${dnsHelpTexts.globalFlags}
 \`\`\``;
 }
 
-export function httpHelp(boldSeparator: string, rootCommand: string) {
+export function httpHelp (boldSeparator: string, rootCommand: string) {
 	return `${httpHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
@@ -79,7 +80,7 @@ ${httpHelpTexts.globalFlags}
 \`\`\``;
 }
 
-export function mtrHelp(boldSeparator: string, rootCommand: string) {
+export function mtrHelp (boldSeparator: string, rootCommand: string) {
 	return `${mtrHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
@@ -101,7 +102,7 @@ ${mtrHelpTexts.globalFlags}
 \`\`\``;
 }
 
-export function pingHelp(boldSeparator: string, rootCommand: string) {
+export function pingHelp (boldSeparator: string, rootCommand: string) {
 	return `${pingHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
@@ -123,7 +124,7 @@ ${pingHelpTexts.globalFlags}
 \`\`\``;
 }
 
-export function tracerouteHelp(boldSeparator: string, rootCommand: string) {
+export function tracerouteHelp (boldSeparator: string, rootCommand: string) {
 	return `${tracerouteHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
@@ -145,7 +146,7 @@ ${tracerouteHelpTexts.globalFlags}
 \`\`\``;
 }
 
-export function authHelp(boldSeparator: string, rootCommand: string) {
+export function authHelp (boldSeparator: string, rootCommand: string) {
 	return `${authHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
@@ -159,7 +160,7 @@ ${authHelpTexts.flags}
 \`\`\``;
 }
 
-export function authLoginHelp(boldSeparator: string, rootCommand: string) {
+export function authLoginHelp (boldSeparator: string, rootCommand: string) {
 	return `${authLoginHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
@@ -173,7 +174,7 @@ ${authLoginHelpTexts.flags}
 \`\`\``;
 }
 
-export function authStatusHelp(boldSeparator: string, rootCommand: string) {
+export function authStatusHelp (boldSeparator: string, rootCommand: string) {
 	return `${authStatusHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
@@ -187,7 +188,7 @@ ${authStatusHelpTexts.flags}
 \`\`\``;
 }
 
-export function authLogoutHelp(boldSeparator: string, rootCommand: string) {
+export function authLogoutHelp (boldSeparator: string, rootCommand: string) {
 	return `${authLogoutHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}

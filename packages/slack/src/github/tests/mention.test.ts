@@ -6,30 +6,30 @@ import {
 	parseCommandfromMention,
 	parseFooter,
 	splitMessageFooter,
-} from '../mention';
-import { GithubTargetType } from '../types';
+} from '../mention.js';
+import { GithubTargetType } from '../types.js';
 
 describe('Mention', () => {
 	describe('parseCommandfromMention', () => {
 		it('valid ', () => {
-			const text =
-				'@globalping ping 1.2.3.4 --from france --limit 5\r\n -- \r\n abc';
+			const text
+				= '@globalping ping 1.2.3.4 --from france --limit 5\r\n -- \r\n abc';
 			const ghHandle = 'globalping';
 			const cmd = parseCommandfromMention(text, ghHandle);
 			expect(cmd).to.equal('ping 1.2.3.4 --from france --limit 5');
 		});
 
 		it('wrong gh handle id', () => {
-			const text =
-				'@globalping ping 1.2.3.4 --from france --limit 5\r\n -- \r\n abc';
+			const text
+				= '@globalping ping 1.2.3.4 --from france --limit 5\r\n -- \r\n abc';
 			const ghHandle = 'someuser';
 			const cmd = parseCommandfromMention(text, ghHandle);
 			expect(cmd).to.equal(undefined);
 		});
 
 		it('text before mention', () => {
-			const text =
-				'some other text @globalping ping <http://yahoo.com|yahoo.com> --from france --limit 5\r\n -- \r\n abc';
+			const text
+				= 'some other text @globalping ping <http://yahoo.com|yahoo.com> --from france --limit 5\r\n -- \r\n abc';
 			const ghHandle = 'globalping';
 			const cmd = parseCommandfromMention(text, ghHandle);
 			expect(cmd).to.equal(undefined);
@@ -38,8 +38,8 @@ describe('Mention', () => {
 
 	describe('isMentionNotification', () => {
 		it('valid ', () => {
-			const text =
-				'@globalping ping 1.2.3.4 --from france --limit 5\r\n -- You are receiving this because you were mentioned ... ';
+			const text
+				= '@globalping ping 1.2.3.4 --from france --limit 5\r\n -- You are receiving this because you were mentioned ... ';
 			const ok = isMentionNotification(text);
 			expect(ok).to.equal(true);
 		});
@@ -63,10 +63,11 @@ You are receiving this because you were mentioned.
 Message ID: <myuser/myrepo/issues/1@github.com>`;
 			const parts = splitMessageFooter(text);
 			expect(parts.length).to.equal(2);
-			const [message, footer] = parts;
+			const [ message, footer ] = parts;
 			expect(message).to.equal(`@gping-dev ping google.com -L 5 --from "UK"
 
 --`);
+
 			expect(footer).to
 				.equal(`Reply to this email directly or view it on GitHub:
 https://github.com/myuser/myrepo/issues/1
@@ -153,20 +154,16 @@ You are receiving this because you were mentioned.`;
 
 	describe('cleanUpCommandText', () => {
 		it('removelink ', async () => {
-			const text =
-				'@globalping http [jsdelivr.com](http://jsdelivr.com) --from france --limit 5';
+			const text
+				= '@globalping http [jsdelivr.com](http://jsdelivr.com) --from france --limit 5';
 			const result = await cleanUpCommandText(text);
-			expect(result).to.equal(
-				'@globalping http jsdelivr.com --from france --limit 5'
-			);
+			expect(result).to.equal('@globalping http jsdelivr.com --from france --limit 5');
 		});
 
 		it('noop', async () => {
 			const text = '@globalping http jsdelivr.com --from france --limit 5';
 			const result = await cleanUpCommandText(text);
-			expect(result).to.equal(
-				'@globalping http jsdelivr.com --from france --limit 5'
-			);
+			expect(result).to.equal('@globalping http jsdelivr.com --from france --limit 5');
 		});
 	});
 });

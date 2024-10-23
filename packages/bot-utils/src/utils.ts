@@ -1,21 +1,17 @@
 export const throwArgError = (
 	invalid: string | undefined,
 	type: string,
-	expected: string
+	expected: string,
 ) => {
-	throw new TypeError(
-		`Invalid argument "${invalid}" for "${type}"!\nExpected "${expected}".`
-	);
+	throw new TypeError(`Invalid argument "${invalid}" for "${type}"!\nExpected "${expected}".`);
 };
 
 export const throwOptError = (
 	invalid: string | undefined,
 	type: string,
-	expected: string
+	expected: string,
 ) => {
-	throw new TypeError(
-		`Invalid option "${invalid}" for "${type}"!\nExpected "${expected}".`
-	);
+	throw new TypeError(`Invalid option "${invalid}" for "${type}"!\nExpected "${expected}".`);
 };
 
 export const generalHelpTexts = {
@@ -74,8 +70,7 @@ Resolve jsdelivr.com from a probe that is from the AWS network and is located in
 \`\`\`
 dns jsdelivr.com from aws+montreal --latency
 \`\`\``,
-	usage: (rootCommand: string) =>
-		`${rootCommand} dns [target] from [location] [flags]`,
+	usage: (rootCommand: string) => `${rootCommand} dns [target] from [location] [flags]`,
 	flags: `  -h, --help              Help for dns
       --port int          Send the query to a non-standard port on the server (default 53)
       --protocol string   Specifies the protocol to use for the DNS query (TCP or UDP) (default "udp")
@@ -140,8 +135,7 @@ HTTP GET request google.com from a probe in ASN 123 with a dns resolver 1.1.1.1
 \`\`\`
 http google.com from 123 --resolver 1.1.1.1
 \`\`\``,
-	usage: (rootCommand: string) =>
-		`${rootCommand} http [target] from [location] [flags]`,
+	usage: (rootCommand: string) => `${rootCommand} http [target] from [location] [flags]`,
 	flags: `      --full                 Full output. Uses an HTTP GET request, and outputs the status, headers and body to the output
   -H, --header string        Specifies a HTTP header to be added to the request, in the format "Key: Value". Multiple headers can be added by adding multiple flags
   -h, --help                 Help for http
@@ -177,8 +171,7 @@ MTR jsdelivr.com from a probe that is from the AWS network and is located in Mon
 \`\`\`
 mtr jsdelivr.com from aws+montreal --protocol tcp --port 453
 \`\`\``,
-	usage: (rootCommand: string) =>
-		`${rootCommand} mtr [target] from [location] [flags]`,
+	usage: (rootCommand: string) => `${rootCommand} mtr [target] from [location] [flags]`,
 	flags: `  -h, --help          Help for mtr
   --packets int       Specifies the number of packets to send to each hop (default 3)
   --port int          Specifies the port to use. Only applicable for TCP protocol (default 53)
@@ -208,8 +201,7 @@ Ping jsdelivr.com from a probe that is from the AWS network and is located in Mo
 \`\`\`
 ping jsdelivr.com from aws+montreal --latency
 \`\`\``,
-	usage: (rootCommand: string) =>
-		`${rootCommand} ping [target] from [location] [flags]`,
+	usage: (rootCommand: string) => `${rootCommand} ping [target] from [location] [flags]`,
 	flags: `  -h, --help          Help for ping
       --packets int   Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)`,
 	globalFlags: `  -F, --from string   Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
@@ -241,8 +233,7 @@ Traceroute jsdelivr.com from a probe that is located in Paris to port 453
 \`\`\`
 traceroute jsdelivr.com from Paris --port 453
 \`\`\``,
-	usage: (rootCommand: string) =>
-		`${rootCommand} traceroute [target] from [location] [flags]`,
+	usage: (rootCommand: string) => `${rootCommand} traceroute [target] from [location] [flags]`,
 	flags: `  -h, --help              Help for traceroute
       --port int          Specifies the port to use for the traceroute. Only applicable for TCP protocol (default 80)
       --protocol string   Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "icmp")`,

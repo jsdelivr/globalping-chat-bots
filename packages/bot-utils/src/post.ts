@@ -1,18 +1,19 @@
 import got, { HTTPError } from 'got';
 
-import { PostError } from './errors';
+import { PostError } from './errors.js';
 import type {
 	AuthToken,
 	PostMeasurement,
 	PostMeasurementResponse,
-} from './types';
-import { userAgent } from './user-agent';
+} from './types.js';
+import { userAgent } from './user-agent.js';
 
 export const postMeasurement = async (
 	optsArr: PostMeasurement[],
-	token?: AuthToken
+	token?: AuthToken,
 ): Promise<PostMeasurementResponse[]> => {
 	let index = 0;
+
 	try {
 		const measurementArr: PostMeasurementResponse[] = [];
 		const headers: { [key: string]: string } = {
@@ -20,9 +21,11 @@ export const postMeasurement = async (
 			'User-Agent': userAgent(),
 			'Accept-Encoding': 'br',
 		};
+
 		if (token) {
 			headers.Authorization = `Bearer ${token.access_token}`;
 		}
+
 		for (const opts of optsArr) {
 			// eslint-disable-next-line no-await-in-loop
 			const res = await got.post('https://api.globalping.io/v1/measurements', {
@@ -39,12 +42,14 @@ export const postMeasurement = async (
 				throw new Error(body);
 			}
 		}
+
 		return measurementArr;
 	} catch (error) {
 		if (error instanceof HTTPError) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const location = optsArr[index].locations[0].magic!;
 			const newError = new PostError(error.response, location, error.message);
+
 			throw newError;
 		} else {
 			throw new TypeError(error as string);

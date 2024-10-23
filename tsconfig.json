@@ -1,6 +1,8 @@
 {
 	"files": [],
-	"exclude": ["node_modules"],
+	"exclude": [
+		"node_modules"
+	],
 	"references": [
 		{ "path": "packages/bot-utils" },
 		{ "path": "packages/discord" },

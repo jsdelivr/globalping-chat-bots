@@ -8,8 +8,7 @@ export const ALLOWED_QUERY_TYPES = [
 	'auth',
 ] as const;
 export type QueryType = (typeof ALLOWED_QUERY_TYPES)[number];
-export const isQueryType = (type: string): type is QueryType =>
-	ALLOWED_QUERY_TYPES.includes(type as QueryType);
+export const isQueryType = (type: string): type is QueryType => ALLOWED_QUERY_TYPES.includes(type as QueryType);
 
 // filters
 export const ALLOWED_LOCATION_TYPES = [
@@ -23,14 +22,12 @@ export const ALLOWED_LOCATION_TYPES = [
 	'magic',
 ] as const;
 export type LocationType = (typeof ALLOWED_LOCATION_TYPES)[number];
-export const isLocationType = (type: string): type is LocationType =>
-	ALLOWED_LOCATION_TYPES.includes(type as LocationType);
+export const isLocationType = (type: string): type is LocationType => ALLOWED_LOCATION_TYPES.includes(type as LocationType);
 
 // traceroute
-export const ALLOWED_TRACE_PROTOCOLS = ['TCP', 'UDP', 'ICMP'] as const;
+export const ALLOWED_TRACE_PROTOCOLS = [ 'TCP', 'UDP', 'ICMP' ] as const;
 export type TraceProtocol = (typeof ALLOWED_TRACE_PROTOCOLS)[number];
-export const isTraceProtocol = (type: string): type is TraceProtocol =>
-	ALLOWED_TRACE_PROTOCOLS.includes(type as TraceProtocol);
+export const isTraceProtocol = (type: string): type is TraceProtocol => ALLOWED_TRACE_PROTOCOLS.includes(type as TraceProtocol);
 
 // dns
 export const ALLOWED_DNS_TYPES = [
@@ -50,30 +47,25 @@ export const ALLOWED_DNS_TYPES = [
 	'SRV',
 ] as const;
 export type DnsType = (typeof ALLOWED_DNS_TYPES)[number];
-export const isDnsType = (type: string): type is DnsType =>
-	ALLOWED_DNS_TYPES.includes(type as DnsType);
+export const isDnsType = (type: string): type is DnsType => ALLOWED_DNS_TYPES.includes(type as DnsType);
 
-export const ALLOWED_DNS_PROTOCOLS = ['UDP', 'TCP'] as const;
+export const ALLOWED_DNS_PROTOCOLS = [ 'UDP', 'TCP' ] as const;
 export type DnsProtocol = (typeof ALLOWED_DNS_PROTOCOLS)[number];
-export const isDnsProtocol = (type: string): type is DnsProtocol =>
-	ALLOWED_DNS_PROTOCOLS.includes(type as DnsProtocol);
+export const isDnsProtocol = (type: string): type is DnsProtocol => ALLOWED_DNS_PROTOCOLS.includes(type as DnsProtocol);
 
 // mtr
-export const ALLOWED_MTR_PROTOCOLS = ['TCP', 'UDP', 'ICMP'] as const;
+export const ALLOWED_MTR_PROTOCOLS = [ 'TCP', 'UDP', 'ICMP' ] as const;
 export type MtrProtocol = (typeof ALLOWED_MTR_PROTOCOLS)[number];
-export const isMtrProtocol = (type: string): type is MtrProtocol =>
-	ALLOWED_MTR_PROTOCOLS.includes(type as MtrProtocol);
+export const isMtrProtocol = (type: string): type is MtrProtocol => ALLOWED_MTR_PROTOCOLS.includes(type as MtrProtocol);
 
 // http
-export const ALLOWED_HTTP_PROTOCOLS = ['HTTP', 'HTTPS', 'HTTP2'] as const;
+export const ALLOWED_HTTP_PROTOCOLS = [ 'HTTP', 'HTTPS', 'HTTP2' ] as const;
 export type HttpProtocol = (typeof ALLOWED_HTTP_PROTOCOLS)[number];
-export const isHttpProtocol = (type: string): type is HttpProtocol =>
-	ALLOWED_HTTP_PROTOCOLS.includes(type as HttpProtocol);
+export const isHttpProtocol = (type: string): type is HttpProtocol => ALLOWED_HTTP_PROTOCOLS.includes(type as HttpProtocol);
 
-export const ALLOWED_HTTP_METHODS = ['GET', 'HEAD'] as const;
+export const ALLOWED_HTTP_METHODS = [ 'GET', 'HEAD' ] as const;
 export type HttpMethod = (typeof ALLOWED_HTTP_METHODS)[number];
-export const isHttpMethod = (type: string): type is HttpMethod =>
-	ALLOWED_HTTP_METHODS.includes(type as HttpMethod);
+export const isHttpMethod = (type: string): type is HttpMethod => ALLOWED_HTTP_METHODS.includes(type as HttpMethod);
 
 // Post Types
 export interface Locations {

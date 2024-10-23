@@ -1,5 +1,5 @@
 import { AuthToken } from '@globalping/bot-utils';
-import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage';
+import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -7,10 +7,10 @@ import {
 	AuthorizeErrorType,
 	IntrospectionResponse,
 	OAuthClient,
-} from '../auth';
-import { Config } from '../config';
-import { AuthorizeSession, Installation } from '../db';
-import { mockInstallationStore,mockLogger, mockSlackClient } from './utils';
+} from '../auth.js';
+import { Config } from '../config.js';
+import { AuthorizeSession, Installation } from '../db.js';
+import { mockInstallationStore, mockLogger, mockSlackClient } from './utils.js';
 
 describe('Auth', () => {
 	const config: Config = {
@@ -29,7 +29,7 @@ describe('Auth', () => {
 		config,
 		loggerMock,
 		installationStoreMock,
-		slackClientMock
+		slackClientMock,
 	);
 
 	afterEach(() => {
@@ -57,7 +57,7 @@ describe('Auth', () => {
 					userId,
 					channelId,
 					threadTs,
-				}
+				},
 			);
 
 			const url = new URL(res.url);
@@ -91,13 +91,13 @@ describe('Auth', () => {
 
 			const err = await oauth.Logout(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
-				installationId
-			);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+
 			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
 				installationId,
-				null
+				null,
 			);
+
 			expect(fetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/revoke`,
 				{
@@ -107,7 +107,7 @@ describe('Auth', () => {
 						'Content-Length': '19',
 					},
 					body: 'token=refresh_tok3n',
-				}
+				},
 			);
 
 			expect(err).toBeNull();
@@ -122,9 +122,8 @@ describe('Auth', () => {
 
 			const err = await oauth.Logout(insallationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
-				insallationId
-			);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(insallationId);
+
 			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
 			expect(fetchSpy).toHaveBeenCalledTimes(0);
 
@@ -156,11 +155,10 @@ describe('Auth', () => {
 
 			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
 
-			const [introspection, error] = await oauth.Introspect(installationId);
+			const [ introspection, error ] = await oauth.Introspect(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
-				installationId
-			);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+
 			expect(fetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/introspect`,
 				{
@@ -170,7 +168,7 @@ describe('Auth', () => {
 						'Content-Length': '11',
 					},
 					body: 'token=tok3n',
-				}
+				},
 			);
 
 			expect(introspection).toEqual(expectedIntrospection);
@@ -210,12 +208,11 @@ describe('Auth', () => {
 
 			const newToken = await oauth.GetToken(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
-				installationId
-			);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+
 			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
 				installationId,
-				expectedToken
+				expectedToken,
 			);
 
 			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
@@ -258,9 +255,8 @@ describe('Auth', () => {
 
 			const newToken = await oauth.GetToken(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(
-				installationId
-			);
+			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+
 			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
 
 			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
@@ -308,7 +304,7 @@ describe('Auth', () => {
 
 			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
 				installationId,
-				expectedToken
+				expectedToken,
 			);
 
 			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
@@ -320,9 +316,7 @@ describe('Auth', () => {
 				body: 'client_id=client_id&client_secret=client_secret&refresh_token=refresh_tok3n&grant_type=refresh_token',
 			});
 
-			expect(errorMsg).toEqual(
-				'Access token successfully refreshed. Try repeating the measurement.'
-			);
+			expect(errorMsg).toEqual('Access token successfully refreshed. Try repeating the measurement.');
 		});
 	});
 
@@ -367,7 +361,7 @@ describe('Auth', () => {
 
 			vi.spyOn(
 				installationStoreMock,
-				'getInstallationForAuthorization'
+				'getInstallationForAuthorization',
 			).mockResolvedValue({
 				token,
 				session: authorizeSession,
@@ -390,18 +384,16 @@ describe('Auth', () => {
 
 			await oauth.OnCallback(req, res);
 
-			expect(
-				installationStoreMock.getInstallationForAuthorization
-			).toHaveBeenCalledWith(installationId);
+			expect(installationStoreMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
 
 			expect(installationStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
 				installationId,
-				null
+				null,
 			);
 
 			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
 				installationId,
-				newToken
+				newToken,
 			);
 
 			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
@@ -422,7 +414,7 @@ describe('Auth', () => {
 						'Content-Length': '19',
 					},
 					body: 'token=refresh_tok3n',
-				}
+				},
 			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
@@ -436,6 +428,7 @@ describe('Auth', () => {
 			expect(res.writeHead).toHaveBeenCalledWith(302, {
 				Location: `${config.dashboardUrl}/authorize/success`,
 			});
+
 			expect(res.end).toHaveBeenCalled();
 		});
 	});

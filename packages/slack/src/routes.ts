@@ -1,18 +1,18 @@
 import { CustomRoute } from '@slack/bolt';
-import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage';
+import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage.js';
 import * as fs from 'node:fs';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { CALLBACK_PATH, oauth } from './auth';
-import { knex } from './db';
-import { githubHandler } from './github/handler';
+import { CALLBACK_PATH, oauth } from './auth.js';
+import { knex } from './db.js';
+import { githubHandler } from './github/handler.js';
 
 export const routes: CustomRoute[] = [
 	{
 		path: '/health',
-		method: ['GET'],
+		method: [ 'GET' ],
 		handler: async (_req, res) => {
 			try {
 				// Check if db is accessible
@@ -35,7 +35,7 @@ export const routes: CustomRoute[] = [
 	},
 	{
 		path: '/',
-		method: ['GET'],
+		method: [ 'GET' ],
 		handler: async (_req, res) => {
 			try {
 				res
@@ -52,16 +52,15 @@ export const routes: CustomRoute[] = [
 	},
 	{
 		path: '/favicon.ico',
-		method: ['GET'],
+		method: [ 'GET' ],
 		handler: async (_req, res) => {
 			try {
 				res.setHeader('Content-Type', 'image/x-icon');
-				fs.createReadStream(
-					path.join(
-						path.dirname(fileURLToPath(import.meta.url)),
-						'../public/favicon.ico'
-					)
-				).pipe(res);
+
+				fs.createReadStream(path.join(
+					path.dirname(fileURLToPath(import.meta.url)),
+					'../public/favicon.ico',
+				)).pipe(res);
 			} catch (error) {
 				res.writeHead(503);
 				res.write(JSON.stringify(error));
@@ -71,16 +70,15 @@ export const routes: CustomRoute[] = [
 	},
 	{
 		path: '/robots.txt',
-		method: ['GET'],
+		method: [ 'GET' ],
 		handler: async (_req, res) => {
 			try {
 				res.setHeader('Content-Type', 'text/plain');
-				fs.createReadStream(
-					path.join(
-						path.dirname(fileURLToPath(import.meta.url)),
-						'../public/robots.txt'
-					)
-				).pipe(res);
+
+				fs.createReadStream(path.join(
+					path.dirname(fileURLToPath(import.meta.url)),
+					'../public/robots.txt',
+				)).pipe(res);
 			} catch (error) {
 				res.writeHead(503);
 				res.write(JSON.stringify(error));
@@ -90,15 +88,15 @@ export const routes: CustomRoute[] = [
 	},
 	{
 		path: '/github-bot',
-		method: ['POST'],
+		method: [ 'POST' ],
 		handler: githubHandler,
 	},
 	{
 		path: CALLBACK_PATH,
-		method: ['GET'],
+		method: [ 'GET' ],
 		handler: (
 			req: ParamsIncomingMessage,
-			res: ServerResponse<IncomingMessage>
+			res: ServerResponse<IncomingMessage>,
 		) => oauth.OnCallback(req, res),
 	},
 ];

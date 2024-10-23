@@ -1,5 +1,5 @@
-import { config } from '../config';
+import { config } from '../config.js';
 
-export function githubHandle(): string {
+export function githubHandle (): string {
 	return config.githubBotHandle;
 }

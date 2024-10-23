@@ -6,8 +6,8 @@ import type {
 } from '@slack/bolt';
 import { knex as knexInstance } from 'knex';
 
-import { config } from './config';
-import { getInstallationId, logger } from './utils';
+import { config } from './config.js';
+import { getInstallationId, logger } from './utils.js';
 
 type AuthVersion = 'v1' | 'v2';
 export type Installation = SlackInstallation<AuthVersion, boolean>;
@@ -54,28 +54,31 @@ export const knex = knexInstance({
 export const installationStore = {
 	storeInstallation: async (installation: Installation) => {
 		logger.debug({ installation }, 'Storing installation');
+
 		try {
 			// Bolt will pass your handler an installation object
 			// Change the lines below so they save to your database
 			let id: string | undefined;
+
 			if (
-				installation.isEnterpriseInstall &&
-				installation.enterprise !== undefined
+				installation.isEnterpriseInstall
+				&& installation.enterprise !== undefined
 			) {
 				id = installation.enterprise.id;
 			} else if (installation.team !== undefined) {
 				id = installation.team.id;
 			}
+
 			if (!id) {
-				throw new Error(
-					'Failed saving installation to installationStore (no team or enterprise id)'
-				);
+				throw new Error('Failed saving installation to installationStore (no team or enterprise id)');
 			}
+
 			await knex
 				.table(Tables.Installations)
 				.insert({ id, installation })
 				.onConflict('id')
 				.merge();
+
 			logger.debug({ id }, 'Installation set');
 		} catch (error) {
 			const err = new Error(`Failed to set installation: ${error}`);
@@ -85,6 +88,7 @@ export const installationStore = {
 	},
 	fetchInstallation: async (installQuery: InstallationQuery<boolean>) => {
 		logger.debug({ installQuery }, 'Fetching installation');
+
 		try {
 			// Bolt will pass your handler an installQuery object
 			// Change the lines below so they fetch from your database
@@ -94,13 +98,16 @@ export const installationStore = {
 				.select('installation')
 				.where('id', id)
 				.first();
+
 			if (!res) {
 				throw new Error(id);
 			}
+
 			logger.debug(
 				{ installation: res.installation },
-				'Installation retrieved'
+				'Installation retrieved',
 			);
+
 			return JSON.parse(res.installation as unknown as string);
 		} catch (error) {
 			const err = new Error(`Failed to fetch installation: ${error}`);
@@ -110,6 +117,7 @@ export const installationStore = {
 	},
 	deleteInstallation: async (installQuery: InstallationQuery<boolean>) => {
 		logger.debug({ installQuery }, 'Deleting installation');
+
 		try {
 			// Bolt will pass your handler  an installQuery object
 			// Change the lines below so they delete from your database
@@ -132,9 +140,11 @@ export const installationStore = {
 				.select('token')
 				.where('id', id)
 				.first();
+
 			if (!token) {
 				return null;
 			}
+
 			return JSON.parse(token.token as unknown as string) as AuthToken;
 		} catch (error) {
 			const err = new Error(`Failed to get token: ${error}`);
@@ -148,8 +158,9 @@ export const installationStore = {
 				.table(Tables.Installations)
 				.where('id', id)
 				.update({
-					token: token ? (JSON.stringify(token) as any) : null,
+					token: token ? (JSON.stringify(token) as never) : null, // TODO add the actual type
 				});
+
 			logger.debug({ id }, 'Token set');
 		} catch (error) {
 			const err = new Error(`Failed to set token: ${error}`);
@@ -159,7 +170,7 @@ export const installationStore = {
 	},
 	updateAuthorizeSession: async (
 		id: string,
-		authorizeSesssion: AuthorizeSession | null
+		authorizeSesssion: AuthorizeSession | null,
 	) => {
 		try {
 			await knex
@@ -167,7 +178,7 @@ export const installationStore = {
 				.where('id', id)
 				.update({
 					authorize_session: authorizeSesssion
-						? (JSON.stringify(authorizeSesssion) as any)
+						? (JSON.stringify(authorizeSesssion) as never) // TODO add the actual type
 						: null,
 				});
 		} catch (error) {
@@ -183,6 +194,7 @@ export const installationStore = {
 				.select('installation', 'token', 'authorize_session')
 				.where('id', id)
 				.first();
+
 			if (!res) {
 				return {
 					token: null,
@@ -190,6 +202,7 @@ export const installationStore = {
 					installation: null,
 				};
 			}
+
 			// Note: When upgrading the MySQL version, the JSON.parse() call may not be needed
 			const installation = res.installation
 				? JSON.parse(res.installation as unknown as string)

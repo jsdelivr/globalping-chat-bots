@@ -1,15 +1,16 @@
 import { formatAPIError, getAPIErrorMessage } from '@globalping/bot-utils';
 import { WebClient } from '@slack/web-api';
 
-import { postAPI } from './post';
-import { logger } from './utils';
+import { postAPI } from './post.js';
+import { logger } from './utils.js';
 
-export function parseCommandfromMention(
+export function parseCommandfromMention (
 	text: string,
-	botUserId: string
+	botUserId: string,
 ): string {
 	const trimmedText = text.trim();
 	const expectedMention = `<@${botUserId}>`;
+
 	if (trimmedText.startsWith(expectedMention)) {
 		const urlRegex = /<([^>|]+)(?:\|([^>]+))?>/g;
 
@@ -22,7 +23,7 @@ export function parseCommandfromMention(
 	return '';
 }
 
-export async function handleMention(
+export async function handleMention (
 	fullText: string,
 	teamId: string | undefined,
 	channelId: string,
@@ -31,7 +32,7 @@ export async function handleMention(
 	threadTs: string | undefined,
 	installationId: string,
 	botUserId: string,
-	client: WebClient
+	client: WebClient,
 ) {
 	const logData = { fullText, teamId, channelId, userId, eventTs, threadTs };
 	logger.info(logData, '@globalping request');
@@ -52,12 +53,11 @@ export async function handleMention(
 	} catch (error) {
 		const errorMsg = getAPIErrorMessage(error);
 		logger.error({ errorMsg, ...logData }, '@globalping failed');
+
 		await client.chat.postMessage({
 			channel: channelId,
 			thread_ts: threadTs,
-			text: `Failed to process command \`${commandText}\`.\n${formatAPIError(
-				errorMsg
-			)}`,
+			text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}`,
 		});
 	}
 }

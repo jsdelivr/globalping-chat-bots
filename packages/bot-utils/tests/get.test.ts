@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { getMeasurement } from '../src/get';
-import { getMeasurementHandlers, setupAPIServer } from './mocks/index';
+import { getMeasurement } from '../src/get.js';
+import { getMeasurementHandlers, setupAPIServer } from './mocks/index.js';
 import probeData from './mocks/probedata.json';
 
 // This is mainly just to have easy probe data fixtures to reference for future debugging

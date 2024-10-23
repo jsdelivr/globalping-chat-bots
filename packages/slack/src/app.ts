@@ -6,14 +6,14 @@ import {
 } from '@globalping/bot-utils';
 import { App, AppOptions, GenericMessageEvent, LogLevel } from '@slack/bolt';
 
-import { initOAuthClient } from './auth';
-import { config } from './config';
-import { installationStore, knex } from './db';
-import { handleMention } from './mention';
-import { postAPI } from './post';
-import { routes } from './routes';
-import { channelWelcome, getInstallationId, logger } from './utils';
-import { handleAppHomeMessagesOpened } from './welcome';
+import { initOAuthClient } from './auth.js';
+import { config } from './config.js';
+import { installationStore, knex } from './db.js';
+import { handleMention } from './mention.js';
+import { postAPI } from './post.js';
+import { routes } from './routes.js';
+import { channelWelcome, getInstallationId, logger } from './utils.js';
+import { handleAppHomeMessagesOpened } from './welcome.js';
 
 const baseAppConfig: AppOptions = {
 	signingSecret: config.slackSigningSecret,
@@ -51,9 +51,9 @@ const baseAppConfig: AppOptions = {
 				logger.error(JSON.stringify(errorParse(msg as Error)));
 			}
 		},
-		setLevel: () => {},
+		setLevel: () => undefined,
 		getLevel: () => logger.level as LogLevel,
-		setName: () => {},
+		setName: () => undefined,
 	},
 	installationStore,
 	installerOptions: {
@@ -63,6 +63,7 @@ const baseAppConfig: AppOptions = {
 };
 
 const app: App = new App(baseAppConfig);
+
 if (config.env !== 'production') {
 	baseAppConfig.logLevel = LogLevel.DEBUG;
 }
@@ -89,8 +90,9 @@ app.command(
 			const err = error as Error;
 			logger.info(
 				{ errorMsg: err.message, ...logData },
-				'/globalping ack failed'
+				'/globalping ack failed',
 			);
+
 			await respond({
 				text: `Unable to acknowledge the request.\n${formatAPIError(err.message)}`,
 			});
@@ -100,6 +102,7 @@ app.command(
 		const { channel_id, user_id, channel_name, text: commandText } = payload;
 
 		let channelConversationsInfo;
+
 		// Check if channel is accessible just to be sure
 		try {
 			channelConversationsInfo = await client.conversations.info({
@@ -109,7 +112,7 @@ app.command(
 			const err = error as Error;
 			logger.info(
 				{ errorMsg: err.message, ...logData },
-				'/globalping channel info not available'
+				'/globalping channel info not available',
 			);
 		}
 
@@ -126,13 +129,14 @@ app.command(
 
 					// If the DM is not the Globalping DM, we cancel the request
 					if (
-						conversation.channel?.id &&
-						channel_id !== conversation.channel.id
+						conversation.channel?.id
+						&& channel_id !== conversation.channel.id
 					) {
 						logger.error(
 							{ errorMsg: 'request in dm', ...logData },
-							'/globalping response - dm'
+							'/globalping response - dm',
 						);
+
 						await respond({
 							text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
 						});
@@ -142,8 +146,9 @@ app.command(
 				} else if (channel_name.startsWith('mpdm-')) {
 					logger.error(
 						{ errorMsg: 'request in mpdm', ...logData },
-						'/globalping response - mpdm'
+						'/globalping response - mpdm',
 					);
+
 					await respond({
 						text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
 					});
@@ -151,11 +156,10 @@ app.command(
 					// If not DM, try checking the properties of the channel
 					logger.error(
 						{ errorMsg: 'asked for invite to channel', ...logData },
-						'/globalping response - channel invite needed'
+						'/globalping response - channel invite needed',
 					);
-					await respond(
-						'Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.'
-					);
+
+					await respond('Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.');
 				}
 			} else {
 				const channelPayload = {
@@ -170,13 +174,12 @@ app.command(
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
 			logger.error({ errorMsg, ...logData }, '/globalping failed');
+
 			await respond({
-				text: `Failed to process command \`${commandText}\`.\n${formatAPIError(
-					errorMsg
-				)}`,
+				text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}`,
 			});
 		}
-	}
+	},
 );
 
 app.event('app_home_opened', async ({ context, event, say, client }) => {
@@ -191,22 +194,24 @@ app.event('app_home_opened', async ({ context, event, say, client }) => {
 			channel,
 			eventTs,
 			teamId,
-			say
+			say,
 		);
 	}
 });
 
 // Needed until this is resolved - https://github.com/slackapi/bolt-js/issues/1203
 app.event('app_uninstalled', async ({ context }) => {
-	// @ts-ignore - They are pretty much the same type
+	// @ts-expect-error - They are pretty much the same type
 	await installationStore.deleteInstallation(context);
 });
 
 app.event('member_joined_channel', async ({ event, context, say }) => {
 	logger.debug(`Member joined channel: ${JSON.stringify(event)}`);
 	logger.debug(`Context: ${JSON.stringify(context)}`);
+
 	if (event.user === context.botUserId) {
 		logger.debug('Bot joined channel, sending welcome message');
+
 		await say({
 			text: channelWelcome,
 		});
@@ -215,9 +220,11 @@ app.event('member_joined_channel', async ({ event, context, say }) => {
 
 app.event('app_mention', async ({ payload, event, context, client }) => {
 	let { botUserId } = context;
+
 	if (botUserId === undefined) {
 		botUserId = '';
 	}
+
 	const fullText = payload.text;
 	const eventTs = payload.event_ts;
 	const teamId = event.team;
@@ -239,7 +246,7 @@ app.event('app_mention', async ({ payload, event, context, client }) => {
 		threadTs,
 		installationId,
 		botUserId,
-		client
+		client,
 	);
 });
 
@@ -252,9 +259,11 @@ app.event('message', async ({ payload, event, context, client }) => {
 	const messageEvent = event as GenericMessageEvent;
 
 	let { botUserId } = context;
+
 	if (botUserId === undefined) {
 		botUserId = '';
 	}
+
 	let fullText = messageEvent.text;
 	const eventTs = payload.event_ts;
 	const teamId = messageEvent.team;
@@ -270,6 +279,7 @@ app.event('message', async ({ payload, event, context, client }) => {
 	if (fullText === undefined) {
 		fullText = '';
 	}
+
 	await handleMention(
 		fullText,
 		teamId,
@@ -279,11 +289,10 @@ app.event('message', async ({ payload, event, context, client }) => {
 		threadTs,
 		installationId,
 		botUserId,
-		client
+		client,
 	);
 });
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
 (async () => {
 	logger.info('Running migrations');
 	await knex.migrate.latest();
@@ -291,6 +300,7 @@ app.event('message', async ({ payload, event, context, client }) => {
 
 	// Start your app
 	await app.start(config.port);
+
 	if (config.env === 'production') {
 		logger.info('Slack bot is online [PRODUCTION]');
 	} else {

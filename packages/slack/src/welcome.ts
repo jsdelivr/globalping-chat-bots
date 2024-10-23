@@ -1,17 +1,17 @@
 import { SayFn } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
 
-import { logger, welcome } from './utils';
+import { logger, welcome } from './utils.js';
 
 const welcomeMap: Record<string, boolean> = {};
 
 const welcomeMapTimeout = 10_000;
 
-function welcomeMapKey(teamId: string | undefined, user: string): string {
+function welcomeMapKey (teamId: string | undefined, user: string): string {
 	return `team:${teamId}-user:${user}`;
 }
 
-function markWelcomeSent(teamId: string | undefined, user: string) {
+function markWelcomeSent (teamId: string | undefined, user: string) {
 	welcomeMap[welcomeMapKey(teamId, user)] = true;
 
 	// delete from the map after timout as the message should be in the slack history by then
@@ -20,18 +20,18 @@ function markWelcomeSent(teamId: string | undefined, user: string) {
 	}, welcomeMapTimeout);
 }
 
-function welcomeSent(teamId: string | undefined, user: string): boolean {
+function welcomeSent (teamId: string | undefined, user: string): boolean {
 	return welcomeMap[welcomeMapKey(teamId, user)];
 }
 
-export async function handleAppHomeMessagesOpened(
+export async function handleAppHomeMessagesOpened (
 	client: WebClient,
 	user: string,
 	botToken: string | undefined,
 	channel: string,
 	eventTs: string | undefined,
 	teamId: string | undefined,
-	say: SayFn
+	say: SayFn,
 ) {
 	const logData = { teamId, user, eventTs };
 
@@ -49,6 +49,7 @@ export async function handleAppHomeMessagesOpened(
 	});
 
 	const historyLength = history?.messages?.length;
+
 	if (historyLength !== undefined && historyLength > 0) {
 		logger.info(logData, 'not sending welcome message, history present');
 		return;
@@ -57,6 +58,7 @@ export async function handleAppHomeMessagesOpened(
 	// no previous messages
 	markWelcomeSent(teamId, user);
 	logger.info(logData, 'sending welcome message');
+
 	await say({
 		text: welcome(user),
 	});

@@ -1,12 +1,12 @@
 import { AuthToken } from '@globalping/bot-utils';
-import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage';
+import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage.js';
 import { createHash, randomBytes } from 'node:crypto';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { parse } from 'node:url';
 
-import { Config } from './config';
-import { AuthorizeSession, Installation, InstallationStore } from './db';
-import { Logger, SlackClient } from './utils';
+import { Config } from './config.js';
+import { AuthorizeSession, Installation, InstallationStore } from './db.js';
+import { Logger, SlackClient } from './utils.js';
 
 export const CALLBACK_PATH = '/slack/oauth/callback';
 export const enum AuthorizeErrorType {
@@ -42,14 +42,14 @@ export interface IntrospectionResponse {
 }
 
 export class OAuthClient {
-	constructor(
+	constructor (
 		private config: Config,
 		private logger: Logger,
 		private installationStore: InstallationStore,
-		private slackClient: SlackClient
+		private slackClient: SlackClient,
 	) {}
 
-	async Authorize(opts: {
+	async Authorize (opts: {
 		installationId: string;
 		channel_id: string;
 		user_id: string;
@@ -77,26 +77,30 @@ export class OAuthClient {
 		};
 	}
 
-	async Logout(id: string): Promise<AuthorizeError | null> {
+	async Logout (id: string): Promise<AuthorizeError | null> {
 		const token = await this.installationStore.getToken(id);
+
 		if (!token) {
 			return null;
 		}
+
 		let error: AuthorizeError | null = null;
+
 		if (token && token.refresh_token) {
 			error = await this.revokeToken(token.refresh_token);
+
 			if (!error) {
 				// Delete token
 				await this.installationStore.updateToken(id, null);
 			}
 		}
+
 		return error;
 	}
 
-	async Introspect(
-		id: string
-	): Promise<[IntrospectionResponse | null, AuthorizeError | null]> {
+	async Introspect (id: string): Promise<[IntrospectionResponse | null, AuthorizeError | null]> {
 		const token = await this.GetToken(id);
+
 		if (!token) {
 			return [
 				null,
@@ -106,6 +110,7 @@ export class OAuthClient {
 				},
 			];
 		}
+
 		const url = new URL(`${this.config.authUrl}/oauth/token/introspect`);
 		const body = new URLSearchParams();
 		body.append('token', token.access_token);
@@ -122,48 +127,56 @@ export class OAuthClient {
 
 		if (res.status !== 200) {
 			const error = (await res.json()) as AuthorizeError;
-			return [null, error];
+			return [ null, error ];
 		}
+
 		const introspection = (await res.json()) as IntrospectionResponse;
-		return [introspection, null];
+		return [ introspection, null ];
 	}
 
 	// NOTE: Does not handle concurrent refreshes
-	async GetToken(id: string): Promise<AuthToken | null> {
+	async GetToken (id: string): Promise<AuthToken | null> {
 		const token = await this.installationStore.getToken(id);
+
 		if (!token) {
 			return null;
 		}
+
 		const now = Date.now() / 1000;
+
 		if (token.expiry < now) {
-			const [t] = await this.refreshToken(id, token.refresh_token);
+			const [ t ] = await this.refreshToken(id, token.refresh_token);
 			return t;
 		}
+
 		return token;
 	}
 
-	async TryToRefreshToken(
+	async TryToRefreshToken (
 		id: string,
-		token: AuthToken
+		token: AuthToken,
 	): Promise<string | null> {
 		if (!token.refresh_token) {
 			return 'Your access token has been rejected by the API. Try signing in with a new token.';
 		}
+
 		try {
-			const [newToken] = await this.refreshToken(id, token.refresh_token);
+			const [ newToken ] = await this.refreshToken(id, token.refresh_token);
+
 			if (newToken) {
 				return 'Access token successfully refreshed. Try repeating the measurement.';
 			}
 		} catch {
 			// Ignore
 		}
+
 		return 'You have been signed out by the API. Please try signing in again.';
 	}
 
-	async exchange(
+	async exchange (
 		code: string,
 		verifier: string,
-		id: string
+		id: string,
 	): Promise<AuthorizeError | null> {
 		const url = new URL(`${this.config.authUrl}/oauth/token`);
 		const body = new URLSearchParams();
@@ -196,7 +209,7 @@ export class OAuthClient {
 		return null;
 	}
 
-	async revokeToken(token: string): Promise<AuthorizeError | null> {
+	async revokeToken (token: string): Promise<AuthorizeError | null> {
 		const url = new URL(`${this.config.authUrl}/oauth/token/revoke`);
 		const body = new URLSearchParams();
 		body.append('token', token);
@@ -214,12 +227,13 @@ export class OAuthClient {
 		if (res.status !== 200) {
 			return (await res.json()) as AuthorizeError;
 		}
+
 		return null;
 	}
 
-	async OnCallback(
+	async OnCallback (
 		req: ParamsIncomingMessage,
-		res: ServerResponse<IncomingMessage>
+		res: ServerResponse<IncomingMessage>,
 	) {
 		if (!this.slackClient) {
 			this.logger.error('Slack client not set');
@@ -237,11 +251,13 @@ export class OAuthClient {
 		if (!installationId) {
 			this.logger.error(
 				callbackError,
-				'/oauth/callback missing installationId'
+				'/oauth/callback missing installationId',
 			);
+
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
+
 			res.end();
 			return;
 		}
@@ -251,10 +267,8 @@ export class OAuthClient {
 		let installation: Installation | null;
 
 		try {
-			const installationRes =
-				await this.installationStore.getInstallationForAuthorization(
-					installationId
-				);
+			const installationRes
+				= await this.installationStore.getInstallationForAuthorization(installationId);
 			oldToken = installationRes.token;
 			session = installationRes.session;
 			installation = installationRes.installation;
@@ -262,15 +276,18 @@ export class OAuthClient {
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
+
 			res.end();
 			return;
 		}
 
 		if (!session) {
 			this.logger.error({ installationId }, '/oauth/callback missing session');
+
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
+
 			res.end();
 			return;
 		}
@@ -294,6 +311,7 @@ export class OAuthClient {
 			} catch (error) {
 				this.logger.error(error, '/oauth/callback failed to post ephemeral');
 			}
+
 			this.logger.error(
 				{
 					error: callbackError,
@@ -301,20 +319,24 @@ export class OAuthClient {
 					code,
 					installationId,
 				},
-				'/oauth/callback failed'
+				'/oauth/callback failed',
 			);
+
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
 			});
+
 			res.end();
 			return;
 		}
+
 		let exchangeError: AuthorizeError | null;
+
 		try {
 			exchangeError = await this.exchange(
 				code,
 				session.verifier,
-				installationId
+				installationId,
 			);
 
 			// Revoke old token if exists
@@ -327,7 +349,7 @@ export class OAuthClient {
 							installationId,
 							error,
 						},
-						'/oauth/callback failed to revoke token'
+						'/oauth/callback failed to revoke token',
 					);
 				}
 			}
@@ -337,13 +359,16 @@ export class OAuthClient {
 				error_description: 'Failed to exchange code',
 			};
 		}
+
 		let message = '';
+
 		if (exchangeError) {
 			this.logger.error(exchangeError, '/oauth/callback failed');
 			message = `Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`;
 		} else {
 			message = 'Success! You are now authenticated.';
 		}
+
 		try {
 			await this.slackClient.chat.postEphemeral({
 				token: installation?.bot?.token,
@@ -355,17 +380,19 @@ export class OAuthClient {
 		} catch (error) {
 			this.logger.error(error, '/oauth/callback failed to post ephemeral');
 		}
+
 		res.writeHead(302, {
 			Location:
-				this.config.dashboardUrl +
-				(exchangeError ? '/authorize/error' : '/authorize/success'),
+				this.config.dashboardUrl
+				+ (exchangeError ? '/authorize/error' : '/authorize/success'),
 		});
+
 		res.end();
 	}
 
-	async refreshToken(
+	async refreshToken (
 		id: string,
-		refreshToken: string
+		refreshToken: string,
 	): Promise<[AuthToken | null, AuthorizeError | null]> {
 		const url = new URL(`${this.config.authUrl}/oauth/token`);
 		const body = new URLSearchParams();
@@ -386,35 +413,34 @@ export class OAuthClient {
 
 		if (res.status !== 200) {
 			const error = (await res.json()) as AuthorizeError;
-			return [null, error];
+			return [ null, error ];
 		}
 
 		const token = (await res.json()) as AuthToken;
 		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
 		await this.installationStore.updateToken(id, token);
 
-		return [token, null];
+		return [ token, null ];
 	}
 }
 
-function generateVerifier(): string {
+function generateVerifier (): string {
 	return randomBytes(32).toString('base64url');
 }
 
-function generateS256Challenge(verifier: string): string {
+function generateS256Challenge (verifier: string): string {
 	const hash = createHash('sha256');
 	hash.update(verifier);
 	return hash.digest('base64url');
 }
 
-// eslint-disable-next-line import/no-mutable-exports
 export let oauth: OAuthClient;
 
-export function initOAuthClient(
+export function initOAuthClient (
 	config: Config,
 	logger: Logger,
 	installationStore: InstallationStore,
-	slackClient: SlackClient
+	slackClient: SlackClient,
 ) {
 	oauth = new OAuthClient(config, logger, installationStore, slackClient);
 }

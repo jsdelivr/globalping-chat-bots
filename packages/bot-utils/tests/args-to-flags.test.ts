@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { argsToFlags, Flags } from '../src/flags';
+import { argsToFlags, Flags } from '../src/flags.js';
 
 describe('Utils', () => {
 	describe('args to flags', () => {
 		it('should convert dns args to flags', () => {
-			const args =
-				'dns google.com from New York --limit 2 --type AAAA --protocol tcp --port 80 --resolver 1.1.1.1 --trace --latency';
+			const args
+				= 'dns google.com from New York --limit 2 --type AAAA --protocol tcp --port 80 --resolver 1.1.1.1 --trace --latency';
 			const result = argsToFlags(args);
 			const flags: Flags = {
 				cmd: 'dns',
@@ -26,8 +26,8 @@ describe('Utils', () => {
 
 		describe('http args to flags', () => {
 			it('host target', () => {
-				const args =
-					'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency';
+				const args
+					= 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency';
 				const result = argsToFlags(args);
 
 				const flags: Flags = {
@@ -49,8 +49,8 @@ describe('Utils', () => {
 			});
 
 			it('url target, resolver and spaces', () => {
-				const args =
-					'http https://www.example.com:1234/my/path/?abc=123&xyz=test @8.8.8.8  --from usa  --limit 2   --method get';
+				const args
+					= 'http https://www.example.com:1234/my/path/?abc=123&xyz=test @8.8.8.8  --from usa  --limit 2   --method get';
 				const result = argsToFlags(args);
 
 				const flags: Flags = {
@@ -72,8 +72,8 @@ describe('Utils', () => {
 			});
 
 			it('with 1 simple header', () => {
-				const args =
-					'http google.com from New York --limit 2 --path / --query  "?a=abc"  --host  google.fr --method get --port  80 --protocol http2 --full -H "AB: 123z"';
+				const args
+					= 'http google.com from New York --limit 2 --path / --query  "?a=abc"  --host  google.fr --method get --port  80 --protocol http2 --full -H "AB: 123z"';
 				const result = argsToFlags(args);
 
 				const flags: Flags = {
@@ -97,8 +97,8 @@ describe('Utils', () => {
 			});
 
 			it('with 2 headers', () => {
-				const args =
-					'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency --header "Content-Encoding: gzip" --header \'Content-Type: text/html; charset=utf-8\'';
+				const args
+					= 'http google.com from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency --header "Content-Encoding: gzip" --header \'Content-Type: text/html; charset=utf-8\'';
 				const result = argsToFlags(args);
 
 				const flags: Flags = {
@@ -124,8 +124,8 @@ describe('Utils', () => {
 		});
 
 		it('convert ping args to flags', () => {
-			const args =
-				'ping google.com from New York --limit 2 --packets 3 --latency';
+			const args
+				= 'ping google.com from New York --limit 2 --packets 3 --latency';
 			const result = argsToFlags(args);
 			const flags: Flags = {
 				cmd: 'ping',
@@ -140,8 +140,8 @@ describe('Utils', () => {
 		});
 
 		it('convert mtr args to flags with share', () => {
-			const args =
-				'mtr aws.com from Canada --packets 2 --protocol icmp -L 5 --share';
+			const args
+				= 'mtr aws.com from Canada --packets 2 --protocol icmp -L 5 --share';
 			const result = argsToFlags(args);
 			const flags: Flags = {
 				cmd: 'mtr',
@@ -168,6 +168,7 @@ describe('Utils', () => {
 			expect(result).toEqual(expectedFlags);
 
 			result = argsToFlags('auth login');
+
 			expectedFlags = {
 				cmd: 'auth',
 				target: 'login',
@@ -175,9 +176,11 @@ describe('Utils', () => {
 				limit: 1,
 				help: false,
 			};
+
 			expect(result).toEqual(expectedFlags);
 
 			result = argsToFlags('auth logout');
+
 			expectedFlags = {
 				cmd: 'auth',
 				target: 'logout',
@@ -185,9 +188,11 @@ describe('Utils', () => {
 				limit: 1,
 				help: false,
 			};
+
 			expect(result).toEqual(expectedFlags);
 
 			result = argsToFlags('auth status');
+
 			expectedFlags = {
 				cmd: 'auth',
 				target: 'status',
@@ -195,9 +200,11 @@ describe('Utils', () => {
 				limit: 1,
 				help: false,
 			};
+
 			expect(result).toEqual(expectedFlags);
 
 			result = argsToFlags('help auth');
+
 			expectedFlags = {
 				cmd: 'auth',
 				target: '',
@@ -205,9 +212,11 @@ describe('Utils', () => {
 				limit: 1,
 				help: true,
 			};
+
 			expect(result).toEqual(expectedFlags);
 
 			result = argsToFlags('help auth login');
+
 			expectedFlags = {
 				cmd: 'auth',
 				target: 'login',
@@ -215,6 +224,7 @@ describe('Utils', () => {
 				limit: 1,
 				help: true,
 			};
+
 			expect(result).toEqual(expectedFlags);
 		});
 	});

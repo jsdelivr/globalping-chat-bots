@@ -4,11 +4,11 @@ export interface TargetQuery {
 	resolver: string;
 }
 
-const commandsWithResolver = new Set(['dns', 'http']);
+const commandsWithResolver = new Set([ 'dns', 'http' ]);
 
-export function parseTargetQuery(
+export function parseTargetQuery (
 	cmd: string | undefined,
-	args: string[]
+	args: string[],
 ): TargetQuery {
 	const targetQuery = {} as TargetQuery;
 
@@ -16,13 +16,12 @@ export function parseTargetQuery(
 		return targetQuery;
 	}
 
-	const [resolver, argsWithoutResolver] = findAndRemoveResolver(args);
+	const [ resolver, argsWithoutResolver ] = findAndRemoveResolver(args);
+
 	if (resolver !== '') {
 		// resolver was found
 		if (!commandsWithResolver.has(cmd)) {
-			throw new Error(
-				`command ${cmd} does not accept a resolver argument. @${resolver} was provided`
-			);
+			throw new Error(`command ${cmd} does not accept a resolver argument. @${resolver} was provided`);
 		}
 
 		targetQuery.resolver = resolver;
@@ -43,11 +42,11 @@ export function parseTargetQuery(
 	return targetQuery;
 }
 
-export function findAndRemoveResolver(args: string[]): [string, string[]] {
+export function findAndRemoveResolver (args: string[]): [string, string[]] {
 	let resolver = '';
 	let resolverIndex = -1;
 
-	for (const [i, arg] of args.entries()) {
+	for (const [ i, arg ] of args.entries()) {
 		if (arg.length > 0 && arg[0] === '@') {
 			resolver = arg.slice(1);
 			resolverIndex = i;
@@ -57,11 +56,11 @@ export function findAndRemoveResolver(args: string[]): [string, string[]] {
 
 	if (resolverIndex === -1) {
 		// resolver was not found
-		return ['', args];
+		return [ '', args ];
 	}
 
-	const argsWithoutResolver: string[] = [...args];
+	const argsWithoutResolver: string[] = [ ...args ];
 	argsWithoutResolver.splice(resolverIndex, 1);
 
-	return [resolver, argsWithoutResolver];
+	return [ resolver, argsWithoutResolver ];
 }
