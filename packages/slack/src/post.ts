@@ -137,7 +137,7 @@ async function authLogin(client: WebClient, payload: ChannelPayload) {
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: `Click <${res.url}|here> to authenticate`,
+					text: `Please <${res.url}|click here> to authenticate.`,
 				},
 			},
 		],
@@ -161,7 +161,7 @@ async function authStatus(client: WebClient, payload: ChannelPayload) {
 	}
 	text =
 		introspection && introspection.active
-			? `Logged in as ${introspection?.username}`
+			? `Logged in as ${introspection?.username}.`
 			: 'Not logged in.';
 	await client.chat.postEphemeral({
 		text,

@@ -255,10 +255,12 @@ traceroute jsdelivr.com from Paris --port 453
 export const authHelpTexts = {
 	preamble: `Authenticate with the Globalping API for higher measurements limits.
 
-Available Commands:
+*Available Commands:*
+\`\`\`
   login       Log in to your Globalping account
   logout      Log out from your Globalping account
-  status      Check the current authentication status`,
+  status      Check the current authentication status
+\`\`\``,
 	usage: (rootCommand: string) => `${rootCommand} auth [command]`,
 	flags: '  -h, --help   Help for auth',
 };

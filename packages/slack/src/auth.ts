@@ -286,7 +286,7 @@ export class OAuthClient {
 			try {
 				await this.slackClient.chat.postEphemeral({
 					token: installation?.bot?.token,
-					text: `Failed to authorize: ${callbackError}: ${errorDescription}`,
+					text: `Authentication failed: ${callbackError}: ${errorDescription}`,
 					user: session.userId,
 					channel: session.channelId,
 					thread_ts: session.threadTs,
@@ -340,7 +340,7 @@ export class OAuthClient {
 		let message = '';
 		if (exchangeError) {
 			this.logger.error(exchangeError, '/oauth/callback failed');
-			message = `Failed to authorize: ${exchangeError.error}: ${exchangeError.error_description}`;
+			message = `Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`;
 		} else {
 			message = 'Success! You are now authenticated.';
 		}
