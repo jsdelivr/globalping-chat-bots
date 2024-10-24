@@ -307,3 +307,22 @@ app.event('message', async ({ payload, event, context, client }) => {
 		logger.info('⚡️ Bolt app is running! [DEVELOPMENT]');
 	}
 })();
+
+// Graceful shutdown
+[
+	'beforeExit',
+	'uncaughtException',
+	'unhandledRejection',
+	'SIGINT',
+	'SIGQUIT',
+	'SIGILL',
+	'SIGTERM',
+].forEach((eventType) => {
+	process.on(eventType, async () => {
+		logger.info('Stopping app');
+		await app.stop();
+		logger.info('Closing database connection');
+		await knex.destroy();
+		logger.info('App stopped');
+	});
+});
