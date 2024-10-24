@@ -53,7 +53,8 @@ describe('Auth', () => {
 			expect(installationStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
 				installationId,
 				{
-					verifier: expect.any(String),
+					callbackVerifier: expect.any(String),
+					exchangeVerifier: expect.any(String),
 					userId,
 					channelId,
 					threadTs,
@@ -67,7 +68,9 @@ describe('Auth', () => {
 			expect(url.searchParams.get('code_challenge')?.length).toBe(43);
 			expect(url.searchParams.get('code_challenge_method')).toBe('S256');
 			expect(url.searchParams.get('scope')).toBe('measurements');
-			expect(url.searchParams.get('state')).toBe(installationId);
+			const state = url.searchParams.get('state');
+			expect(state?.length).toBe(43 + 1 + installationId.length);
+			expect(state?.substring(43)).toBe('-' + installationId);
 		});
 	});
 
@@ -339,7 +342,8 @@ describe('Auth', () => {
 			};
 
 			const authorizeSession: AuthorizeSession = {
-				verifier: 'verifier',
+				callbackVerifier: 'callback',
+				exchangeVerifier: 'verifier',
 				userId,
 				channelId,
 				threadTs,
@@ -375,7 +379,7 @@ describe('Auth', () => {
 			} as Response);
 
 			const req = {
-				url: `/oauth/callback?code=${code}&state=${installationId}`,
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${installationId}`,
 			} as ParamsIncomingMessage;
 			const res = {
 				writeHead: vi.fn(),
@@ -427,6 +431,78 @@ describe('Auth', () => {
 
 			expect(res.writeHead).toHaveBeenCalledWith(302, {
 				Location: `${config.dashboardUrl}/authorize/success`,
+			});
+
+			expect(res.end).toHaveBeenCalled();
+		});
+
+		it('should redirect to the error page - callback verifier does not match', async () => {
+			const code = 'code';
+			const userId = 'U123';
+			const channelId = 'C123';
+			const threadTs = '123';
+			const installationId = 'I123';
+
+			const now = new Date();
+
+			const token: AuthToken = {
+				access_token: 'tok3n',
+				refresh_token: 'refresh_tok3n',
+				expires_in: 3600,
+				token_type: 'Bearer',
+				expiry: now.getTime() / 1000 - 3600,
+			};
+
+			const authorizeSession: AuthorizeSession = {
+				callbackVerifier: 'callback',
+				exchangeVerifier: 'verifier',
+				userId,
+				channelId,
+				threadTs,
+			};
+
+			const installation = {
+				bot: { token: 'installation_token' },
+			} as Installation;
+
+			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
+
+			vi.spyOn(
+				installationStoreMock,
+				'getInstallationForAuthorization',
+			).mockResolvedValue({
+				token,
+				session: {
+					...authorizeSession,
+					callbackVerifier: 'wrong',
+				},
+				installation,
+			});
+
+			const fetchSpy = vi.spyOn(global, 'fetch');
+
+			const req = {
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${installationId}`,
+			} as ParamsIncomingMessage;
+			const res = {
+				writeHead: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await oauth.OnCallback(req, res);
+
+			expect(installationStoreMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
+
+			expect(installationStoreMock.updateAuthorizeSession).toHaveBeenCalledTimes(0);
+
+			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
+
+			expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+
+			expect(res.writeHead).toHaveBeenCalledWith(302, {
+				Location: `${config.dashboardUrl}/authorize/error`,
 			});
 
 			expect(res.end).toHaveBeenCalled();
