@@ -31,6 +31,8 @@ export const config = {
 	githubPersonalAccessToken: process.env.GITHUB_PERSONAL_ACCESS_TOKEN,
 	githubBotApiKey: process.env.GITHUB_BOT_API_KEY,
 	githubBotHandle: process.env.GITHUB_BOT_HANDLE || 'globalping',
+
+	globalpingToken: process.env.GLOBALPING_TOKEN,
 };
 
 export type Config = typeof config;

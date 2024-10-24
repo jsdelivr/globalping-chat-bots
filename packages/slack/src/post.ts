@@ -74,7 +74,7 @@ export const postAPI = async (
 	const token = await oauth.GetToken(payload.installationId);
 
 	try {
-		measurements = await postMeasurement(postMeasurements, token || undefined);
+		measurements = await postMeasurement(postMeasurements, token?.access_token);
 	} catch (error) {
 		let e = error;
 
