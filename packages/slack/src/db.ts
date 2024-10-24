@@ -17,7 +17,8 @@ export const enum Tables {
 }
 
 export interface AuthorizeSession {
-	verifier: string;
+	callbackVerifier: string;
+	exchangeVerifier: string;
 	channelId: string;
 	userId: string;
 	threadTs?: string;

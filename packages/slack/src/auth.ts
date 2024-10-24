@@ -2,7 +2,6 @@ import { AuthToken } from '@globalping/bot-utils';
 import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage.js';
 import { createHash, randomBytes } from 'node:crypto';
 import { IncomingMessage, ServerResponse } from 'node:http';
-import { parse } from 'node:url';
 
 import { Config } from './config.js';
 import { AuthorizeSession, Installation, InstallationStore } from './db.js';
@@ -55,10 +54,12 @@ export class OAuthClient {
 		user_id: string;
 		thread_ts?: string;
 	}): Promise<AuthorizeResponse> {
-		const verifier = generateVerifier();
+		const callbackVerifier = generateVerifier();
+		const exchangeVerifier = generateVerifier();
 
 		await this.installationStore.updateAuthorizeSession(opts.installationId, {
-			verifier,
+			callbackVerifier,
+			exchangeVerifier,
 			channelId: opts.channel_id,
 			userId: opts.user_id,
 			threadTs: opts.thread_ts,
@@ -66,11 +67,11 @@ export class OAuthClient {
 
 		const url = new URL(`${this.config.authUrl}/oauth/authorize`);
 		url.searchParams.append('client_id', this.config.authClientId);
-		url.searchParams.append('code_challenge', generateS256Challenge(verifier));
+		url.searchParams.append('code_challenge', generateS256Challenge(exchangeVerifier));
 		url.searchParams.append('code_challenge_method', 'S256');
 		url.searchParams.append('response_type', 'code');
 		url.searchParams.append('scope', 'measurements');
-		url.searchParams.append('state', opts.installationId);
+		url.searchParams.append('state', `${callbackVerifier}-${opts.installationId}`);
 
 		return {
 			url: url.toString(),
@@ -242,16 +243,16 @@ export class OAuthClient {
 			return;
 		}
 
-		const { query } = parse(req.url || '', true);
-		const callbackError = query.error;
-		const errorDescription = query.error_description;
-		const code = query.code as string;
-		const installationId = query.state as string;
+		const url = new URL(req.url || '', this.config.serverHost);
+		const callbackError = url.searchParams.get('error');
+		const errorDescription = url.searchParams.get('error_description');
+		const code = url.searchParams.get('code');
+		const state = url.searchParams.get('state');
 
-		if (!installationId) {
+		if (!state) {
 			this.logger.error(
 				callbackError,
-				'/oauth/callback missing installationId',
+				'/oauth/callback missing state',
 			);
 
 			res.writeHead(302, {
@@ -261,6 +262,10 @@ export class OAuthClient {
 			res.end();
 			return;
 		}
+
+		const separatorIndex = state.indexOf('-');
+		const callbackVerifier = state.substring(0, separatorIndex);
+		const installationId = state.substring(separatorIndex + 1);
 
 		let oldToken: AuthToken | null;
 		let session: AuthorizeSession | null;
@@ -283,6 +288,22 @@ export class OAuthClient {
 
 		if (!session) {
 			this.logger.error({ installationId }, '/oauth/callback missing session');
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		if (callbackVerifier !== session.callbackVerifier) {
+			this.logger.error(
+				{
+					installationId,
+				},
+				'/oauth/callback invalid verifier',
+			);
 
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
@@ -335,7 +356,7 @@ export class OAuthClient {
 		try {
 			exchangeError = await this.exchange(
 				code,
-				session.verifier,
+				session.exchangeVerifier,
 				installationId,
 			);
 
