@@ -21,6 +21,7 @@ import {
 import { helpCmd, logger } from '../utils.js';
 import { getGithubClient } from './client.js';
 import { GithubTarget } from './types.js';
+import { config } from '../config.js';
 
 export const processCommand = async (
 	reqId: string,
@@ -60,7 +61,10 @@ export const processCommand = async (
 	let measurements: PostMeasurementResponse[];
 
 	try {
-		measurements = await postMeasurement(postMeasurements);
+		measurements = await postMeasurement(
+			postMeasurements,
+			config.globalpingToken,
+		);
 	} catch (error) {
 		const errorMsg = getAPIErrorMessage(error);
 		logger.error(

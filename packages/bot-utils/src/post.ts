@@ -1,16 +1,12 @@
 import got, { HTTPError } from 'got';
 
 import { PostError } from './errors.js';
-import type {
-	AuthToken,
-	PostMeasurement,
-	PostMeasurementResponse,
-} from './types.js';
+import type { PostMeasurement, PostMeasurementResponse } from './types.js';
 import { userAgent } from './user-agent.js';
 
 export const postMeasurement = async (
 	optsArr: PostMeasurement[],
-	token?: AuthToken,
+	token?: string,
 ): Promise<PostMeasurementResponse[]> => {
 	let index = 0;
 
@@ -23,7 +19,7 @@ export const postMeasurement = async (
 		};
 
 		if (token) {
-			headers.Authorization = `Bearer ${token.access_token}`;
+			headers.Authorization = `Bearer ${token}`;
 		}
 
 		for (const opts of optsArr) {
