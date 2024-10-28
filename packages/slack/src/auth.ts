@@ -67,11 +67,20 @@ export class OAuthClient {
 
 		const url = new URL(`${this.config.authUrl}/oauth/authorize`);
 		url.searchParams.append('client_id', this.config.authClientId);
-		url.searchParams.append('code_challenge', generateS256Challenge(exchangeVerifier));
+
+		url.searchParams.append(
+			'code_challenge',
+			generateS256Challenge(exchangeVerifier),
+		);
+
 		url.searchParams.append('code_challenge_method', 'S256');
 		url.searchParams.append('response_type', 'code');
 		url.searchParams.append('scope', 'measurements');
-		url.searchParams.append('state', `${callbackVerifier}-${opts.installationId}`);
+
+		url.searchParams.append(
+			'state',
+			`${callbackVerifier}-${opts.installationId}`,
+		);
 
 		return {
 			url: url.toString(),
@@ -87,7 +96,7 @@ export class OAuthClient {
 
 		let error: AuthorizeError | null = null;
 
-		if (token && token.refresh_token) {
+		if (token && !token.isAnonymous && token.refresh_token) {
 			error = await this.revokeToken(token.refresh_token);
 
 			if (!error) {
@@ -109,6 +118,15 @@ export class OAuthClient {
 					error: AuthorizeErrorType.NotAuthorized,
 					error_description: 'You are not authorized',
 				},
+			];
+		}
+
+		if (token.isAnonymous) {
+			return [
+				{
+					active: false,
+				},
+				null,
 			];
 		}
 
@@ -140,7 +158,8 @@ export class OAuthClient {
 		const token = await this.installationStore.getToken(id);
 
 		if (!token) {
-			return null;
+			const [ t ] = await this.requestAnonymousToken(id);
+			return t;
 		}
 
 		const now = Date.now() / 1000;
@@ -210,6 +229,38 @@ export class OAuthClient {
 		return null;
 	}
 
+	async requestAnonymousToken (id: string): Promise<[AuthToken | null, AuthorizeError | null]> {
+		const url = new URL(`${this.config.authUrl}/oauth/token`);
+		const body = new URLSearchParams();
+		body.append('client_id', this.config.authClientId);
+		body.append('client_secret', this.config.authClientSecret);
+		body.append('grant_type', 'globalping_client_credentials');
+		body.append('scope', 'measurements');
+		const b = body.toString();
+
+		const res = await fetch(url.toString(), {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Content-Length': b.length.toString(),
+			},
+			body: b,
+		});
+
+		if (res.status !== 200) {
+			const err = (await res.json()) as AuthorizeError;
+			this.logger.error(err, 'Failed to get anonymous token');
+			return [ null, err ];
+		}
+
+		const token = (await res.json()) as AuthToken;
+		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
+		token.isAnonymous = true;
+
+		await this.installationStore.updateToken(id, token);
+		return [ token, null ];
+	}
+
 	async revokeToken (token: string): Promise<AuthorizeError | null> {
 		const url = new URL(`${this.config.authUrl}/oauth/token/revoke`);
 		const body = new URLSearchParams();
@@ -250,10 +301,7 @@ export class OAuthClient {
 		const state = url.searchParams.get('state');
 
 		if (!state) {
-			this.logger.error(
-				callbackError,
-				'/oauth/callback missing state',
-			);
+			this.logger.error(callbackError, '/oauth/callback missing state');
 
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,

@@ -253,4 +253,5 @@ export interface AuthToken {
 	expires_in: number;
 	refresh_token: string;
 	expiry: number; // Unix timestamp
+	isAnonymous?: boolean;
 }
