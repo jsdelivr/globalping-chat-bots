@@ -12,13 +12,11 @@ export function responseHeader (
 	tag: string | undefined,
 	boldSeparator: string,
 ): string {
-	return `>${boldSeparator}${result.probe.continent}, ${
-		result.probe.country
-	}, ${result.probe.state ? `(${result.probe.state}), ` : ''}${
-		result.probe.city
-	}, ASN:${result.probe.asn}, ${result.probe.network}${
-		tag ? ` (${tag})` : ''
-	}${boldSeparator}\n`;
+	return `>${boldSeparator}${result.probe.city}${
+		result.probe.state ? ` (${result.probe.state})` : ''
+	}, ${result.probe.country}, ${result.probe.continent}, ${
+		result.probe.network
+	} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}${boldSeparator}\n`;
 }
 
 export function resultsLink (id: string, isSlackLink: boolean): string {

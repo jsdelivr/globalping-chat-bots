@@ -59,7 +59,7 @@ describe('Response', () => {
 			};
 			const tag = undefined;
 			const text = responseHeader(pingResult, tag, boldSeparator);
-			expect(text).to.equal('>*EU, AT, Vienna, ASN:12345, My Network*\n');
+			expect(text).to.equal('>*Vienna, AT, EU, My Network (AS12345)*\n');
 		});
 	});
 
@@ -95,7 +95,7 @@ describe('Response', () => {
 				},
 			};
 			const text = responseHeader(pingResult, 'tag-1', boldSeparator);
-			expect(text).to.equal('>*NA, US, (GA), Atlanta, ASN:12345, My Network (tag-1)*\n');
+			expect(text).to.equal('>*Atlanta (GA), US, NA, My Network (AS12345), (tag-1)*\n');
 		});
 	});
 });
