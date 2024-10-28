@@ -24,6 +24,7 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
   ping          Run a ping test
   traceroute    Run a traceroute test`,
 	additionalCommands: `  auth          Authenticate with the Globalping API
+  limits        Show the current rate limits
   help          Help about any command`,
 	flags: `  -F, --from string   Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
   -h, --help          help for globalping
@@ -272,4 +273,10 @@ export const authLogoutHelpTexts = {
 	preamble: 'Log out from your Globalping account.',
 	usage: (rootCommand: string) => `${rootCommand} auth logout`,
 	flags: '  -h, --help   Help for logout',
+};
+
+export const limitsHelpTexts = {
+	preamble: `Show the current rate limits.`,
+	usage: (rootCommand: string) => `${rootCommand} limits`,
+	flags: '  -h, --help   Help for limits',
 };

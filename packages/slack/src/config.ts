@@ -16,6 +16,7 @@ export const config = {
 	dbPassword: process.env.DB_PASSWORD as string,
 	dbDatabase: process.env.DB_DATABASE as string,
 
+	apiUrl: 'https://api.globalping.io/v1',
 	dashboardUrl: process.env.DASHBOARD_URL as string,
 	authUrl: process.env.AUTH_URL as string,
 	authClientId: process.env.AUTH_CLIENT_ID as string,

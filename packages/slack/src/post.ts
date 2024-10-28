@@ -10,9 +10,15 @@ import {
 } from '@globalping/bot-utils';
 import type { WebClient } from '@slack/web-api';
 
-import { AuthorizeErrorType, oauth } from './auth.js';
+import {
+	AuthorizeErrorType,
+	CreateLimitType,
+	IntrospectionResponse,
+	LimitsResponse,
+	oauth,
+} from './auth.js';
 import { measurementsChatResponse } from './response.js';
-import { helpCmd, logger } from './utils.js';
+import { formatSeconds, helpCmd, logger, pluralize } from './utils.js';
 
 interface ChannelPayload {
 	installationId: string;
@@ -63,6 +69,11 @@ export const postAPI = async (
 
 				return;
 		}
+	}
+
+	if (flags.cmd === 'limits') {
+		await limits(client, payload);
+		return;
 	}
 
 	const postMeasurements = buildPostMeasurements(flags);
@@ -240,4 +251,81 @@ async function canUseAuthCommand (
 	}
 
 	return true;
+}
+
+async function limits (client: WebClient, payload: ChannelPayload) {
+	const [ introspection, error ] = await oauth.Introspect(payload.installationId);
+
+	if (!introspection) {
+		await client.chat.postEphemeral({
+			text: `${error?.error}: ${error?.error_description}`,
+			user: payload.user_id,
+			channel: payload.channel_id,
+			thread_ts: payload.thread_ts,
+		});
+
+		return;
+	}
+
+	const [ limits, limitsError ] = await oauth.Limits(payload.installationId);
+
+	if (!limits) {
+		await client.chat.postEphemeral({
+			text: `${limitsError?.type}: ${limitsError?.message}`,
+			user: payload.user_id,
+			channel: payload.channel_id,
+			thread_ts: payload.thread_ts,
+		});
+
+		return;
+	}
+
+	await client.chat.postEphemeral({
+		text: getLimitsOutput(limits, introspection),
+		user: payload.user_id,
+		channel: payload.channel_id,
+		thread_ts: payload.thread_ts,
+	});
+}
+
+export function getLimitsOutput (
+	limits: LimitsResponse,
+	introspection: IntrospectionResponse,
+) {
+	let text = '';
+
+	if (limits.rateLimit.measurements.create.type === CreateLimitType.User) {
+		text = `Authentication: token (${introspection?.username || ''})\n\n`;
+	} else {
+		text = 'Authentication: workspace\n\n';
+	}
+
+	const createLimit = pluralize(
+		limits.rateLimit.measurements.create.limit,
+		'test',
+	);
+	const createConsumed
+		= limits.rateLimit.measurements.create.limit
+		- limits.rateLimit.measurements.create.remaining;
+	const createRemaining = limits.rateLimit.measurements.create.remaining;
+	text += `Creating measurements:
+ - ${createLimit} per hour
+ - ${createConsumed} consumed, ${createRemaining} remaining
+`;
+
+	if (limits.rateLimit.measurements.create.reset) {
+		text += ` - resets in ${formatSeconds(limits.rateLimit.measurements.create.reset)}\n`;
+	}
+
+	if (limits.rateLimit.measurements.create.type === CreateLimitType.User) {
+		text += `
+Credits:
+ - ${pluralize(
+		limits.credits?.remaining || 0,
+		'credit',
+	)} remaining (may be used to create measurements above the hourly limits)
+`;
+	}
+
+	return text;
 }
