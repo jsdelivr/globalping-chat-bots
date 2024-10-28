@@ -86,11 +86,11 @@ export const expandResults = async (
 	for (const result of results) {
 		const tag = getTag(result.probe.tags);
 		const msg = {
-			content: `> **${result.probe.continent}, ${result.probe.country}, ${
-				result.probe.state ? `(${result.probe.state}), ` : ''
-			}${result.probe.city}, ASN:${result.probe.asn}, ${result.probe.network}${
-				tag ? ` (${tag})` : ''
-			}**`,
+			content: `> **${result.probe.city}${
+				result.probe.state ? ` (${result.probe.state})` : ''
+			}, ${result.probe.country}, ${result.probe.continent}, ${
+				result.probe.network
+			} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}**`,
 		};
 		// Discord has a limit of 2000 characters per block - truncate if necessary
 		const rawOutput
@@ -110,17 +110,29 @@ export const expandResults = async (
 };
 
 export const helpCmd = (cmd: string): string => {
-	if (cmd === 'help') { return `${help.help.preamble}\n\n**Usage:**\n\`\`\`${help.help.usage}\`\`\`\n**Arguments**:\n\`\`\`${help.help.args}\`\`\`\nMore help can be found here:\n\`\`\`${help.help.endDiscord}\`\`\``; }
+	if (cmd === 'help') {
+		return `${help.help.preamble}\n\n**Usage:**\n\`\`\`${help.help.usage}\`\`\`\n**Arguments**:\n\`\`\`${help.help.args}\`\`\`\nMore help can be found here:\n\`\`\`${help.help.endDiscord}\`\`\``;
+	}
 
-	if (cmd === 'ping') { return `${help.ping.preamble}\n\n**Usage:**\n\`\`\`${help.ping.usage}\`\`\`\n**Options:**\n\`\`\`${help.ping.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.ping.examples}\`\`\``; }
+	if (cmd === 'ping') {
+		return `${help.ping.preamble}\n\n**Usage:**\n\`\`\`${help.ping.usage}\`\`\`\n**Options:**\n\`\`\`${help.ping.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.ping.examples}\`\`\``;
+	}
 
-	if (cmd === 'traceroute') { return `${help.traceroute.preamble}\n\n**Usage:**\n\`\`\`${help.traceroute.usage}\`\`\`\n**Options:**\n\`\`\`${help.traceroute.options}\`\`\`\n**Examples:**\n\`\`\`${help.traceroute.examples}\`\`\``; }
+	if (cmd === 'traceroute') {
+		return `${help.traceroute.preamble}\n\n**Usage:**\n\`\`\`${help.traceroute.usage}\`\`\`\n**Options:**\n\`\`\`${help.traceroute.options}\`\`\`\n**Examples:**\n\`\`\`${help.traceroute.examples}\`\`\``;
+	}
 
-	if (cmd === 'dns') { return `${help.dns.preamble}\n\n**Usage:**\n\`\`\`${help.dns.usage}\`\`\`\n**Options:**\n\`\`\`${help.dns.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.dns.examples}\`\`\``; }
+	if (cmd === 'dns') {
+		return `${help.dns.preamble}\n\n**Usage:**\n\`\`\`${help.dns.usage}\`\`\`\n**Options:**\n\`\`\`${help.dns.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.dns.examples}\`\`\``;
+	}
 
-	if (cmd === 'mtr') { return `${help.mtr.preamble}\n\n**Usage:**\n\`\`\`${help.mtr.usage}\`\`\`\n**Options:**\n\`\`\`${help.mtr.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.mtr.examples}\`\`\``; }
+	if (cmd === 'mtr') {
+		return `${help.mtr.preamble}\n\n**Usage:**\n\`\`\`${help.mtr.usage}\`\`\`\n**Options:**\n\`\`\`${help.mtr.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.mtr.examples}\`\`\``;
+	}
 
-	if (cmd === 'http') { return `${help.http.preamble}\n\n**Usage:**\n\`\`\`${help.http.usage}\`\`\`\n**Options:**\n\`\`\`${help.http.options}\`\`\`\n**Examples:**\n\`\`\`${help.http.examples}\`\`\``; }
+	if (cmd === 'http') {
+		return `${help.http.preamble}\n\n**Usage:**\n\`\`\`${help.http.usage}\`\`\`\n**Options:**\n\`\`\`${help.http.options}\`\`\`\n**Examples:**\n\`\`\`${help.http.examples}\`\`\``;
+	}
 
 	return 'Unknown command! Please call `/globalping help` for a list of commands.';
 };
