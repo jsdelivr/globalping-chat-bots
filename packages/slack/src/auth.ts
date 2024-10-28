@@ -165,7 +165,17 @@ export class OAuthClient {
 		const now = Date.now() / 1000;
 
 		if (token.expiry < now) {
-			const [ t ] = await this.refreshToken(id, token.refresh_token);
+			const [ t, error ] = await this.refreshToken(id, token.refresh_token);
+
+			if (
+				token.isAnonymous
+				&& error
+				&& error.error === AuthorizeErrorType.InvalidGrant
+			) {
+				const [ newToken ] = await this.requestAnonymousToken(id);
+				return newToken;
+			}
+
 			return t;
 		}
 
