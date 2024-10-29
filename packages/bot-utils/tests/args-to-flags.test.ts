@@ -227,5 +227,29 @@ describe('Utils', () => {
 
 			expect(result).toEqual(expectedFlags);
 		});
+
+		it('convert limits flags', () => {
+			let result = argsToFlags('limits');
+			let expectedFlags: Flags = {
+				cmd: 'limits',
+				target: '',
+				from: '',
+				limit: 1,
+				help: false,
+			};
+			expect(result).toEqual(expectedFlags);
+
+			result = argsToFlags('help limits');
+
+			expectedFlags = {
+				cmd: 'limits',
+				target: '',
+				from: '',
+				limit: 1,
+				help: true,
+			};
+
+			expect(result).toEqual(expectedFlags);
+		});
 	});
 });

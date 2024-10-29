@@ -6,10 +6,11 @@ import {
 	dnsHelpTexts,
 	generalHelpTexts,
 	httpHelpTexts,
+	limitsHelpTexts,
 	mtrHelpTexts,
 	pingHelpTexts,
 	tracerouteHelpTexts,
-// eslint-disable-next-line n/no-missing-import
+	// eslint-disable-next-line n/no-missing-import
 } from '@globalping/bot-utils/src/utils.js';
 
 export function generalHelp (boldSeparator: string, rootCommand: string) {
@@ -199,5 +200,19 @@ ${authLogoutHelpTexts.usage(rootCommand)}
 ${boldSeparator}Flags${boldSeparator}:
 \`\`\`
 ${authLogoutHelpTexts.flags}
+\`\`\``;
+}
+
+export function limitsHelp (boldSeparator: string, rootCommand: string) {
+	return `${limitsHelpTexts.preamble}
+
+${boldSeparator}Usage:${boldSeparator}
+\`\`\`
+${limitsHelpTexts.usage(rootCommand)}
+\`\`\`
+
+${boldSeparator}Flags${boldSeparator}:
+\`\`\`
+${limitsHelpTexts.flags}
 \`\`\``;
 }

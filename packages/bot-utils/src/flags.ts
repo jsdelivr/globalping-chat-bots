@@ -110,31 +110,41 @@ const checkFlags = (cmd: string, args: Record<string, string>): void => {
 
 	if (cmd === 'ping') {
 		for (const flag of flags) {
-			if (!isPingFlag(flag)) { throwOptError(flag, 'ping', [ ...ALLOWED_PING_FLAGS ].join(', ')); }
+			if (!isPingFlag(flag)) {
+				throwOptError(flag, 'ping', [ ...ALLOWED_PING_FLAGS ].join(', '));
+			}
 		}
 	}
 
 	if (cmd === 'traceroute') {
 		for (const flag of flags) {
-			if (!isTraceFlag(flag)) { throwOptError(flag, 'traceroute', [ ...ALLOWED_TRACE_FLAGS ].join(', ')); }
+			if (!isTraceFlag(flag)) {
+				throwOptError(flag, 'traceroute', [ ...ALLOWED_TRACE_FLAGS ].join(', '));
+			}
 		}
 	}
 
 	if (cmd === 'dns') {
 		for (const flag of flags) {
-			if (!isDnsFlag(flag)) { throwOptError(flag, 'dns', [ ...ALLOWED_DNS_FLAGS ].join(', ')); }
+			if (!isDnsFlag(flag)) {
+				throwOptError(flag, 'dns', [ ...ALLOWED_DNS_FLAGS ].join(', '));
+			}
 		}
 	}
 
 	if (cmd === 'mtr') {
 		for (const flag of flags) {
-			if (!isMtrFlag(flag)) { throwOptError(flag, 'mtr', [ ...ALLOWED_MTR_FLAGS ].join(', ')); }
+			if (!isMtrFlag(flag)) {
+				throwOptError(flag, 'mtr', [ ...ALLOWED_MTR_FLAGS ].join(', '));
+			}
 		}
 	}
 
 	if (cmd === 'http') {
 		for (const flag of flags) {
-			if (!isHttpFlag(flag)) { throwOptError(flag, 'http', [ ...ALLOWED_HTTP_FLAGS ].join(', ')); }
+			if (!isHttpFlag(flag)) {
+				throwOptError(flag, 'http', [ ...ALLOWED_HTTP_FLAGS ].join(', '));
+			}
 		}
 	}
 };
@@ -155,7 +165,9 @@ interface HttpHeaders {
 export const argsToFlags = (argv: string | string[]): Flags => {
 	let args = argv;
 
-	if (typeof args === 'string') { args = args.split(' '); }
+	if (typeof args === 'string') {
+		args = args.split(' ');
+	}
 
 	if (args[0] === 'help' || args[1] === 'help') {
 		// Ensure help flag is added for parser to catch
@@ -239,6 +251,20 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		};
 	}
 
+	if (cmd === 'limits' || argsForTargetQueryParser[0] === 'limits') {
+		const target
+			= argsForTargetQueryParser[0] === 'limits'
+				? argsForTargetQueryParser[1] || ''
+				: argsForTargetQueryParser[0] || '';
+		return {
+			cmd: 'limits',
+			help: !!parsed.help,
+			target,
+			from: '',
+			limit: 1,
+		};
+	}
+
 	const targetQuery = parseTargetQuery(cmd, argsForTargetQueryParser);
 	let { target, from, resolver } = targetQuery;
 
@@ -259,7 +285,9 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 	}
 
 	// Throw on any invalid flags
-	if (cmd && parsed.help === undefined) { checkFlags(cmd, parsed); }
+	if (cmd && parsed.help === undefined) {
+		checkFlags(cmd, parsed);
+	}
 
 	let urlData: UrlData | undefined;
 	let httpHeaders: HttpHeaders | undefined;

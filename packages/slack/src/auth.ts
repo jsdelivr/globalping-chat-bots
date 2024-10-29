@@ -40,6 +40,40 @@ export interface IntrospectionResponse {
 	jti?: string;
 }
 
+export interface LimitsError {
+	type: string;
+	message: string;
+}
+
+export interface CreditLimits {
+	remaining: number;
+}
+
+export const enum CreateLimitType {
+	IP = 'ip',
+	User = 'user',
+}
+
+export interface MeasurementsCreateLimits {
+	type: CreateLimitType;
+	limit: number;
+	remaining: number;
+	reset: number;
+}
+
+export interface MeasurementsLimits {
+	create: MeasurementsCreateLimits;
+}
+
+export interface RateLimits {
+	measurements: MeasurementsLimits;
+}
+
+export interface LimitsResponse {
+	rateLimit: RateLimits;
+	credits?: CreditLimits; // Only for authenticated requests
+}
+
 export class OAuthClient {
 	constructor (
 		private config: Config,
@@ -151,6 +185,27 @@ export class OAuthClient {
 
 		const introspection = (await res.json()) as IntrospectionResponse;
 		return [ introspection, null ];
+	}
+
+	async Limits (id: string): Promise<[LimitsResponse | null, LimitsError | null]> {
+		const token = await this.GetToken(id);
+		const headers: { [key: string]: string } = {};
+
+		if (token) {
+			headers['Authorization'] = `Bearer ${token.access_token}`;
+		}
+
+		const res = await fetch(this.config.apiUrl + '/limits', {
+			headers,
+		});
+
+		if (res.status !== 200) {
+			const error = (await res.json()) as LimitsError;
+			return [ null, error ];
+		}
+
+		const limits = (await res.json()) as LimitsResponse;
+		return [ limits, null ];
 	}
 
 	// NOTE: Does not handle concurrent refreshes

@@ -6,6 +6,7 @@ export const ALLOWED_QUERY_TYPES = [
 	'mtr',
 	'http',
 	'auth',
+	'limits',
 ] as const;
 export type QueryType = (typeof ALLOWED_QUERY_TYPES)[number];
 export const isQueryType = (type: string): type is QueryType => ALLOWED_QUERY_TYPES.includes(type as QueryType);
