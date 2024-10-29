@@ -110,6 +110,10 @@ export const installationStore = {
 				'Installation retrieved',
 			);
 
+			if (!res.installation) {
+				return null;
+			}
+
 			return JSON.parse(res.installation as unknown as string);
 		} catch (error) {
 			const err = new Error(`Failed to fetch installation: ${error}`);

@@ -1,6 +1,7 @@
 import { Knex } from 'knex';
 
 import { Tables } from '../src/db.js';
+import { AuthToken } from '@globalping/bot-utils';
 
 export const up = async (knex: Knex) => {
 	console.log('Adding installation_token columns to installations table');
@@ -8,6 +9,28 @@ export const up = async (knex: Knex) => {
 	await knex.schema.table(Tables.Installations, (table) => {
 		table.json('installation_token');
 	});
+
+	const rows = await knex(Tables.Installations).select('id', 'token');
+
+	for (const row of rows) {
+		const token = row.token
+			? (JSON.parse(row.token as unknown as string) as AuthToken)
+			: null;
+
+		if (token?.isAnonymous) {
+			const update: {
+				token?: string | null;
+				installation_token?: string | null;
+			} = {};
+			update.token = null;
+			update.installation_token = JSON.stringify(token);
+
+			await knex
+				.table(Tables.Installations)
+				.where('id', row.id)
+				.update(update as never);
+		}
+	}
 };
 
 export const down = async (knex: Knex) => {
