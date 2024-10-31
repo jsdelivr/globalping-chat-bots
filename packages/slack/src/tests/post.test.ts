@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getLimitsOutput as getLimitsText } from '../post.js';
+import {
+	getLimitsOutput,
+	getMoreCreditsRequiredAuthError,
+	getMoreCreditsRequiredNoAuthError,
+	getNoCreditsAuthError,
+	getNoCreditsNoAuthError,
+} from '../post.js';
 import {
 	CreateLimitType,
 	IntrospectionResponse,
@@ -44,7 +50,7 @@ Credits:
  - 1000 credits remaining (may be used to create measurements above the hourly limits)
 `;
 
-			expect(getLimitsText(limits, introspection)).toBe(expectedText);
+			expect(getLimitsOutput(limits, introspection)).toBe(expectedText);
 		});
 
 		it('should return correct text - limit type IP', () => {
@@ -72,7 +78,35 @@ Creating measurements:
  - 0 consumed, 500 remaining
 `;
 
-			expect(getLimitsText(limits, introspection)).toBe(expectedText);
+			expect(getLimitsOutput(limits, introspection)).toBe(expectedText);
+		});
+	});
+
+	describe('getMoreCreditsRequiredAuthError', () => {
+		it('should return correct error', () => {
+			const error = getMoreCreditsRequiredAuthError(5, 2, 300);
+			expect(error).toEqual(new Error('You only have 2 credits remaining, and 5 were required. Try requesting fewer probes or wait 5 minutes for the rate limit to reset. You can get higher limits by sponsoring us or hosting probes.'));
+		});
+	});
+
+	describe('getNoCreditsAuthError', () => {
+		it('should return correct error', () => {
+			const error = getNoCreditsAuthError(60);
+			expect(error).toEqual(new Error('You have run out of credits for this session. You can wait 1 minute for the rate limit to reset or get higher limits by sponsoring us or hosting probes.'));
+		});
+	});
+
+	describe('getMoreCreditsRequiredNoAuthError', () => {
+		it('should return correct error', () => {
+			const error = getMoreCreditsRequiredNoAuthError(2, 1, 245);
+			expect(error).toEqual(new Error('You only have 1 credit remaining, and 2 were required. Try requesting fewer probes or wait 4 minutes for the rate limit to reset. You can get higher limits by creating an account. Sign up at https://globalping.io'));
+		});
+	});
+
+	describe('getNoCreditsNoAuthError', () => {
+		it('should return correct error', () => {
+			const error = getNoCreditsNoAuthError(10);
+			expect(error).toEqual(new Error('You have run out of credits for this session. You can wait 10 seconds for the rate limit to reset or get higher limits by creating an account. Sign up at https://globalping.io'));
 		});
 	});
 });

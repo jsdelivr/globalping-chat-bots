@@ -87,25 +87,54 @@ export const postAPI = async (
 	try {
 		measurements = await postMeasurement(postMeasurements, token?.access_token);
 	} catch (error) {
-		let e = error;
+		if (error instanceof PostError) {
+			const { statusCode, headers } = error.response;
 
-		if (
-			error instanceof PostError
-			&& (error.response.statusCode === 401
-				|| error.response.statusCode === 403)
-			&& token
-		) {
-			const errMsg = await oauth.TryToRefreshToken(
-				payload.installationId,
-				token,
-			);
+			// Unauthorized or Forbidden
+			if ((statusCode === 401 || statusCode === 403) && token) {
+				const errMsg = await oauth.TryToRefreshToken(
+					payload.installationId,
+					token,
+				);
 
-			if (errMsg) {
-				e = new Error(errMsg);
+				if (errMsg) {
+					throw new Error(errMsg);
+				}
+			}
+
+			// Too many requests
+			if (statusCode === 429) {
+				const rateLimitRemaining = parseInt(headers['X-RateLimit-Remaining'] as string);
+				const rateLimitReset = parseInt(headers['X-RateLimit-Reset'] as string);
+				const creditsRemaining = parseInt(headers['X-Credits-Remaining'] as string);
+				const requestCost = parseInt(headers['X-Request-Cost'] as string);
+				const remaining = rateLimitRemaining + creditsRemaining;
+
+				if (token && !token.isAnonymous) {
+					if (remaining > 0) {
+						throw getMoreCreditsRequiredAuthError(
+							requestCost,
+							remaining,
+							rateLimitReset,
+						);
+					}
+
+					throw getNoCreditsAuthError(rateLimitReset);
+				} else {
+					if (remaining > 0) {
+						throw getMoreCreditsRequiredNoAuthError(
+							remaining,
+							requestCost,
+							rateLimitReset,
+						);
+					}
+
+					throw getNoCreditsNoAuthError(rateLimitReset);
+				}
 			}
 		}
 
-		throw e;
+		throw error;
 	}
 
 	await client.chat.postEphemeral({
@@ -328,4 +357,34 @@ Credits:
 	}
 
 	return text;
+}
+
+export function getMoreCreditsRequiredAuthError (
+	requestCost: number,
+	remaining: number,
+	rateLimitReset: number,
+): Error {
+	return new Error(`You only have ${pluralize(
+		remaining,
+		'credit',
+	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by sponsoring us or hosting probes.`);
+}
+
+export function getNoCreditsAuthError (rateLimitReset: number): Error {
+	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by sponsoring us or hosting probes.`);
+}
+
+export function getMoreCreditsRequiredNoAuthError (
+	requestCost: number,
+	remaining: number,
+	rateLimitReset: number,
+): Error {
+	return new Error(`You only have ${pluralize(
+		remaining,
+		'credit',
+	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by creating an account. Sign up at https://globalping.io`);
+}
+
+export function getNoCreditsNoAuthError (rateLimitReset: number): Error {
+	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by creating an account. Sign up at https://globalping.io`);
 }
