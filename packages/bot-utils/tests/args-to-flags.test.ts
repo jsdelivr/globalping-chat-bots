@@ -48,6 +48,29 @@ describe('Utils', () => {
 				expect(result).toEqual(flags);
 			});
 
+			it('host target with slack link', () => {
+				const args
+					= 'http <https://google.com|google.com> from New York --limit 2 --path / --query ?a=abc --host google.fr --method get --port 80 --protocol http2 --latency';
+				const result = argsToFlags(args);
+
+				const flags: Flags = {
+					cmd: 'http',
+					from: 'New York',
+					host: 'google.fr',
+					limit: 2,
+					method: 'GET',
+					path: '/',
+					port: 80,
+					protocol: 'HTTP2',
+					query: '?a=abc',
+					target: 'google.com',
+					latency: true,
+					headers: {},
+				};
+
+				expect(result).toEqual(flags);
+			});
+
 			it('url target, resolver and spaces', () => {
 				const args
 					= 'http https://www.example.com:1234/my/path/?abc=123&xyz=test @8.8.8.8  --from usa  --limit 2   --method get';
@@ -126,6 +149,22 @@ describe('Utils', () => {
 		it('convert ping args to flags', () => {
 			const args
 				= 'ping google.com from New York --limit 2 --packets 3 --latency';
+			const result = argsToFlags(args);
+			const flags: Flags = {
+				cmd: 'ping',
+				from: 'New York',
+				limit: 2,
+				packets: 3,
+				target: 'google.com',
+				latency: true,
+			};
+
+			expect(result).toEqual(flags);
+		});
+
+		it('convert ping args to flags with slack link', () => {
+			const args
+				= 'ping <http://google.com|google.com> from New York --limit 2 --packets 3 --latency';
 			const result = argsToFlags(args);
 			const flags: Flags = {
 				cmd: 'ping',

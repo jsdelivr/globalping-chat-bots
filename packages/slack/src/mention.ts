@@ -8,19 +8,14 @@ export function parseCommandfromMention (
 	text: string,
 	botUserId: string,
 ): string {
-	const trimmedText = text.trim();
-	const expectedMention = `<@${botUserId}>`;
+	const botMention = '<@' + botUserId + '>';
+	const mentionIndex = text.indexOf(botMention);
 
-	if (trimmedText.startsWith(expectedMention)) {
-		const urlRegex = /<([^>|]+)(?:\|([^>]+))?>/g;
-
-		return trimmedText
-			.slice(expectedMention.length)
-			.replace(urlRegex, (_, link, urlText) => urlText || link)
-			.trim();
+	if (mentionIndex === -1) {
+		return text;
 	}
 
-	return '';
+	return text.slice(mentionIndex + botMention.length).trim();
 }
 
 export async function handleMention (

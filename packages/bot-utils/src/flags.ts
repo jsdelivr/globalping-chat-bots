@@ -289,14 +289,11 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		checkFlags(cmd, parsed);
 	}
 
-	let urlData: UrlData | undefined;
+	const urlData = parseUrlData(target);
 	let httpHeaders: HttpHeaders | undefined;
+	target = urlData.target;
 
 	if (cmd === 'http' && target) {
-		urlData = parseUrlData(target);
-
-		target = urlData.target;
-
 		if (!host) {
 			host = urlData.host;
 		}
@@ -360,6 +357,16 @@ function parseUrlData (input: string): UrlData {
 	const urlData = {} as UrlData;
 
 	let u = input;
+
+	if (u.startsWith('<') && u.endsWith('>')) {
+		const linkEnd = u.indexOf('|');
+
+		if (linkEnd !== -1) {
+			u = u.slice(1, linkEnd);
+		} else {
+			u = u.slice(1, -1);
+		}
+	}
 
 	// add url scheme if missing
 	if (!u.startsWith('http://') && !u.startsWith('https://')) {
