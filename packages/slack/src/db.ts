@@ -27,10 +27,10 @@ export interface AuthorizeSession {
 declare module 'knex/types/tables' {
 	interface UserInstallation {
 		id: string;
-		installation: Installation | null;
-		token: AuthToken | null;
-		authorize_session: AuthorizeSession | null;
-		installation_token: AuthToken | null;
+		installation: string | null;
+		token: string | null;
+		authorize_session: string | null;
+		installation_token: string | null;
 	}
 
 	interface Tables {
@@ -77,7 +77,7 @@ export const installationStore = {
 
 			await knex
 				.table(Tables.Installations)
-				.insert({ id, installation })
+				.insert({ id, installation: JSON.stringify(installation) })
 				.onConflict('id')
 				.merge();
 
@@ -114,7 +114,7 @@ export const installationStore = {
 				return null;
 			}
 
-			return JSON.parse(res.installation as unknown as string);
+			return JSON.parse(res.installation);
 		} catch (error) {
 			const err = new Error(`Failed to fetch installation: ${error}`);
 			logger.error(err);
@@ -155,11 +155,11 @@ export const installationStore = {
 			}
 
 			if (res.token) {
-				return JSON.parse(res.token as unknown as string) as AuthToken;
+				return JSON.parse(res.token) as AuthToken;
 			}
 
 			if (res.installation_token) {
-				return JSON.parse(res.installation_token as unknown as string) as AuthToken;
+				return JSON.parse(res.installation_token) as AuthToken;
 			}
 
 			return null;
@@ -208,7 +208,7 @@ export const installationStore = {
 				.where('id', id)
 				.update({
 					authorize_session: authorizeSesssion
-						? (JSON.stringify(authorizeSesssion) as never) // TODO add the actual type
+						? JSON.stringify(authorizeSesssion)
 						: null,
 				});
 		} catch (error) {
@@ -235,13 +235,11 @@ export const installationStore = {
 
 			// Note: When upgrading the MySQL version, the JSON.parse() call may not be needed
 			const installation = res.installation
-				? JSON.parse(res.installation as unknown as string)
+				? JSON.parse(res.installation)
 				: null;
-			const token = res.token
-				? JSON.parse(res.token as unknown as string)
-				: null;
+			const token = res.token ? JSON.parse(res.token) : null;
 			const session = res.authorize_session
-				? JSON.parse(res.authorize_session as unknown as string)
+				? JSON.parse(res.authorize_session)
 				: null;
 			return {
 				installation,
