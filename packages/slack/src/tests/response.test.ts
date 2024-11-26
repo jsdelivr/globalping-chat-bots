@@ -14,7 +14,7 @@ describe('Response', () => {
 		it('ok', () => {
 			const id = 'abc123';
 			const text = shareMessageFooter(id, boldSeparator, true);
-			expect(text).to.equal('>*View the results online: <https://www.jsdelivr.com/globalping?measurement=abc123>*\n');
+			expect(text).to.equal('>*View the results online: <https://globalping.io?measurement=abc123>*\n');
 		});
 	});
 
@@ -22,7 +22,7 @@ describe('Response', () => {
 		it('ok', () => {
 			const id = 'abc123';
 			const text = fullResultsFooter(id, boldSeparator, true);
-			expect(text).to.equal('>*Full results available here: <https://www.jsdelivr.com/globalping?measurement=abc123>*\n');
+			expect(text).to.equal('>*Full results available here: <https://globalping.io?measurement=abc123>*\n');
 		});
 	});
 

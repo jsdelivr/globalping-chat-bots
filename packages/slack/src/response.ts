@@ -20,7 +20,7 @@ export function responseHeader (
 }
 
 export function resultsLink (id: string, isSlackLink: boolean): string {
-	const url = `https://www.jsdelivr.com/globalping?measurement=${id}`;
+	const url = `https://globalping.io?measurement=${id}`;
 	return isSlackLink ? `<${url}>` : `[${url}](${url})`;
 }
 

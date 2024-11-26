@@ -87,7 +87,7 @@ dns jsdelivr.com from aws+montreal --latency
 export const httpHelpTexts = {
 	preamble: `The http command sends an HTTP request to a host and can perform HEAD or GET operations. GET is limited to 10KB responses, everything above will be cut by the API. Detailed performance stats as available for every request.
 The tool supports 2 formats for this command:
-When the full url is supplied, the tool autoparses the scheme, host, port, domain, path and query. For example:
+When the full url is supplied, the tool automatically parses the scheme, host, port, domain, path and query. For example:
 \`\`\`
 http https://www.jsdelivr.com:443/package/npm/test?nav=stats
 \`\`\`

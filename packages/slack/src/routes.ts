@@ -40,7 +40,7 @@ export const routes: CustomRoute[] = [
 			try {
 				res
 					.writeHead(301, {
-						Location: 'https://www.jsdelivr.com/globalping',
+						Location: 'https://globalping.io',
 					})
 					.end();
 			} catch (error) {
