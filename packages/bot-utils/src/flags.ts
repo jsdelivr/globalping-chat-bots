@@ -289,29 +289,33 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		checkFlags(cmd, parsed);
 	}
 
-	const urlData = parseUrlData(target);
+	let urlData: UrlData | undefined;
 	let httpHeaders: HttpHeaders | undefined;
-	target = urlData.target;
+
+	if (target) {
+		urlData = parseUrlData(target);
+		target = urlData.target;
+	}
 
 	if (cmd === 'http' && target) {
 		if (!host) {
-			host = urlData.host;
+			host = urlData?.host;
 		}
 
 		if (!path) {
-			path = urlData.path;
+			path = urlData?.path;
 		}
 
 		if (!port) {
-			port = urlData.port;
+			port = urlData?.port;
 		}
 
 		if (!protocol) {
-			protocol = urlData.protocol;
+			protocol = urlData?.protocol;
 		}
 
 		if (!query) {
-			query = urlData.query;
+			query = urlData?.query;
 		}
 
 		httpHeaders = parseHttpHeaders(parsed.header);

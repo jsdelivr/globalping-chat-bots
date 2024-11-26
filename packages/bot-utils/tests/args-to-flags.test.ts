@@ -4,6 +4,29 @@ import { argsToFlags, Flags } from '../src/flags.js';
 
 describe('Utils', () => {
 	describe('args to flags', () => {
+		it('should convert args to flags - empty cmd', () => {
+			const args = '';
+			const result = argsToFlags(args);
+			const flags = {
+				from: 'world',
+				limit: 1,
+			};
+
+			expect(result).toEqual(flags);
+		});
+
+		it('should convert args to flags - empty target', () => {
+			const args = 'ping';
+			const result = argsToFlags(args);
+			const flags = {
+				cmd: 'ping',
+				from: 'world',
+				limit: 1,
+			};
+
+			expect(result).toEqual(flags);
+		});
+
 		it('should convert dns args to flags', () => {
 			const args
 				= 'dns google.com from New York --limit 2 --type AAAA --protocol tcp --port 80 --resolver 1.1.1.1 --trace --latency';
