@@ -256,6 +256,10 @@ app.event('message', async ({ payload, event, context, client }) => {
 		return;
 	}
 
+	if (event.subtype === 'message_changed') {
+		return;
+	}
+
 	const messageEvent = event as GenericMessageEvent;
 
 	let { botUserId } = context;
