@@ -21,7 +21,9 @@ You will want to enable the following **Bot Token Scopes** under the **OAuth & P
 
 Setup the Globalping command by navigating to the **Slash Commands** tab in your app configuration and create new command `/globalping` with the request URL `https://<yourdomain.com>/slack/events`.
 
-Navigate to **Event Subscriptions** in your app configuration and enable the feature. The request URL will also be `https://<yourdomain.com>/slack/events`. Scroll down to **Subscribe to Bot Events** and add `app_uninstalled`, `app_home_opened` and `member_joined_channel` to the subscribed events.
+Navigate to **Event Subscriptions** in your app configuration and enable the feature. The request URL will also be `https://<yourdomain.com>/slack/events`. Scroll down to **Subscribe to Bot Events** and add `app_uninstalled`, `app_home_opened`, `message.im`, `app_mention` and `member_joined_channel` to the subscribed events.
+
+Navigate to **App Home** in your app configuration and enable `Allow users to send Slash commands and messages from the messages tab`.
 
 Then navigate to **OAuth & Permissions** in your app configuration and click Add a Redirect URL. The redirect URL should be set to your domain with the `slack/oauth_redirect` path appended. e.g. `https://<yourdomain.com>/slack/oauth_redirect`
 
@@ -66,12 +68,11 @@ DB_DATABASE=
 
 ### Development
 
-For development, you will need to install [`ngrok`](https://ngrok.com/) to proxy your local instance to a public URL that your `\globalping` command can interact with.
+Set `SLACK_SOCKET_MODE=true` to enable socket mode for local development.
 
-For development, you can save these variables in an `.env` file. These variables can be found in your [app configuration](https://api.slack.com/apps).
+Go to `http://localhost:3000/slack/install` to install the app to your workspace (after the callback, replace `https` with `http` in the redirect URL to bypass the SSL error).
 
-1. Run `ngrok http 3000`
-2. Copy the public URL and replace all the above request URLs with `https://<subdomain>.ngrok.io/slack/events or oauth_redirect`.
+Run the app with `pnpm dev`.
 
 ### Github Bot Zapier Configuration
 
