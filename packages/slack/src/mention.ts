@@ -1,21 +1,42 @@
 import { formatAPIError, getAPIErrorMessage } from '@globalping/bot-utils';
-import { WebClient } from '@slack/web-api';
+import { Block, KnownBlock, RichTextBlockElement, WebClient } from '@slack/web-api';
 
 import { postAPI } from './post.js';
 import { logger } from './utils.js';
 
-export function parseCommandfromMention (
-	text: string,
+export function getRawTextFromBlocks (
 	botUserId: string,
+	blocks?: (KnownBlock | Block)[],
 ): string {
-	const botMention = '<@' + botUserId + '>';
-	const mentionIndex = text.indexOf(botMention);
-
-	if (mentionIndex === -1) {
-		return text;
+	if (!blocks) {
+		return '';
 	}
 
-	return text.slice(mentionIndex + botMention.length).trim();
+	let text = '';
+	traverseBlocks(blocks, (block) => {
+		if (block.type === 'user' && 'user_id' in block && block.user_id === botUserId) {
+			// ignore text before the bot mention
+			text = '';
+		} else if ('text' in block && typeof block.text === 'string') {
+			if ((block.text as string).trim()) {
+				text += block.text;
+			}
+		}
+	});
+
+	return text.trim();
+}
+
+function traverseBlocks (blocks: (KnownBlock | Block)[], callback: (block: KnownBlock | Block | RichTextBlockElement) => void) {
+	for (const block of blocks) {
+		if ('text' in block || block.type === 'user') {
+			callback(block);
+		}
+
+		if ('elements' in block) {
+			traverseBlocks(block.elements, callback);
+		}
+	}
 }
 
 export async function handleMention (
@@ -26,13 +47,10 @@ export async function handleMention (
 	eventTs: string,
 	threadTs: string | undefined,
 	installationId: string,
-	botUserId: string,
 	client: WebClient,
 ) {
 	const logData = { fullText, teamId, channelId, userId, eventTs, threadTs };
 	logger.info(logData, '@globalping request');
-
-	const commandText = parseCommandfromMention(fullText, botUserId);
 
 	try {
 		// the mention is always received in a channel where the bot is a member
@@ -42,8 +60,8 @@ export async function handleMention (
 			thread_ts: threadTs,
 			installationId,
 		};
-		logger.info({ commandText, ...logData }, '@globalping processing starting');
-		await postAPI(client, channelPayload, commandText);
+		logger.info(logData, '@globalping processing starting');
+		await postAPI(client, channelPayload, fullText);
 		logger.info(logData, '@globalping response - OK');
 	} catch (error) {
 		const errorMsg = getAPIErrorMessage(error);
@@ -52,7 +70,7 @@ export async function handleMention (
 		await client.chat.postMessage({
 			channel: channelId,
 			thread_ts: threadTs,
-			text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}`,
+			text: `Failed to process command \`${fullText}\`.\n${formatAPIError(errorMsg)}`,
 		});
 	}
 }

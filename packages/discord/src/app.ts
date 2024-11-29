@@ -8,11 +8,19 @@ import {
 import { Client, GatewayIntentBits, inlineCode, userMention } from 'discord.js';
 import * as dotenv from 'dotenv';
 
-import { expandFlags, expandResults, getFlags, helpCmd, logger } from './utils.js';
+import {
+	expandFlags,
+	expandResults,
+	getFlags,
+	helpCmd,
+	logger,
+} from './utils.js';
 
 dotenv.config();
 
-if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_APP_ID) { throw new Error('DISCORD_TOKEN and DISCORD_APP_ID env variables must be set'); }
+if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_APP_ID) {
+	throw new Error('DISCORD_TOKEN and DISCORD_APP_ID env variables must be set');
+}
 
 const client = new Client({ intents: [ GatewayIntentBits.Guilds ] });
 
@@ -22,7 +30,9 @@ client.on('warn', m => logger.warn(m));
 client.on('error', m => logger.error(m));
 
 client.on('interactionCreate', async (interaction) => {
-	if (!interaction.isChatInputCommand()) { return; }
+	if (!interaction.isChatInputCommand()) {
+		return;
+	}
 
 	const { commandName, user } = interaction;
 
@@ -35,7 +45,9 @@ client.on('interactionCreate', async (interaction) => {
 			logger.debug(`Flags received: ${JSON.stringify(flags)}`);
 
 			if (flags.cmd === 'help') {
-				if (typeof flags.help !== 'string') { flags.help = 'help'; }
+				if (typeof flags.help !== 'string') {
+					flags.help = 'help';
+				}
 
 				await interaction.editReply({ content: helpCmd(flags.help) });
 			} else {
@@ -43,16 +55,13 @@ client.on('interactionCreate', async (interaction) => {
 					= expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
 				txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
 
-				const measurements = await postMeasurement(buildPostMeasurements(flags));
+				const measurementResponse = await postMeasurement(buildPostMeasurements(flags));
+				const res = await getMeasurement(measurementResponse.id);
+				logger.debug(`Get response: ${JSON.stringify(res)}`);
 
-				for (const measurement of measurements) {
-					const res = await getMeasurement(measurement.id);
-					logger.debug(`Get response: ${JSON.stringify(res)}`);
+				await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
 
-					await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
-
-					await expandResults(res, interaction);
-				}
+				await expandResults(res, interaction);
 			}
 		} catch (error) {
 			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand ?? 'help')}`);

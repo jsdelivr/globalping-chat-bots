@@ -56,13 +56,13 @@ export const processCommand = async (
 		return;
 	}
 
-	const postMeasurements = buildPostMeasurements(flags);
+	const opts = buildPostMeasurements(flags);
 
-	let measurements: PostMeasurementResponse[];
+	let measurementResponse: PostMeasurementResponse;
 
 	try {
-		measurements = await postMeasurement(
-			postMeasurements,
+		measurementResponse = await postMeasurement(
+			opts,
 			config.globalpingToken,
 		);
 	} catch (error) {
@@ -81,44 +81,34 @@ export const processCommand = async (
 		throw error;
 	}
 
-	let firstMeasurement = true;
+	let res: PingMeasurementResponse;
 
-	/* eslint-disable no-await-in-loop */
-	for (const measurement of measurements) {
-		let res: PingMeasurementResponse;
-
-		try {
-			res = await getMeasurement(measurement.id);
-		} catch (error) {
-			const errorMsg = getAPIErrorMessage(error);
-			logger.error(
-				{ errorMsg, ...logData },
-				'/github-bot - getMeasurement failed',
-			);
-
-			await postComment(
-				githubClient,
-				githubTarget,
-				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`,
-			);
-
-			throw error;
-		}
-
-		await measurementsResponse(
-			githubClient,
-			githubTarget,
-			measurement.id,
-			res,
-			flags,
-			cmdText,
-			firstMeasurement,
+	try {
+		res = await getMeasurement(measurementResponse.id);
+	} catch (error) {
+		const errorMsg = getAPIErrorMessage(error);
+		logger.error(
+			{ errorMsg, ...logData },
+			'/github-bot - getMeasurement failed',
 		);
 
-		if (firstMeasurement) {
-			firstMeasurement = false;
-		}
+		await postComment(
+			githubClient,
+			githubTarget,
+			`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`,
+		);
+
+		throw error;
 	}
+
+	await measurementsResponse(
+		githubClient,
+		githubTarget,
+		measurementResponse.id,
+		res,
+		flags,
+		cmdText,
+	);
 };
 
 async function postComment (
@@ -143,7 +133,6 @@ async function measurementsResponse (
 	res: PingMeasurementResponse,
 	flags: Flags,
 	cmdText: string,
-	firstMeasurement: boolean,
 ) {
 	const resultsForDisplay = res.results.slice(0, maxDisplayedResults);
 
@@ -152,17 +141,12 @@ async function measurementsResponse (
 
 	let fullText = '';
 
-	const preHeader = firstMeasurement
-		? `Here are the results for \`${cmdText}\`\r\n`
-		: '';
-
-	fullText += preHeader;
+	fullText += `Here are the results for \`${cmdText}\`\r\n`;
 
 	/* eslint-disable no-await-in-loop */
 	for (const result of resultsForDisplay) {
 		const tag = getTag(result.probe.tags);
-		const text = `${
-			responseHeader(result, tag, githubBoldSeparator)
+		const text = `${responseHeader(result, tag, githubBoldSeparator)
 			+ responseText(result, flags, githubTruncationLimit)
 		}\r\n`;
 		fullText += text;

@@ -17,7 +17,7 @@ import {
 	LimitsResponse,
 	oauth,
 } from './auth.js';
-import { measurementsChatResponse } from './response.js';
+import { formatMeasurementResponse } from './response.js';
 import { formatSeconds, helpCmd, logger, pluralize } from './utils.js';
 
 interface ChannelPayload {
@@ -76,16 +76,18 @@ export const postAPI = async (
 		return;
 	}
 
-	const postMeasurements = buildPostMeasurements(flags);
+	const opts = buildPostMeasurements(flags);
 
-	// We post measurement first to catch any validation errors before committing to processing request message
-	logger.debug(`Posting measurement: ${JSON.stringify(postMeasurements)}`);
-	let measurements: PostMeasurementResponse[];
+	logger.debug(`Posting measurement: ${JSON.stringify(opts)}`);
+	let measurementResponse: PostMeasurementResponse;
 
 	const token = await oauth.GetToken(payload.installationId);
 
 	try {
-		measurements = await postMeasurement(postMeasurements, token?.access_token);
+		measurementResponse = await postMeasurement(
+			opts,
+			token?.access_token,
+		);
 	} catch (error) {
 		if (error instanceof PostError) {
 			const { statusCode, headers } = error.response;
@@ -144,37 +146,17 @@ export const postAPI = async (
 		thread_ts,
 	});
 
-	logger.debug(`Post response: ${JSON.stringify(measurements)}`);
-	logger.debug(`Latency mode: ${flags.latency}`);
+	logger.debug(`Post response: ${JSON.stringify(measurementResponse)}`);
+	const res = await getMeasurement(measurementResponse.id);
+	logger.debug(`Get response: ${JSON.stringify(res)}`);
 
-	let first = true;
+	const blocks = formatMeasurementResponse(user_id, cmdText, res, flags);
 
-	// You can have multiple locations run in parallel
-	for (const measurement of measurements) {
-		const res = await getMeasurement(measurement.id);
-		logger.debug(`Get response: ${JSON.stringify(res)}`);
-
-		// Only want this to run on first measurement
-		if (first) {
-			await client.chat.postMessage({
-				channel: channel_id,
-				thread_ts,
-				text: `<@${user_id}>, here are the results for \`${cmdText}\``,
-			});
-
-			first = false;
-		}
-
-		await measurementsChatResponse(
-			logger,
-			client,
-			channel_id,
-			thread_ts,
-			measurement.id,
-			res,
-			flags,
-		);
-	}
+	await client.chat.postMessage({
+		blocks,
+		channel: channel_id,
+		thread_ts,
+	});
 };
 
 async function authLogin (client: WebClient, payload: ChannelPayload) {
