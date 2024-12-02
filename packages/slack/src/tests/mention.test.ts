@@ -1,53 +1,87 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseCommandfromMention } from '../mention.js';
+import { getRawTextFromBlocks } from '../mention.js';
 
 describe('Mention', () => {
-	describe('parseCommandfromMention', () => {
-		it('valid with url link', () => {
-			const text
-				= '<@U052V9JLQ5C> http <http://yahoo.com|yahoo.com> --from uk --limit 5';
-			const botUserId = 'U052V9JLQ5C';
-			const cmd = parseCommandfromMention(text, botUserId);
-			expect(cmd).to.equal('http <http://yahoo.com|yahoo.com> --from uk --limit 5');
+	describe('getRawTextFromBlocks', () => {
+		it('should return only the text', () => {
+			const blocks = [
+				{
+					type: 'rich_text',
+					block_id: '4T2L4',
+					elements: [
+						{
+							type: 'rich_text_section',
+							elements: [
+								{
+									type: 'emoji',
+									name: 'laughing',
+									unicode: '1f606',
+								},
+								{
+									type: 'text',
+									text: '  ',
+								},
+								{
+									type: 'text',
+									text: ' ping ',
+								},
+								{
+									type: 'link',
+									url: 'http://google.com',
+									text: 'google.com',
+								},
+							],
+						},
+					],
+				},
+			];
+			const text = getRawTextFromBlocks('U07QAK46BGU', blocks);
+			expect(text).to.equal('ping google.com');
 		});
 
-		it('valid with url link and query', () => {
-			const text
-				= '<@U052V9JLQ5C> http <http://yahoo.com?abc=xyz1|yahoo.com> --from uk';
-			const botUserId = 'U052V9JLQ5C';
-			const cmd = parseCommandfromMention(text, botUserId);
-			expect(cmd).to.equal('http <http://yahoo.com?abc=xyz1|yahoo.com> --from uk');
-		});
-
-		it('valid with just complex url link', () => {
-			const text
-				= '<@U052V9JLQ5C> http <https://www.example.com:8080/my/path?x=abc&yz=defg> --from france --limit 5';
-			const botUserId = 'U052V9JLQ5C';
-			const cmd = parseCommandfromMention(text, botUserId);
-			expect(cmd).to.equal('http <https://www.example.com:8080/my/path?x=abc&yz=defg> --from france --limit 5');
-		});
-
-		it('valid with host', () => {
-			const text = '<@U052V9JLQ5C> dns yahoo.com --from france --limit 5';
-			const botUserId = 'U052V9JLQ5C';
-			const cmd = parseCommandfromMention(text, botUserId);
-			expect(cmd).to.equal('dns yahoo.com --from france --limit 5');
-		});
-
-		it('valid with ip', () => {
-			const text = '<@U052V9JLQ5C> ping 1.2.3.4 --from france --limit 5';
-			const botUserId = 'U052V9JLQ5C';
-			const cmd = parseCommandfromMention(text, botUserId);
-			expect(cmd).to.equal('ping 1.2.3.4 --from france --limit 5');
-		});
-
-		it('text before mention', () => {
-			const text
-				= 'some other text <@U052V9JLQ5C> ping <http://yahoo.com|yahoo.com> --from france --limit 5';
-			const botUserId = 'U052V9JLQ5C';
-			const cmd = parseCommandfromMention(text, botUserId);
-			expect(cmd).to.equal('ping <http://yahoo.com|yahoo.com> --from france --limit 5');
+		it('should return the text after the mention', () => {
+			const blocks = [
+				{
+					type: 'rich_text',
+					block_id: '4T2L4',
+					elements: [
+						{
+							type: 'rich_text_section',
+							elements: [
+								{
+									type: 'text',
+									text: 'xxxxx ',
+								},
+								{
+									type: 'emoji',
+									name: 'laughing',
+									unicode: '1f606',
+								},
+								{
+									type: 'text',
+									text: ' ',
+								},
+								{
+									type: 'user',
+									user_id: 'U07QAK46BGU',
+								},
+								{
+									type: 'text',
+									text: ' ping ',
+								},
+								{
+									type: 'link',
+									url: 'http://google.com',
+									text: 'google.com',
+								},
+							],
+						},
+					],
+				},
+			];
+			const text = getRawTextFromBlocks('U07QAK46BGU', blocks);
+			expect(text).to.equal('ping google.com');
 		});
 	});
 });

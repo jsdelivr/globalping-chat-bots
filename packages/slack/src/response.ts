@@ -1,21 +1,18 @@
 import {
 	Flags,
 	getTag,
-	Logger,
 	PingMeasurementResponse,
 	PingResult,
 } from '@globalping/bot-utils';
-import { WebClient } from '@slack/web-api';
+import { KnownBlock } from '@slack/web-api';
 
 export function responseHeader (
 	result: PingResult,
 	tag: string | undefined,
 	boldSeparator: string,
 ): string {
-	return `>${boldSeparator}${result.probe.city}${
-		result.probe.state ? ` (${result.probe.state})` : ''
-	}, ${result.probe.country}, ${result.probe.continent}, ${
-		result.probe.network
+	return `>${boldSeparator}${result.probe.city}${result.probe.state ? ` (${result.probe.state})` : ''
+	}, ${result.probe.country}, ${result.probe.continent}, ${result.probe.network
 	} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}${boldSeparator}\n`;
 }
 
@@ -96,7 +93,6 @@ const latencyText = (result: PingResult, flags: Flags): string => {
 
 		default:
 			throw new Error(`unknown command: ${flags.cmd}`);
-			break;
 	}
 
 	return text;
@@ -116,55 +112,62 @@ export const responseText = (
 
 const maxDisplayedResults = 4;
 
-export const measurementsChatResponse = async (
-	logger: Logger,
-	client: WebClient,
-	channel_id: string,
-	thread_ts: string | undefined,
-	measurementId: string,
+export const formatMeasurementResponse = (
+	userId: string,
+	cmdText: string,
 	res: PingMeasurementResponse,
 	flags: Flags,
 ) => {
+	const blocks: KnownBlock[] = [
+		{
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `<@${userId}>, here are the results for \`${cmdText}\``,
+				verbatim: true,
+			},
+		},
+	];
 	const resultsForDisplay = res.results.slice(0, maxDisplayedResults);
-
 	const slackBoldSeparator = '*';
-	const slackTruncationLimit = 2800;
+	const slackTruncationLimit = 4000;
 
 	/* eslint-disable no-await-in-loop */
 	for (const result of resultsForDisplay) {
 		const tag = getTag(result.probe.tags);
-		const text
-			= responseHeader(result, tag, slackBoldSeparator)
-			+ responseText(result, flags, slackTruncationLimit);
-
-		try {
-			await client.chat.postMessage({ text, channel: channel_id, thread_ts });
-		} catch (error) {
-			logger.error(error);
-			throw error;
-		}
+		blocks.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text:
+					responseHeader(result, tag, slackBoldSeparator)
+					+ responseText(result, flags, slackTruncationLimit),
+				verbatim: true,
+			},
+		});
 	}
 
 	const resultsTruncated = resultsForDisplay.length !== res.results.length;
 
-	let footerText;
-
 	if (resultsTruncated) {
-		footerText = fullResultsFooter(measurementId, slackBoldSeparator, true);
+		blocks.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: fullResultsFooter(res.id, slackBoldSeparator, true),
+				verbatim: true,
+			},
+		});
 	} else if (flags.share) {
-		footerText = shareMessageFooter(measurementId, slackBoldSeparator, true);
+		blocks.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: shareMessageFooter(res.id, slackBoldSeparator, true),
+				verbatim: true,
+			},
+		});
 	}
 
-	if (footerText !== undefined) {
-		try {
-			await client.chat.postMessage({
-				text: footerText,
-				channel: channel_id,
-				thread_ts,
-			});
-		} catch (error) {
-			logger.error(error);
-			throw error;
-		}
-	}
+	return blocks;
 };

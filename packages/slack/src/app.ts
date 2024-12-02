@@ -9,7 +9,7 @@ import { App, AppOptions, GenericMessageEvent, LogLevel } from '@slack/bolt';
 import { initOAuthClient } from './auth.js';
 import { config } from './config.js';
 import { installationStore, knex } from './db.js';
-import { handleMention } from './mention.js';
+import { getRawTextFromBlocks, handleMention } from './mention.js';
 import { postAPI } from './post.js';
 import { routes } from './routes.js';
 import { channelWelcome, getInstallationId, logger } from './utils.js';
@@ -225,7 +225,7 @@ app.event('app_mention', async ({ payload, event, context, client }) => {
 		botUserId = '';
 	}
 
-	const fullText = payload.text;
+	const fullText = getRawTextFromBlocks(botUserId, payload.blocks);
 	const eventTs = payload.event_ts;
 	const teamId = event.team;
 	const channelId = event.channel;
@@ -245,7 +245,6 @@ app.event('app_mention', async ({ payload, event, context, client }) => {
 		eventTs,
 		threadTs,
 		installationId,
-		botUserId,
 		client,
 	);
 });
@@ -268,7 +267,7 @@ app.event('message', async ({ payload, event, context, client }) => {
 		botUserId = '';
 	}
 
-	let fullText = messageEvent.text;
+	let fullText = getRawTextFromBlocks(botUserId, messageEvent.blocks);
 	const eventTs = payload.event_ts;
 	const teamId = messageEvent.team;
 	const channelId = event.channel;
@@ -292,7 +291,6 @@ app.event('message', async ({ payload, event, context, client }) => {
 		eventTs,
 		threadTs,
 		installationId,
-		botUserId,
 		client,
 	);
 });

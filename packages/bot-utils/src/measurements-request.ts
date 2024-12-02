@@ -25,7 +25,7 @@ function buildLocations (from: string): Locations[] {
 		.map((l): Locations => ({ magic: l }));
 }
 
-export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
+export const buildPostMeasurements = (args: Flags): PostMeasurement => {
 	const {
 		cmd,
 		target,
@@ -44,15 +44,17 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 	} = args;
 	const locations = buildLocations(from);
 
-	if (locations.length > 10) { throw new Error('You can only query up to 10 different locations at once!'); }
+	if (locations.length > 10) {
+		throw new Error('You can only query up to 10 different locations at once!');
+	}
 
-	const postArray: PostMeasurement[] = [];
-
-	if (locations.length === 0) { throw new Error('Empty location! Run "/globalping help" for more information.'); }
+	if (locations.length === 0) {
+		throw new Error('Empty location! Run "/globalping help" for more information.');
+	}
 
 	switch (cmd) {
-		case 'ping': {
-			postArray.push({
+		case 'ping':
+			return {
 				type: 'ping',
 				target,
 				inProgressUpdates: false,
@@ -61,13 +63,9 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 				measurementOptions: {
 					...packets && { packets },
 				},
-			});
-
-			break;
-		}
-
-		case 'traceroute': {
-			postArray.push({
+			};
+		case 'traceroute':
+			return {
 				type: 'traceroute',
 				target,
 				inProgressUpdates: false,
@@ -85,13 +83,9 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 					},
 					...port && { port },
 				},
-			});
-
-			break;
-		}
-
-		case 'dns': {
-			postArray.push({
+			};
+		case 'dns':
+			return {
 				type: 'dns',
 				target,
 				inProgressUpdates: false,
@@ -122,13 +116,10 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 					...resolver && { resolver },
 					...trace && { trace },
 				},
-			});
+			};
 
-			break;
-		}
-
-		case 'mtr': {
-			postArray.push({
+		case 'mtr':
+			return {
 				type: 'mtr',
 				target,
 				inProgressUpdates: false,
@@ -147,13 +138,9 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 					...port && { port },
 					...packets && { packets },
 				},
-			});
-
-			break;
-		}
-
-		case 'http': {
-			postArray.push({
+			};
+		case 'http':
+			return {
 				type: 'http',
 				target,
 				inProgressUpdates: false,
@@ -187,10 +174,7 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 						headers,
 					},
 				},
-			});
-
-			break;
-		}
+			};
 
 		default: {
 			throwArgError(
@@ -202,6 +186,4 @@ export const buildPostMeasurements = (args: Flags): PostMeasurement[] => {
 			throw new Error('Unknown error.');
 		}
 	}
-
-	return postArray;
 };
