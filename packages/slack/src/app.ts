@@ -107,6 +107,11 @@ app.event('member_joined_channel', async ({ event, context, say }) => {
 });
 
 app.command('/globalping', args => bot.HandleCommand(args));
+app.command('/dns', args => bot.HandleCommand(args));
+app.command('/http', args => bot.HandleCommand(args));
+app.command('/mtr', args => bot.HandleCommand(args));
+app.command('/ping', args => bot.HandleCommand(args));
+app.command('/traceroute', args => bot.HandleCommand(args));
 app.event('app_mention', args => bot.HandleMention(args));
 app.event('message', args => bot.HandleMessage(args));
 

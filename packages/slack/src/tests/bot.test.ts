@@ -5,7 +5,7 @@ import {
 	LimitsResponse,
 } from '../auth.js';
 import { Bot, getLimitsOutput, getMoreCreditsRequiredAuthError, getMoreCreditsRequiredNoAuthError, getNoCreditsAuthError, getNoCreditsNoAuthError, getRawTextFromBlocks } from '../bot.js';
-import { getDefaultPingRawOutput, getDefaultPingResponse, mockAuthClient, mockGetMeasurement, mockLogger, mockPostMeasurement, mockSlackClient } from './utils.js';
+import { getDefaultDnsResponse, getDefaultHttpResponse, getDefaultMtrResponse, getDefaultPingResponse, getDefaultTracerouteResponse, mockAuthClient, mockGetMeasurement, mockLogger, mockPostMeasurement, mockSlackClient } from './utils.js';
 import { Context, SlashCommand } from '@slack/bolt';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
 import { AuthToken } from '@globalping/bot-utils';
@@ -27,7 +27,7 @@ describe('Bot', () => {
 	const bot = new Bot(loggerMock, oauthClientMock, postMeasurementMock, getMeasurementMock);
 
 	describe('HandleCommand', () => {
-		it('should handle the command', async () => {
+		it('should handle the command - /globalping', async () => {
 			const payload = {
 				channel_id: 'C07QAK46BGU',
 				user_id: 'U07QAK46BGU',
@@ -49,7 +49,8 @@ describe('Bot', () => {
 				probesCount: 1,
 			});
 
-			getMeasurementMock.mockResolvedValue(getDefaultPingResponse());
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
 
 			await bot.HandleCommand({
 				ack: ackMock,
@@ -98,9 +99,457 @@ describe('Bot', () => {
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*New York City (NY), US, NA, ColoCrossing (AS36352)*
+						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
 \`\`\`
-${getDefaultPingRawOutput()}
+${expectedResponse.results[0].result.rawOutput}
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - /dns', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/dns',
+				text: 'google.com from Berlin --resolver 1.1.1.1',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultDnsResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith({
+				type: 'dns',
+				target: 'google.com',
+				inProgressUpdates: false,
+				limit: 1,
+				locations: [{ magic: 'Berlin' }],
+				measurementOptions: {
+					resolver: '1.1.1.1',
+				},
+			}, 'tok3n');
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`dns ${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `>*Helsinki, FI, EU, Hetzner Online GmbH (AS24940)*
+\`\`\`
+${expectedResponse.results[0].result.rawOutput.trim()}
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - /http', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/http',
+				text: 'jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultHttpResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith({
+				type: 'http',
+				target: 'jsdelivr.com',
+				inProgressUpdates: false,
+				limit: 1,
+				locations: [{ magic: 'world' }],
+				measurementOptions: {
+					port: 443,
+					protocol: 'HTTPS',
+					request: {
+						headers: {},
+						host: 'www.jsdelivr.com',
+						path: '/package/npm/test',
+						query: 'nav=stats',
+					},
+				},
+			}, 'tok3n');
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`http ${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `>*Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)*
+\`\`\`
+${expectedResponse.results[0].result.rawOutput}
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - /mtr', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/mtr',
+				text: 'google.com',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultMtrResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith({
+				type: 'mtr',
+				target: 'google.com',
+				inProgressUpdates: false,
+				limit: 1,
+				locations: [{ magic: 'world' }],
+				measurementOptions: {
+				},
+			}, 'tok3n');
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`mtr ${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `>*Beauharnois, CA, NA, OVH SAS (AS16276)*
+\`\`\`
+${expectedResponse.results[0].result.rawOutput.trim()}
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - /ping', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/ping',
+				text: 'google.com from New York --limit 2',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith({
+				type: 'ping',
+				target: 'google.com',
+				inProgressUpdates: false,
+				limit: 2,
+				locations: [{ magic: 'New York' }],
+				measurementOptions: {},
+			}, 'tok3n');
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`ping ${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
+\`\`\`
+${expectedResponse.results[0].result.rawOutput}
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - /traceroute', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/traceroute',
+				text: 'google.com',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultTracerouteResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith({
+				type: 'traceroute',
+				target: 'google.com',
+				inProgressUpdates: false,
+				limit: 1,
+				locations: [{ magic: 'world' }],
+				measurementOptions: {
+				},
+			}, 'tok3n');
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`traceroute ${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `>*Rotterdam, NL, EU, DELTA Fiber Nederland B.V. (AS15435)*
+\`\`\`
+${expectedResponse.results[0].result.rawOutput.trim()}
 \`\`\``,
 						verbatim: true,
 					},
@@ -163,7 +612,8 @@ ${getDefaultPingRawOutput()}
 				probesCount: 1,
 			});
 
-			getMeasurementMock.mockResolvedValue(getDefaultPingResponse());
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
 
 			await bot.HandleMention({
 				event,
@@ -204,9 +654,9 @@ ${getDefaultPingRawOutput()}
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*New York City (NY), US, NA, ColoCrossing (AS36352)*
+						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
 \`\`\`
-${getDefaultPingRawOutput()}
+${expectedResponse.results[0].result.rawOutput}
 \`\`\``,
 						verbatim: true,
 					},
@@ -265,7 +715,8 @@ ${getDefaultPingRawOutput()}
 				probesCount: 1,
 			});
 
-			getMeasurementMock.mockResolvedValue(getDefaultPingResponse());
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
 
 			await bot.HandleMessage({
 				event,
@@ -306,9 +757,9 @@ ${getDefaultPingRawOutput()}
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*New York City (NY), US, NA, ColoCrossing (AS36352)*
+						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
 \`\`\`
-${getDefaultPingRawOutput()}
+${expectedResponse.results[0].result.rawOutput}
 \`\`\``,
 						verbatim: true,
 					},

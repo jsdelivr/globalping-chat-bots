@@ -1,374 +1,158 @@
 {
 	"ping1": {
-		"id": "kg8n5uP6QLAOmpij",
+		"id": "ZE5IQWjONEjUq6E8",
 		"type": "ping",
 		"status": "finished",
-		"createdAt": "2022-08-09T09:53:23.095Z",
-		"updatedAt": "2022-08-09T09:53:25.184Z",
+		"createdAt": "2024-12-03T10:41:12.266Z",
+		"updatedAt": "2024-12-03T10:41:13.312Z",
+		"target": "google.com",
 		"probesCount": 1,
+		"locations": [
+			{ "magic": "world" }
+		],
 		"results": [
 			{
 				"probe": {
-					"continent": "NA",
-					"region": "Northern America",
-					"country": "US",
-					"state": "NY",
-					"city": "New York City",
-					"asn": 36352,
-					"longitude": -74.006,
-					"latitude": 40.7143,
-					"network": "ColoCrossing",
+					"continent": "EU",
+					"region": "Western Europe",
+					"country": "NL",
+					"state": null,
+					"city": "Amsterdam",
+					"asn": 56655,
+					"longitude": 4.89,
+					"latitude": 52.37,
+					"network": "Gigahost AS",
+					"tags": [
+						"datacenter-network"
+					],
 					"resolvers": [
-						"8.8.8.8",
-						"8.8.4.4"
+						"1.1.1.1",
+						"1.0.0.1",
+						"private"
 					]
 				},
 				"result": {
-					"resolvedAddress": "216.24.57.3",
-					"resolvedHostname": "216.24.57.3:",
-					"timings": [],
+					"status": "finished",
+					"rawOutput": "PING  (142.250.179.206) 56(84) bytes of data.\n64 bytes from ams15s42-in-f14.1e100.net (142.250.179.206): icmp_seq=1 ttl=119 time=0.419 ms\n64 bytes from ams15s42-in-f14.1e100.net (142.250.179.206): icmp_seq=2 ttl=119 time=0.489 ms\n64 bytes from ams15s42-in-f14.1e100.net (142.250.179.206): icmp_seq=3 ttl=119 time=0.455 ms\n\n---  ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 1002ms\nrtt min/avg/max/mdev = 0.419/0.454/0.489/0.028 ms",
+					"resolvedAddress": "142.250.179.206",
+					"resolvedHostname": "ams15s42-in-f14.1e100.net",
+					"timings": [
+						{ "ttl": 119,
+							"rtt": 0.419 },
+						{ "ttl": 119,
+							"rtt": 0.489 },
+						{ "ttl": 119,
+							"rtt": 0.455 }
+					],
 					"stats": {
-						"min": 1.038,
-						"avg": 1.354,
-						"max": 1.777,
-						"loss": 0
-					},
-					"rawOutput": "PING jsdelivr.com (216.24.57.3) 56(84) bytes of data.\n64 bytes from 216.24.57.3: icmp_seq=1 ttl=58 time=1.78 ms\n64 bytes from 216.24.57.3: icmp_seq=2 ttl=58 time=1.04 ms\n64 bytes from 216.24.57.3: icmp_seq=3 ttl=58 time=1.25 ms\n\n--- jsdelivr.com ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 1102ms\nrtt min/avg/max/mdev = 1.038/1.354/1.777/0.310 ms"
+						"min": 0.419,
+						"max": 0.489,
+						"avg": 0.454,
+						"total": 3,
+						"loss": 0,
+						"rcv": 3,
+						"drop": 0
+					}
 				}
 			}
 		]
 	},
 	"ping2": {
-		"id": "gYHIjSroSP04BIyt",
+		"id": "kCJ73cob8aTn1Kyn",
 		"type": "ping",
 		"status": "finished",
-		"createdAt": "2022-08-12T11:13:14.236Z",
-		"updatedAt": "2022-08-12T11:13:28.073Z",
+		"createdAt": "2024-12-03T10:41:57.734Z",
+		"updatedAt": "2024-12-03T10:41:59.348Z",
+		"target": "google.com",
+		"limit": 3,
 		"probesCount": 3,
+		"locations": [
+			{ "magic": "world" }
+		],
 		"results": [
 			{
 				"probe": {
-					"continent": "AS",
-					"region": "Eastern Asia",
-					"country": "CN",
+					"continent": "OC",
+					"region": "Australia and New Zealand",
+					"country": "AU",
 					"state": null,
-					"city": "Tianjin",
-					"asn": 45090,
-					"longitude": 117.1767,
-					"latitude": 39.1422,
-					"network": "Shenzhen Tencent Computer Systems Company Limited",
-					"resolvers": [
-						"private"
-					]
-				},
-				"result": {
-					"resolvedAddress": "216.24.57.253",
-					"resolvedHostname": "216.24.57.253:",
-					"timings": [],
-					"stats": {
-						"min": 172.363,
-						"avg": 172.414,
-						"max": 172.477,
-						"loss": 20
-					},
-					"rawOutput": "PING jsdelivr.com (216.24.57.253) 56(84) bytes of data.\n64 bytes from 216.24.57.253: icmp_seq=1 ttl=251 time=172 ms\n64 bytes from 216.24.57.253: icmp_seq=3 ttl=251 time=172 ms\n64 bytes from 216.24.57.253: icmp_seq=4 ttl=251 time=172 ms\n64 bytes from 216.24.57.253: icmp_seq=5 ttl=251 time=172 ms\n\n--- jsdelivr.com ping statistics ---\n5 packets transmitted, 4 received, 20% packet loss, time 11017ms\nrtt min/avg/max/mdev = 172.363/172.414/172.477/0.042 ms"
-				}
-			},
-			{
-				"probe": {
-					"continent": "AS",
-					"region": "Eastern Asia",
-					"country": "CN",
-					"state": null,
-					"city": "Shanghai",
-					"asn": 45090,
-					"longitude": 121.4581,
-					"latitude": 31.2222,
-					"network": "Shenzhen Tencent Computer Systems Company Limited",
-					"resolvers": [
-						"private"
-					]
-				},
-				"result": {
-					"resolvedAddress": "216.24.57.3",
-					"resolvedHostname": "216.24.57.3:",
-					"timings": [],
-					"stats": {
-						"min": 127.748,
-						"avg": 128.59,
-						"max": 129.636,
-						"loss": 0
-					},
-					"rawOutput": "PING jsdelivr.com (216.24.57.3) 56(84) bytes of data.\n64 bytes from 216.24.57.3: icmp_seq=1 ttl=51 time=130 ms\n64 bytes from 216.24.57.3: icmp_seq=2 ttl=51 time=128 ms\n64 bytes from 216.24.57.3: icmp_seq=3 ttl=51 time=129 ms\n64 bytes from 216.24.57.3: icmp_seq=4 ttl=51 time=128 ms\n\n--- jsdelivr.com ping statistics ---\n4 packets transmitted, 4 received, 0% packet loss, time 8817ms\nrtt min/avg/max/mdev = 127.748/128.590/129.636/0.851 ms"
-				}
-			},
-			{
-				"probe": {
-					"continent": "AS",
-					"region": "Eastern Asia",
-					"country": "CN",
-					"state": null,
-					"city": "Shanghai",
-					"asn": 45090,
-					"longitude": 121.4581,
-					"latitude": 31.2222,
-					"network": "Shenzhen Tencent Computer Systems Company Limited",
-					"resolvers": [
-						"private"
-					]
-				},
-				"result": {
-					"resolvedAddress": "216.24.57.253",
-					"resolvedHostname": "216.24.57.253:",
-					"timings": [],
-					"stats": {
-						"min": 163.075,
-						"avg": 164.441,
-						"max": 165.614,
-						"loss": 20
-					},
-					"rawOutput": "PING jsdelivr.com (216.24.57.253) 56(84) bytes of data.\n64 bytes from 216.24.57.253: icmp_seq=1 ttl=51 time=166 ms\n64 bytes from 216.24.57.253: icmp_seq=2 ttl=51 time=164 ms\n64 bytes from 216.24.57.253: icmp_seq=3 ttl=51 time=163 ms\n64 bytes from 216.24.57.253: icmp_seq=5 ttl=51 time=165 ms\n\n--- jsdelivr.com ping statistics ---\n5 packets transmitted, 4 received, 20% packet loss, time 11144ms\nrtt min/avg/max/mdev = 163.075/164.441/165.614/1.116 ms"
-				}
-			}
-		]
-	},
-	"traceroute1": {
-		"id": "FQPCvhVHyja6xQ8Q",
-		"type": "traceroute",
-		"status": "finished",
-		"createdAt": "2022-08-12T11:48:49.356Z",
-		"updatedAt": "2022-08-12T11:48:55.819Z",
-		"probesCount": 1,
-		"results": [
-			{
-				"probe": {
-					"continent": "AS",
-					"region": "Eastern Asia",
-					"country": "JP",
-					"state": null,
-					"city": "Tokyo",
-					"asn": 8075,
-					"longitude": 139.6917,
-					"latitude": 35.6895,
-					"network": "Microsoft Corporation",
-					"resolvers": [
-						"private"
-					]
-				},
-				"result": {
-					"resolvedAddress": "216.24.57.253",
-					"resolvedHostname": "216.24.57.253",
-					"hops": [
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "*",
-							"resolvedAddress": "*",
-							"timings": []
-						},
-						{
-							"resolvedHostname": "216.24.57.253",
-							"resolvedAddress": "216.24.57.253",
-							"timings": [
-								{
-									"rtt": 1.722
-								}
-							]
-						}
+					"city": "Blacktown",
+					"asn": 31898,
+					"longitude": 150.88,
+					"latitude": -33.8,
+					"network": "Oracle Corporation",
+					"tags": [
+						"datacenter-network"
 					],
-					"rawOutput": "traceroute to jsdelivr.com (216.24.57.253), 20 hops max, 60 byte packets\n 1  * *\n 2  * *\n 3  * *\n 4  * *\n 5  * *\n 6  * *\n 7  * *\n 8  * *\n 9  * *\n10  * 216.24.57.253 (216.24.57.253)  1.722 ms"
+					"resolvers": [
+						"private"
+					]
+				},
+				"result": {
+					"status": "finished",
+					"rawOutput": "PING  (172.217.24.46) 56(84) bytes of data.\n64 bytes from hkg07s23-in-f14.1e100.net (172.217.24.46): icmp_seq=1 ttl=120 time=1.31 ms\n64 bytes from hkg07s23-in-f46.1e100.net (172.217.24.46): icmp_seq=2 ttl=120 time=1.40 ms\n64 bytes from hkg07s23-in-f46.1e100.net (172.217.24.46): icmp_seq=3 ttl=120 time=1.36 ms\n\n---  ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 1002ms\nrtt min/avg/max/mdev = 1.314/1.356/1.398/0.034 ms",
+					"resolvedAddress": "172.217.24.46",
+					"resolvedHostname": "hkg07s23-in-f14.1e100.net",
+					"timings": [
+						{ "ttl": 120,
+							"rtt": 1.31 },
+						{ "ttl": 120,
+							"rtt": 1.4 },
+						{ "ttl": 120,
+							"rtt": 1.36 }
+					],
+					"stats": {
+						"min": 1.314,
+						"max": 1.398,
+						"avg": 1.356,
+						"total": 3,
+						"loss": 0,
+						"rcv": 3,
+						"drop": 0
+					}
 				}
-			}
-		]
-	},
-	"traceroute2": {
-		"id": "6bfbUeCHzAO32ACO",
-		"type": "traceroute",
-		"status": "finished",
-		"createdAt": "2022-08-12T11:54:02.844Z",
-		"updatedAt": "2022-08-12T11:54:05.218Z",
-		"probesCount": 2,
-		"results": [
+			},
 			{
 				"probe": {
-					"continent": "NA",
-					"region": "Northern America",
-					"country": "US",
-					"state": "NY",
-					"city": "Buffalo",
-					"asn": 55286,
-					"longitude": -78.8784,
-					"latitude": 42.8865,
-					"network": "B2 Net Solutions Inc.",
+					"continent": "EU",
+					"region": "Western Europe",
+					"country": "DE",
+					"state": null,
+					"city": "Frankfurt",
+					"asn": 47447,
+					"longitude": 8.68,
+					"latitude": 50.12,
+					"network": "23M GmbH",
+					"tags": [
+						"datacenter-network"
+					],
 					"resolvers": [
 						"8.8.8.8",
 						"8.8.4.4"
 					]
 				},
 				"result": {
-					"resolvedAddress": "216.24.57.3",
-					"resolvedHostname": "216.24.57.3",
-					"hops": [
-						{
-							"resolvedHostname": "100.64.19.217",
-							"resolvedAddress": "100.64.19.217",
-							"timings": [
-								{
-									"rtt": 0.305
-								},
-								{
-									"rtt": 0.221
-								}
-							]
-						},
-						{
-							"resolvedHostname": "23.229.68.1",
-							"resolvedAddress": "23.229.68.1",
-							"timings": [
-								{
-									"rtt": 1.399
-								},
-								{
-									"rtt": 2.361
-								}
-							]
-						},
-						{
-							"resolvedHostname": "10.8.26.5",
-							"resolvedAddress": "10.8.26.5",
-							"timings": [
-								{
-									"rtt": 0.655
-								},
-								{
-									"rtt": 0.599
-								}
-							]
-						},
-						{
-							"resolvedHostname": "10.8.31.117",
-							"resolvedAddress": "10.8.31.117",
-							"timings": [
-								{
-									"rtt": 16.323
-								},
-								{
-									"rtt": 16.299
-								}
-							]
-						},
-						{
-							"resolvedHostname": "192-3-194-5-host.colocrossing.com",
-							"resolvedAddress": "192.3.194.5",
-							"timings": [
-								{
-									"rtt": 0.688
-								},
-								{
-									"rtt": 0.681
-								}
-							]
-						},
-						{
-							"resolvedHostname": "10.8.40.229",
-							"resolvedAddress": "10.8.40.229",
-							"timings": [
-								{
-									"rtt": 0.326
-								},
-								{
-									"rtt": 0.35
-								}
-							]
-						},
-						{
-							"resolvedHostname": "10.8.25.141",
-							"resolvedAddress": "10.8.25.141",
-							"timings": [
-								{
-									"rtt": 4.84
-								},
-								{
-									"rtt": 3.582
-								}
-							]
-						},
-						{
-							"resolvedHostname": "buf-b1-link.ip.twelve99.net",
-							"resolvedAddress": "62.115.145.90",
-							"timings": [
-								{
-									"rtt": 0.435
-								},
-								{
-									"rtt": 0.4
-								}
-							]
-						},
-						{
-							"resolvedHostname": "cloudflare-ic342964-buf-b1.ip.twelve99-cust.net",
-							"resolvedAddress": "62.115.174.13",
-							"timings": [
-								{
-									"rtt": 1.166
-								},
-								{
-									"rtt": 1.453
-								}
-							]
-						},
-						{
-							"resolvedHostname": "216.24.57.3",
-							"resolvedAddress": "216.24.57.3",
-							"timings": [
-								{
-									"rtt": 0.441
-								},
-								{
-									"rtt": 0.427
-								}
-							]
-						}
+					"status": "finished",
+					"rawOutput": "PING  (216.58.212.142) 56(84) bytes of data.\n64 bytes from ams15s21-in-f142.1e100.net (216.58.212.142): icmp_seq=1 ttl=120 time=0.887 ms\n64 bytes from ams15s21-in-f14.1e100.net (216.58.212.142): icmp_seq=2 ttl=120 time=0.859 ms\n64 bytes from ams15s21-in-f142.1e100.net (216.58.212.142): icmp_seq=3 ttl=120 time=0.963 ms\n\n---  ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 1002ms\nrtt min/avg/max/mdev = 0.859/0.903/0.963/0.043 ms",
+					"resolvedAddress": "216.58.212.142",
+					"resolvedHostname": "ams15s21-in-f142.1e100.net",
+					"timings": [
+						{ "ttl": 120,
+							"rtt": 0.887 },
+						{ "ttl": 120,
+							"rtt": 0.859 },
+						{ "ttl": 120,
+							"rtt": 0.963 }
 					],
-					"rawOutput": "traceroute to jsdelivr.com (216.24.57.3), 20 hops max, 60 byte packets\n 1  100.64.19.217 (100.64.19.217)  0.305 ms  0.221 ms\n 2  23.229.68.1 (23.229.68.1)  1.399 ms  2.361 ms\n 3  10.8.26.5 (10.8.26.5)  0.655 ms 10.8.26.1 (10.8.26.1)  0.599 ms\n 4  10.8.31.117 (10.8.31.117)  16.323 ms  16.299 ms\n 5  192-3-194-5-host.colocrossing.com (192.3.194.5)  0.688 ms  0.681 ms\n 6  10.8.40.229 (10.8.40.229)  0.326 ms  0.350 ms\n 7  10.8.25.141 (10.8.25.141)  4.840 ms 10.8.40.213 (10.8.40.213)  3.582 ms\n 8  buf-b1-link.ip.twelve99.net (62.115.145.90)  0.435 ms buf-b1-link.ip.twelve99.net (62.115.59.93)  0.400 ms\n 9  cloudflare-ic342964-buf-b1.ip.twelve99-cust.net (62.115.174.13)  1.166 ms  1.453 ms\n10  216.24.57.3 (216.24.57.3)  0.441 ms  0.427 ms"
+					"stats": {
+						"min": 0.859,
+						"max": 0.963,
+						"avg": 0.903,
+						"total": 3,
+						"loss": 0,
+						"rcv": 3,
+						"drop": 0
+					}
 				}
 			},
 			{
@@ -376,842 +160,829 @@
 					"continent": "NA",
 					"region": "Northern America",
 					"country": "US",
-					"state": "NY",
-					"city": "New York",
-					"asn": 204154,
-					"longitude": -73.9877,
-					"latitude": 40.7425,
-					"network": "Network Management Ltd",
+					"state": "CA",
+					"city": "Los Angeles",
+					"asn": 396982,
+					"longitude": -118.24,
+					"latitude": 34.05,
+					"network": "Google LLC",
+					"tags": [
+						"gcp-us-west2",
+						"datacenter-network"
+					],
+					"resolvers": [
+						"private"
+					]
+				},
+				"result": {
+					"status": "finished",
+					"rawOutput": "PING  (142.250.188.238) 56(84) bytes of data.\n64 bytes from lax31s15-in-f14.1e100.net (142.250.188.238): icmp_seq=1 ttl=122 time=4.58 ms\n64 bytes from lax31s15-in-f14.1e100.net (142.250.188.238): icmp_seq=2 ttl=122 time=0.365 ms\n64 bytes from lax31s15-in-f14.1e100.net (142.250.188.238): icmp_seq=3 ttl=122 time=0.387 ms\n\n---  ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 1002ms\nrtt min/avg/max/mdev = 0.365/1.778/4.584/1.983 ms",
+					"resolvedAddress": "142.250.188.238",
+					"resolvedHostname": "lax31s15-in-f14.1e100.net",
+					"timings": [
+						{ "ttl": 122,
+							"rtt": 4.58 },
+						{ "ttl": 122,
+							"rtt": 0.365 },
+						{ "ttl": 122,
+							"rtt": 0.387 }
+					],
+					"stats": {
+						"min": 0.365,
+						"max": 4.584,
+						"avg": 1.778,
+						"total": 3,
+						"loss": 0,
+						"rcv": 3,
+						"drop": 0
+					}
+				}
+			}
+		]
+	},
+	"traceroute1": {
+		"id": "BHL0zZG2346J2rpc",
+		"type": "traceroute",
+		"status": "finished",
+		"createdAt": "2024-12-03T10:43:30.627Z",
+		"updatedAt": "2024-12-03T10:43:32.913Z",
+		"target": "google.com",
+		"probesCount": 1,
+		"locations": [
+			{ "magic": "world" }
+		],
+		"results": [
+			{
+				"probe": {
+					"continent": "EU",
+					"region": "Western Europe",
+					"country": "NL",
+					"state": null,
+					"city": "Rotterdam",
+					"asn": 15435,
+					"longitude": 4.17,
+					"latitude": 52,
+					"network": "DELTA Fiber Nederland B.V.",
+					"tags": [
+						"eyeball-network"
+					],
+					"resolvers": [
+						"8.8.8.8",
+						"1.1.1.1",
+						"2a02:f68:0:cf3:6e73::2",
+						"2a02:f68:0:6e:6e73::1"
+					]
+				},
+				"result": {
+					"rawOutput": "traceroute to google.com (172.217.23.206), 20 hops max, 60 byte packets\n 1  192.168.88.254 (192.168.88.254)  0.675 ms  0.671 ms\n 2  033-044-143-149.dynamic.caiway.nl (149.143.44.33)  2.200 ms  2.159 ms\n 3  * *\n 4  62.45.63.229 (62.45.63.229)  4.173 ms  4.231 ms\n 5  172.253.66.253 (172.253.66.253)  3.457 ms  7.917 ms\n 6  142.251.255.41 (142.251.255.41)  6.506 ms  6.648 ms\n 7  ams16s37-in-f14.1e100.net (172.217.23.206)  6.422 ms  6.121 ms",
+					"status": "finished",
+					"resolvedAddress": "172.217.23.206",
+					"resolvedHostname": "ams16s37-in-f14.1e100.net",
+					"hops": [
+						{
+							"resolvedHostname": "192.168.88.254",
+							"resolvedAddress": "192.168.88.254",
+							"timings": [
+								{ "rtt": 0.675 },
+								{ "rtt": 0.671 }
+							]
+						},
+						{
+							"resolvedHostname": "033-044-143-149.dynamic.caiway.nl",
+							"resolvedAddress": "149.143.44.33",
+							"timings": [
+								{ "rtt": 2.2 },
+								{ "rtt": 2.159 }
+							]
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": "62.45.63.229",
+							"resolvedAddress": "62.45.63.229",
+							"timings": [
+								{ "rtt": 4.173 },
+								{ "rtt": 4.231 }
+							]
+						},
+						{
+							"resolvedHostname": "172.253.66.253",
+							"resolvedAddress": "172.253.66.253",
+							"timings": [
+								{ "rtt": 3.457 },
+								{ "rtt": 7.917 }
+							]
+						},
+						{
+							"resolvedHostname": "142.251.255.41",
+							"resolvedAddress": "142.251.255.41",
+							"timings": [
+								{ "rtt": 6.506 },
+								{ "rtt": 6.648 }
+							]
+						},
+						{
+							"resolvedHostname": "ams16s37-in-f14.1e100.net",
+							"resolvedAddress": "172.217.23.206",
+							"timings": [
+								{ "rtt": 6.422 },
+								{ "rtt": 6.121 }
+							]
+						}
+					]
+				}
+			}
+		]
+	},
+	"traceroute2": {
+		"id": "I8lMHNlwh9vZL7Ui",
+		"type": "traceroute",
+		"status": "finished",
+		"createdAt": "2024-12-03T10:43:56.087Z",
+		"updatedAt": "2024-12-03T10:43:58.489Z",
+		"target": "google.com",
+		"limit": 2,
+		"probesCount": 2,
+		"locations": [
+			{ "magic": "world" }
+		],
+		"results": [
+			{
+				"probe": {
+					"continent": "EU",
+					"region": "Southern Europe",
+					"country": "RS",
+					"state": null,
+					"city": "Paracin",
+					"asn": 8400,
+					"longitude": 21.40778,
+					"latitude": 43.86083,
+					"network": "TELEKOM SRBIJA a.d.",
+					"tags": [
+						"eyeball-network",
+						"u-petarpetrovic-paracin"
+					],
+					"resolvers": [
+						"private"
+					]
+				},
+				"result": {
+					"rawOutput": "traceroute to google.com (142.250.180.238), 20 hops max, 60 byte packets\n 1  192.168.100.1 (192.168.100.1)  0.771 ms  0.984 ms\n 2  100.112.224.1 (100.112.224.1)  7.309 ms  7.204 ms\n 3  * *\n 4  192.168.42.0 (192.168.42.0)  10.437 ms  10.419 ms\n 5  * *\n 6  212-200-216-46.dynamic.isp.telekom.rs (212.200.216.46)  10.332 ms  10.316 ms\n 7  79.101.106.242 (79.101.106.242)  24.749 ms  24.725 ms\n 8  172.253.51.195 (172.253.51.195)  24.690 ms  24.660 ms\n 9  142.251.65.219 (142.251.65.219)  24.622 ms  24.596 ms\n10  bud02s34-in-f14.1e100.net (142.250.180.238)  24.462 ms  24.433 ms",
+					"status": "finished",
+					"resolvedAddress": "142.250.180.238",
+					"resolvedHostname": "bud02s34-in-f14.1e100.net",
+					"hops": [
+						{
+							"resolvedHostname": "192.168.100.1",
+							"resolvedAddress": "192.168.100.1",
+							"timings": [
+								{ "rtt": 0.771 },
+								{ "rtt": 0.984 }
+							]
+						},
+						{
+							"resolvedHostname": "100.112.224.1",
+							"resolvedAddress": "100.112.224.1",
+							"timings": [
+								{ "rtt": 7.309 },
+								{ "rtt": 7.204 }
+							]
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": "192.168.42.0",
+							"resolvedAddress": "192.168.42.0",
+							"timings": [
+								{ "rtt": 10.437 },
+								{ "rtt": 10.419 }
+							]
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": "212-200-216-46.dynamic.isp.telekom.rs",
+							"resolvedAddress": "212.200.216.46",
+							"timings": [
+								{ "rtt": 10.332 },
+								{ "rtt": 10.316 }
+							]
+						},
+						{
+							"resolvedHostname": "79.101.106.242",
+							"resolvedAddress": "79.101.106.242",
+							"timings": [
+								{ "rtt": 24.749 },
+								{ "rtt": 24.725 }
+							]
+						},
+						{
+							"resolvedHostname": "172.253.51.195",
+							"resolvedAddress": "172.253.51.195",
+							"timings": [
+								{ "rtt": 24.69 },
+								{ "rtt": 24.66 }
+							]
+						},
+						{
+							"resolvedHostname": "142.251.65.219",
+							"resolvedAddress": "142.251.65.219",
+							"timings": [
+								{ "rtt": 24.622 },
+								{ "rtt": 24.596 }
+							]
+						},
+						{
+							"resolvedHostname": "bud02s34-in-f14.1e100.net",
+							"resolvedAddress": "142.250.180.238",
+							"timings": [
+								{ "rtt": 24.462 },
+								{ "rtt": 24.433 }
+							]
+						}
+					]
+				}
+			},
+			{
+				"probe": {
+					"continent": "AS",
+					"region": "Eastern Europe",
+					"country": "RU",
+					"state": null,
+					"city": "Moscow",
+					"asn": 48282,
+					"longitude": 37.62,
+					"latitude": 55.75,
+					"network": "Hosting technology LTD",
+					"tags": [
+						"datacenter-network"
+					],
 					"resolvers": [
 						"8.8.8.8"
 					]
 				},
 				"result": {
-					"resolvedAddress": "216.24.57.253",
-					"resolvedHostname": "216.24.57.253",
+					"rawOutput": "traceroute to google.com (64.233.162.113), 20 hops max, 60 byte packets\n 1  host-62-113-112-243.hosted-by-vdsina.ru (62.113.112.243)  0.352 ms  0.324 ms\n 2  109.239.138.90 (109.239.138.90)  1.530 ms  1.828 ms\n 3  91.108.51.16 (91.108.51.16)  1.177 ms  1.219 ms\n 4  * *\n 5  74.125.244.180 (74.125.244.180)  11.690 ms  11.798 ms\n 6  72.14.232.85 (72.14.232.85)  11.064 ms  11.127 ms\n 7  142.251.61.221 (142.251.61.221)  17.122 ms  17.163 ms\n 8  142.250.57.7 (142.250.57.7)  16.859 ms  16.903 ms\n 9  * *\n10  * *\n11  * *\n12  * *\n13  * *\n14  * *\n15  * *\n16  * *\n17  * *\n18  li-in-f113.1e100.net (64.233.162.113)  16.529 ms  16.533 ms",
+					"status": "finished",
+					"resolvedAddress": "64.233.162.113",
+					"resolvedHostname": "li-in-f113.1e100.net",
 					"hops": [
 						{
-							"resolvedHostname": "gw.firstbyte.ru",
-							"resolvedAddress": "46.17.107.1",
+							"resolvedHostname": "host-62-113-112-243.hosted-by-vdsina.ru",
+							"resolvedAddress": "62.113.112.243",
 							"timings": [
-								{
-									"rtt": 0.522
-								},
-								{
-									"rtt": 0.783
-								}
+								{ "rtt": 0.352 },
+								{ "rtt": 0.324 }
 							]
 						},
 						{
-							"resolvedHostname": "139.60.160.74",
-							"resolvedAddress": "139.60.160.74",
+							"resolvedHostname": "109.239.138.90",
+							"resolvedAddress": "109.239.138.90",
 							"timings": [
-								{
-									"rtt": 0.306
-								},
-								{
-									"rtt": 0.29
-								}
+								{ "rtt": 1.53 },
+								{ "rtt": 1.828 }
 							]
 						},
 						{
-							"resolvedHostname": "10ge0-3.core1.nyc1.he.net",
-							"resolvedAddress": "209.51.163.93",
+							"resolvedHostname": "91.108.51.16",
+							"resolvedAddress": "91.108.51.16",
 							"timings": [
-								{
-									"rtt": 1.082
-								},
-								{
-									"rtt": 1.368
-								}
+								{ "rtt": 1.177 },
+								{ "rtt": 1.219 }
 							]
 						},
 						{
-							"resolvedHostname": "10ge0-21.core2.nyc6.he.net",
-							"resolvedAddress": "184.104.193.89",
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": "74.125.244.180",
+							"resolvedAddress": "74.125.244.180",
 							"timings": [
-								{
-									"rtt": 1.629
-								},
-								{
-									"rtt": 1.448
-								}
+								{ "rtt": 11.69 },
+								{ "rtt": 11.798 }
 							]
 						},
 						{
-							"resolvedHostname": "206.126.115.75",
-							"resolvedAddress": "206.126.115.75",
+							"resolvedHostname": "72.14.232.85",
+							"resolvedAddress": "72.14.232.85",
 							"timings": [
-								{
-									"rtt": 10.265
-								},
-								{
-									"rtt": 10.424
-								}
+								{ "rtt": 11.064 },
+								{ "rtt": 11.127 }
 							]
 						},
 						{
-							"resolvedHostname": "172.70.112.4",
-							"resolvedAddress": "172.70.112.4",
+							"resolvedHostname": "142.251.61.221",
+							"resolvedAddress": "142.251.61.221",
 							"timings": [
-								{
-									"rtt": 2.271
-								},
-								{
-									"rtt": 4.277
-								}
+								{ "rtt": 17.122 },
+								{ "rtt": 17.163 }
 							]
 						},
 						{
-							"resolvedHostname": "216.24.57.253",
-							"resolvedAddress": "216.24.57.253",
+							"resolvedHostname": "142.250.57.7",
+							"resolvedAddress": "142.250.57.7",
 							"timings": [
-								{
-									"rtt": 1.767
-								},
-								{
-									"rtt": 1.729
-								}
+								{ "rtt": 16.859 },
+								{ "rtt": 16.903 }
+							]
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": null,
+							"resolvedAddress": null,
+							"timings": []
+						},
+						{
+							"resolvedHostname": "li-in-f113.1e100.net",
+							"resolvedAddress": "64.233.162.113",
+							"timings": [
+								{ "rtt": 16.529 },
+								{ "rtt": 16.533 }
 							]
 						}
-					],
-					"rawOutput": "traceroute to jsdelivr.com (216.24.57.253), 20 hops max, 60 byte packets\n 1  gw.firstbyte.ru (46.17.107.1)  0.522 ms  0.783 ms\n 2  139.60.160.74 (139.60.160.74)  0.306 ms 139.60.160.75 (139.60.160.75)  0.290 ms\n 3  10ge0-3.core1.nyc1.he.net (209.51.163.93)  1.082 ms  1.368 ms\n 4  10ge0-21.core2.nyc6.he.net (184.104.193.89)  1.629 ms  1.448 ms\n 5  206.126.115.75 (206.126.115.75)  10.265 ms  10.424 ms\n 6  172.70.112.4 (172.70.112.4)  2.271 ms 172.70.108.2 (172.70.108.2)  4.277 ms\n 7  216.24.57.253 (216.24.57.253)  1.767 ms  1.729 ms"
+					]
 				}
 			}
 		]
 	},
 	"dns1": {
-		"id": "CJ7R41WLZ7K83JZE",
+		"id": "6D9WRLZ4BTMOzDBT",
 		"type": "dns",
 		"status": "finished",
-		"createdAt": "2022-08-12T11:58:40.056Z",
-		"updatedAt": "2022-08-12T11:58:40.330Z",
+		"createdAt": "2024-12-03T10:44:28.616Z",
+		"updatedAt": "2024-12-03T10:44:28.722Z",
+		"target": "google.com",
 		"probesCount": 1,
+		"locations": [
+			{ "magic": "world" }
+		],
 		"results": [
+			{
+				"probe": {
+					"continent": "EU",
+					"region": "Northern Europe",
+					"country": "FI",
+					"state": null,
+					"city": "Helsinki",
+					"asn": 24940,
+					"longitude": 24.94,
+					"latitude": 60.17,
+					"network": "Hetzner Online GmbH",
+					"tags": [
+						"datacenter-network"
+					],
+					"resolvers": [
+						"private"
+					]
+				},
+				"result": {
+					"status": "finished",
+					"statusCodeName": "NOERROR",
+					"statusCode": 0,
+					"rawOutput": "\n; <<>> DiG 9.16.44-Debian <<>> -t A google.com -p 53 -4 +timeout=3 +tries=2 +nocookie +nosplit +nsid\n;; global options: +cmd\n;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 38122\n;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 65494\n;; QUESTION SECTION:\n;google.com.\t\t\tIN\tA\n\n;; ANSWER SECTION:\ngoogle.com.\t\t136\tIN\tA\t216.58.211.238\n\n;; Query time: 7 msec\n;; SERVER: x.x.x.x#53(x.x.x.x)\n;; WHEN: Tue Dec 03 10:44:28 UTC 2024\n;; MSG SIZE  rcvd: 55\n",
+					"answers": [
+						{
+							"name": "google.com.",
+							"type": "A",
+							"ttl": 136,
+							"class": "IN",
+							"value": "216.58.211.238"
+						}
+					],
+					"timings": { "total": 7 },
+					"resolver": "private"
+				}
+			}
+		]
+	},
+	"dns2": {
+		"id": "EH0IzkCurHXnLL3U",
+		"type": "dns",
+		"status": "finished",
+		"createdAt": "2024-12-03T10:44:50.727Z",
+		"updatedAt": "2024-12-03T10:44:50.920Z",
+		"target": "google.com",
+		"limit": 2,
+		"probesCount": 2,
+		"locations": [
+			{ "magic": "world" }
+		],
+		"results": [
+			{
+				"probe": {
+					"continent": "AS",
+					"region": "Eastern Europe",
+					"country": "RU",
+					"state": null,
+					"city": "Moscow",
+					"asn": 50516,
+					"longitude": 37.62,
+					"latitude": 55.75,
+					"network": "Maxiplace Ltd.",
+					"tags": [
+						"datacenter-network"
+					],
+					"resolvers": [
+						"8.8.8.8",
+						"8.8.4.4"
+					]
+				},
+				"result": {
+					"status": "finished",
+					"statusCodeName": "NOERROR",
+					"statusCode": 0,
+					"rawOutput": "\n; <<>> DiG 9.16.37-Debian <<>> -t A google.com -p 53 -4 +timeout=3 +tries=2 +nocookie +nosplit +nsid\n;; global options: +cmd\n;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 24808\n;; flags: qr rd ra; QUERY: 1, ANSWER: 6, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 512\n; NSID: 67 70 64 6e 73 2d 6c 70 70 (\"gpdns-lpp\")\n;; QUESTION SECTION:\n;google.com.\t\t\tIN\tA\n\n;; ANSWER SECTION:\ngoogle.com.\t\t300\tIN\tA\t64.233.162.139\ngoogle.com.\t\t300\tIN\tA\t64.233.162.100\ngoogle.com.\t\t300\tIN\tA\t64.233.162.138\ngoogle.com.\t\t300\tIN\tA\t64.233.162.113\ngoogle.com.\t\t300\tIN\tA\t64.233.162.101\ngoogle.com.\t\t300\tIN\tA\t64.233.162.102\n\n;; Query time: 19 msec\n;; SERVER: 8.8.8.8#53(8.8.8.8)\n;; WHEN: Tue Dec 03 10:44:50 UTC 2024\n;; MSG SIZE  rcvd: 148\n",
+					"answers": [
+						{
+							"name": "google.com.",
+							"type": "A",
+							"ttl": 300,
+							"class": "IN",
+							"value": "64.233.162.139"
+						},
+						{
+							"name": "google.com.",
+							"type": "A",
+							"ttl": 300,
+							"class": "IN",
+							"value": "64.233.162.100"
+						},
+						{
+							"name": "google.com.",
+							"type": "A",
+							"ttl": 300,
+							"class": "IN",
+							"value": "64.233.162.138"
+						},
+						{
+							"name": "google.com.",
+							"type": "A",
+							"ttl": 300,
+							"class": "IN",
+							"value": "64.233.162.113"
+						},
+						{
+							"name": "google.com.",
+							"type": "A",
+							"ttl": 300,
+							"class": "IN",
+							"value": "64.233.162.101"
+						},
+						{
+							"name": "google.com.",
+							"type": "A",
+							"ttl": 300,
+							"class": "IN",
+							"value": "64.233.162.102"
+						}
+					],
+					"timings": { "total": 19 },
+					"resolver": "8.8.8.8"
+				}
+			},
 			{
 				"probe": {
 					"continent": "EU",
 					"region": "Northern Europe",
 					"country": "GB",
 					"state": null,
-					"city": "London",
-					"asn": 395092,
-					"longitude": -0.1257,
-					"latitude": 51.5085,
-					"network": "Shock Hosting LLC",
-					"resolvers": [
-						"1.1.1.1",
-						"1.0.0.1"
-					]
-				},
-				"result": {
-					"answers": [
-						{
-							"name": "jsdelivr.com.",
-							"type": "A",
-							"ttl": 162,
-							"class": "IN",
-							"value": "216.24.57.253"
-						},
-						{
-							"name": "jsdelivr.com.",
-							"type": "A",
-							"ttl": 162,
-							"class": "IN",
-							"value": "216.24.57.3"
-						}
+					"city": "Coventry",
+					"asn": 44477,
+					"longitude": -1.51,
+					"latitude": 52.41,
+					"network": "STARK INDUSTRIES SOLUTIONS LTD",
+					"tags": [
+						"datacenter-network"
 					],
-					"resolver": "1.1.1.1",
-					"timings": {
-						"total": 7
-					},
-					"rawOutput": "\n; <<>> DiG 9.16.27-Debian <<>> jsdelivr.com -t A -p 53 -4 +timeout=3 +tries=2 +nocookie\n;; global options: +cmd\n;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 58746\n;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 1232\n;; QUESTION SECTION:\n;jsdelivr.com.\t\t\tIN\tA\n\n;; ANSWER SECTION:\njsdelivr.com.\t\t162\tIN\tA\t216.24.57.253\njsdelivr.com.\t\t162\tIN\tA\t216.24.57.3\n\n;; Query time: 7 msec\n;; SERVER: 1.1.1.1#53(1.1.1.1)\n;; WHEN: Fri Aug 12 11:58:40 UTC 2022\n;; MSG SIZE  rcvd: 73\n"
-				}
-			}
-		]
-	},
-	"dns2": {
-		"id": "n2V7hx8odLyeMktF",
-		"type": "dns",
-		"status": "finished",
-		"createdAt": "2022-08-12T12:11:45.017Z",
-		"updatedAt": "2022-08-12T12:11:46.509Z",
-		"probesCount": 2,
-		"results": [
-			{
-				"probe": {
-					"continent": "SA",
-					"region": "Southern America",
-					"country": "BR",
-					"state": null,
-					"city": "São Paulo",
-					"asn": 202422,
-					"longitude": -46.6361,
-					"latitude": -23.5475,
-					"network": "G-Core Labs S.A.",
 					"resolvers": [
 						"8.8.8.8",
 						"8.8.4.4"
 					]
 				},
 				"result": {
-					"hops": [
+					"status": "finished",
+					"statusCodeName": "NOERROR",
+					"statusCode": 0,
+					"rawOutput": "\n; <<>> DiG 9.16.37-Debian <<>> -t A google.com -p 53 -4 +timeout=3 +tries=2 +nocookie +nosplit +nsid\n;; global options: +cmd\n;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 20513\n;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 512\n; NSID: 67 70 64 6e 73 2d 6c 68 72 (\"gpdns-lhr\")\n;; QUESTION SECTION:\n;google.com.\t\t\tIN\tA\n\n;; ANSWER SECTION:\ngoogle.com.\t\t63\tIN\tA\t142.250.200.46\n\n;; Query time: 8 msec\n;; SERVER: 8.8.8.8#53(8.8.8.8)\n;; WHEN: Tue Dec 03 10:44:50 UTC 2024\n;; MSG SIZE  rcvd: 68\n",
+					"answers": [
 						{
-							"answers": [
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "a.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "b.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "c.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "d.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "e.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "f.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "g.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "h.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "i.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "j.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "k.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "l.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "m.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "RRSIG",
-									"ttl": 518012,
-									"class": "IN",
-									"value": "9JmUnA=="
-								}
-							],
-							"timings": {
-								"total": 0
-							},
-							"resolver": "1.1.1.1"
-						},
-						{
-							"answers": [
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "a.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "b.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "c.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "d.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "e.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "f.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "g.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "h.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "i.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "j.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "k.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "l.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "m.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "DS",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "C41A5766"
-								},
-								{
-									"name": "com.",
-									"type": "RRSIG",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "pBkx5Q=="
-								}
-							],
-							"timings": {
-								"total": 107
-							},
-							"resolver": "b.root-servers.net"
-						},
-						{
-							"answers": [
-								{
-									"name": "google.com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "ns2.google.com."
-								},
-								{
-									"name": "google.com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "ns1.google.com."
-								},
-								{
-									"name": "google.com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "ns3.google.com."
-								},
-								{
-									"name": "google.com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "ns4.google.com."
-								},
-								{
-									"name": "CK0POJMG874LJREF7EFN8430QVIT8BSM.com.",
-									"type": "NSEC3",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "NSEC3PARAM"
-								},
-								{
-									"name": "CK0POJMG874LJREF7EFN8430QVIT8BSM.com.",
-									"type": "RRSIG",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "J0Je7ndJNCFb54O2gyFR63I8/BeltgrZq/RLC9/vEYsiow=="
-								},
-								{
-									"name": "S84BKCIBC38P58340AKVNFN5KR9O59QC.com.",
-									"type": "NSEC3",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "RRSIG"
-								},
-								{
-									"name": "S84BKCIBC38P58340AKVNFN5KR9O59QC.com.",
-									"type": "RRSIG",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "SvO4dXilsSZzTAUN8RvIdz9SgkBe+QxG8TiioAFYuTqdkw=="
-								}
-							],
-							"timings": {
-								"total": 115
-							},
-							"resolver": "j.gtld-servers.net"
-						},
-						{
-							"answers": [
-								{
-									"name": "google.com.",
-									"type": "A",
-									"ttl": 300,
-									"class": "IN",
-									"value": "216.58.222.14"
-								}
-							],
-							"timings": {
-								"total": 51
-							},
-							"resolver": "ns2.google.com"
+							"name": "google.com.",
+							"type": "A",
+							"ttl": 63,
+							"class": "IN",
+							"value": "142.250.200.46"
 						}
 					],
-					"rawOutput": "\n; <<>> DiG 9.16.27-Debian <<>> google.com @1.1.1.1 -t A -p 53 -4 +timeout=3 +tries=2 +nocookie +trace +tcp\n;; global options: +cmd\n.\t\t\t518012\tIN\tNS\ta.root-servers.net.\n.\t\t\t518012\tIN\tNS\tb.root-servers.net.\n.\t\t\t518012\tIN\tNS\tc.root-servers.net.\n.\t\t\t518012\tIN\tNS\td.root-servers.net.\n.\t\t\t518012\tIN\tNS\te.root-servers.net.\n.\t\t\t518012\tIN\tNS\tf.root-servers.net.\n.\t\t\t518012\tIN\tNS\tg.root-servers.net.\n.\t\t\t518012\tIN\tNS\th.root-servers.net.\n.\t\t\t518012\tIN\tNS\ti.root-servers.net.\n.\t\t\t518012\tIN\tNS\tj.root-servers.net.\n.\t\t\t518012\tIN\tNS\tk.root-servers.net.\n.\t\t\t518012\tIN\tNS\tl.root-servers.net.\n.\t\t\t518012\tIN\tNS\tm.root-servers.net.\n.\t\t\t518012\tIN\tRRSIG\tNS 8 0 518400 20220825050000 20220812040000 20826 . dRhKdnEGpDvITgRpCPVYf6fDp478dlugBp9LjKxK7MCEvXAYPFla80dQ wslD8+PhPK91ZSR90XUZiWhAI/G3PPnX5k8YNs+DI1qsHVAZP+PNwbwE QUG5DwR+x19rUREoRMeHysqEDeHzdHFPYDfydzuO1xb4BRzhNlGwmheK be3+ppTKl+4Qw5PwuZDzsgcYX7haGouJZ1DD75IFRap6s7aB+A7MTYZX 6tib5lZcPEjME1xj9LGrBY8VO2L8Kpk7D+wnLUPFHiZ2uflQDaBkslTV 2OVk1Ig1p6QwXybQ0QxOr99r1et6ZZSbwOdJk9xiVVkH2x6SdH2uwlRd 9JmUnA==\n;; Received 1097 bytes from 1.1.1.1#53(1.1.1.1) in 0 ms\n\ncom.\t\t\t172800\tIN\tNS\ta.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tb.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tc.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\td.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\te.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tf.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tg.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\th.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\ti.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tj.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tk.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tl.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tm.gtld-servers.net.\ncom.\t\t\t86400\tIN\tDS\t30909 8 2 E2D3C916F6DEEAC73294E8268FB5885044A833FC5459588F4A9184CF C41A5766\ncom.\t\t\t86400\tIN\tRRSIG\tDS 8 1 86400 20220825050000 20220812040000 20826 . MQAHjZnIlF2/OAtD5TjU+X6tBRmhQy40ZY48D0mUCHqun6DN8uAfoKfU P6I627d+0KJ0BxWRq3qLzDm5qUlYVKcuW/QhAI933+jnTw0iOEYOHbc5 5lwrqeZGcF0WEqFDN1srFcmGV0YWIL79jeEwwcIBTeYSlBFYwhK7ijGR O9ebtc196FLm9RjpDWCPANrpjc1HmZI3O4+4NjqP8qIjx9UyGklhjW2c GcNO6ZFLBwmytu0UTVyjiFWkexr0Yq38Nz3IfNMFyBOBPA5FjjchXej+ XJ1Te7MfMGI5xPjQ8ogTm3uAfbpb/IcXxbUn+pFWBPwUxJ6tsgnUqgBo pBkx5Q==\n;; Received 1198 bytes from 199.9.14.201#53(b.root-servers.net) in 107 ms\n\ngoogle.com.\t\t172800\tIN\tNS\tns2.google.com.\ngoogle.com.\t\t172800\tIN\tNS\tns1.google.com.\ngoogle.com.\t\t172800\tIN\tNS\tns3.google.com.\ngoogle.com.\t\t172800\tIN\tNS\tns4.google.com.\nCK0POJMG874LJREF7EFN8430QVIT8BSM.com. 86400 IN NSEC3 1 1 0 - CK0Q2D6NI4I7EQH8NA30NS61O48UL8G5 NS SOA RRSIG DNSKEY NSEC3PARAM\nCK0POJMG874LJREF7EFN8430QVIT8BSM.com. 86400 IN RRSIG NSEC3 8 2 86400 20220819042341 20220812031341 32298 com. qllFbhUUxEno/kZAlwQFHwlZEsat15dJN1zshaz7drTWuTIh2dtM1ctK KdKmUST+ixD1GyHmcnomWC/vkSGF1GvO7KbRLEVshCBeTz0z4Rnib1I4 Dap0BpHb1ZrnxhrjsA9l6OFGRyCSD2bMuj1SVgIvyVRFwymcTKbX3/+d J0Je7ndJNCFb54O2gyFR63I8/BeltgrZq/RLC9/vEYsiow==\nS84BKCIBC38P58340AKVNFN5KR9O59QC.com. 86400 IN NSEC3 1 1 0 - S84BUO64GQCVN69RJFUO6LVC7FSLUNJ5 NS DS RRSIG\nS84BKCIBC38P58340AKVNFN5KR9O59QC.com. 86400 IN RRSIG NSEC3 8 2 86400 20220816051414 20220809040414 32298 com. BI5XFgxbzwBugDjaV04ygejNaUOMRGmTaJvdufqfRnJPaDEHLnqVpw7p 8UdjQnXLbtO4Fns2BpPOTD9DSSaWGRjxeZxlb6Rwxw1n4RGmJGe9QyaI f/zBXzn69uRXpgeRP6FFBmUuFCb7OQTBqoReLat+3fwKkebSv7epenW1 SvO4dXilsSZzTAUN8RvIdz9SgkBe+QxG8TiioAFYuTqdkw==\n;; Received 836 bytes from 192.48.79.30#53(j.gtld-servers.net) in 115 ms\n\ngoogle.com.\t\t300\tIN\tA\t216.58.222.14\n;; Received 55 bytes from 216.239.34.10#53(ns2.google.com) in 51 ms\n"
-				}
-			},
-			{
-				"probe": {
-					"continent": "SA",
-					"region": "Southern America",
-					"country": "BR",
-					"state": null,
-					"city": "São Paulo",
-					"asn": 199524,
-					"longitude": -46.6361,
-					"latitude": -23.5475,
-					"network": "G-Core Labs S.A.",
-					"resolvers": [
-						"private"
-					]
-				},
-				"result": {
-					"hops": [
-						{
-							"answers": [
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "a.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "b.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "c.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "d.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "e.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "f.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "g.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "h.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "i.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "j.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "k.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "l.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "NS",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "m.root-servers.net."
-								},
-								{
-									"name": ".",
-									"type": "RRSIG",
-									"ttl": 511495,
-									"class": "IN",
-									"value": "9JmUnA=="
-								}
-							],
-							"timings": {
-								"total": 3
-							},
-							"resolver": "1.1.1.1"
-						},
-						{
-							"answers": [
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "a.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "b.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "c.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "d.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "e.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "f.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "g.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "h.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "i.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "j.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "k.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "l.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "m.gtld-servers.net."
-								},
-								{
-									"name": "com.",
-									"type": "DS",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "C41A5766"
-								},
-								{
-									"name": "com.",
-									"type": "RRSIG",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "pBkx5Q=="
-								}
-							],
-							"timings": {
-								"total": 107
-							},
-							"resolver": "b.root-servers.net"
-						},
-						{
-							"answers": [
-								{
-									"name": "google.com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "ns2.google.com."
-								},
-								{
-									"name": "google.com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "ns1.google.com."
-								},
-								{
-									"name": "google.com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "ns3.google.com."
-								},
-								{
-									"name": "google.com.",
-									"type": "NS",
-									"ttl": 172800,
-									"class": "IN",
-									"value": "ns4.google.com."
-								},
-								{
-									"name": "CK0POJMG874LJREF7EFN8430QVIT8BSM.com.",
-									"type": "NSEC3",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "NSEC3PARAM"
-								},
-								{
-									"name": "CK0POJMG874LJREF7EFN8430QVIT8BSM.com.",
-									"type": "RRSIG",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "J0Je7ndJNCFb54O2gyFR63I8/BeltgrZq/RLC9/vEYsiow=="
-								},
-								{
-									"name": "S84BKCIBC38P58340AKVNFN5KR9O59QC.com.",
-									"type": "NSEC3",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "RRSIG"
-								},
-								{
-									"name": "S84BKCIBC38P58340AKVNFN5KR9O59QC.com.",
-									"type": "RRSIG",
-									"ttl": 86400,
-									"class": "IN",
-									"value": "SvO4dXilsSZzTAUN8RvIdz9SgkBe+QxG8TiioAFYuTqdkw=="
-								}
-							],
-							"timings": {
-								"total": 115
-							},
-							"resolver": "j.gtld-servers.net"
-						},
-						{
-							"answers": [
-								{
-									"name": "google.com.",
-									"type": "A",
-									"ttl": 300,
-									"class": "IN",
-									"value": "142.251.132.46"
-								}
-							],
-							"timings": {
-								"total": 55
-							},
-							"resolver": "ns2.google.com"
-						}
-					],
-					"rawOutput": "\n; <<>> DiG 9.16.27-Debian <<>> google.com @1.1.1.1 -t A -p 53 -4 +timeout=3 +tries=2 +nocookie +trace +tcp\n;; global options: +cmd\n.\t\t\t511495\tIN\tNS\ta.root-servers.net.\n.\t\t\t511495\tIN\tNS\tb.root-servers.net.\n.\t\t\t511495\tIN\tNS\tc.root-servers.net.\n.\t\t\t511495\tIN\tNS\td.root-servers.net.\n.\t\t\t511495\tIN\tNS\te.root-servers.net.\n.\t\t\t511495\tIN\tNS\tf.root-servers.net.\n.\t\t\t511495\tIN\tNS\tg.root-servers.net.\n.\t\t\t511495\tIN\tNS\th.root-servers.net.\n.\t\t\t511495\tIN\tNS\ti.root-servers.net.\n.\t\t\t511495\tIN\tNS\tj.root-servers.net.\n.\t\t\t511495\tIN\tNS\tk.root-servers.net.\n.\t\t\t511495\tIN\tNS\tl.root-servers.net.\n.\t\t\t511495\tIN\tNS\tm.root-servers.net.\n.\t\t\t511495\tIN\tRRSIG\tNS 8 0 518400 20220825050000 20220812040000 20826 . dRhKdnEGpDvITgRpCPVYf6fDp478dlugBp9LjKxK7MCEvXAYPFla80dQ wslD8+PhPK91ZSR90XUZiWhAI/G3PPnX5k8YNs+DI1qsHVAZP+PNwbwE QUG5DwR+x19rUREoRMeHysqEDeHzdHFPYDfydzuO1xb4BRzhNlGwmheK be3+ppTKl+4Qw5PwuZDzsgcYX7haGouJZ1DD75IFRap6s7aB+A7MTYZX 6tib5lZcPEjME1xj9LGrBY8VO2L8Kpk7D+wnLUPFHiZ2uflQDaBkslTV 2OVk1Ig1p6QwXybQ0QxOr99r1et6ZZSbwOdJk9xiVVkH2x6SdH2uwlRd 9JmUnA==\n;; Received 1097 bytes from 1.1.1.1#53(1.1.1.1) in 3 ms\n\ncom.\t\t\t172800\tIN\tNS\ta.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tb.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tc.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\td.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\te.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tf.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tg.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\th.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\ti.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tj.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tk.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tl.gtld-servers.net.\ncom.\t\t\t172800\tIN\tNS\tm.gtld-servers.net.\ncom.\t\t\t86400\tIN\tDS\t30909 8 2 E2D3C916F6DEEAC73294E8268FB5885044A833FC5459588F4A9184CF C41A5766\ncom.\t\t\t86400\tIN\tRRSIG\tDS 8 1 86400 20220825050000 20220812040000 20826 . MQAHjZnIlF2/OAtD5TjU+X6tBRmhQy40ZY48D0mUCHqun6DN8uAfoKfU P6I627d+0KJ0BxWRq3qLzDm5qUlYVKcuW/QhAI933+jnTw0iOEYOHbc5 5lwrqeZGcF0WEqFDN1srFcmGV0YWIL79jeEwwcIBTeYSlBFYwhK7ijGR O9ebtc196FLm9RjpDWCPANrpjc1HmZI3O4+4NjqP8qIjx9UyGklhjW2c GcNO6ZFLBwmytu0UTVyjiFWkexr0Yq38Nz3IfNMFyBOBPA5FjjchXej+ XJ1Te7MfMGI5xPjQ8ogTm3uAfbpb/IcXxbUn+pFWBPwUxJ6tsgnUqgBo pBkx5Q==\n;; Received 1198 bytes from 199.9.14.201#53(b.root-servers.net) in 107 ms\n\ngoogle.com.\t\t172800\tIN\tNS\tns2.google.com.\ngoogle.com.\t\t172800\tIN\tNS\tns1.google.com.\ngoogle.com.\t\t172800\tIN\tNS\tns3.google.com.\ngoogle.com.\t\t172800\tIN\tNS\tns4.google.com.\nCK0POJMG874LJREF7EFN8430QVIT8BSM.com. 86400 IN NSEC3 1 1 0 - CK0Q2D6NI4I7EQH8NA30NS61O48UL8G5 NS SOA RRSIG DNSKEY NSEC3PARAM\nCK0POJMG874LJREF7EFN8430QVIT8BSM.com. 86400 IN RRSIG NSEC3 8 2 86400 20220819042341 20220812031341 32298 com. qllFbhUUxEno/kZAlwQFHwlZEsat15dJN1zshaz7drTWuTIh2dtM1ctK KdKmUST+ixD1GyHmcnomWC/vkSGF1GvO7KbRLEVshCBeTz0z4Rnib1I4 Dap0BpHb1ZrnxhrjsA9l6OFGRyCSD2bMuj1SVgIvyVRFwymcTKbX3/+d J0Je7ndJNCFb54O2gyFR63I8/BeltgrZq/RLC9/vEYsiow==\nS84BKCIBC38P58340AKVNFN5KR9O59QC.com. 86400 IN NSEC3 1 1 0 - S84BUO64GQCVN69RJFUO6LVC7FSLUNJ5 NS DS RRSIG\nS84BKCIBC38P58340AKVNFN5KR9O59QC.com. 86400 IN RRSIG NSEC3 8 2 86400 20220816051414 20220809040414 32298 com. BI5XFgxbzwBugDjaV04ygejNaUOMRGmTaJvdufqfRnJPaDEHLnqVpw7p 8UdjQnXLbtO4Fns2BpPOTD9DSSaWGRjxeZxlb6Rwxw1n4RGmJGe9QyaI f/zBXzn69uRXpgeRP6FFBmUuFCb7OQTBqoReLat+3fwKkebSv7epenW1 SvO4dXilsSZzTAUN8RvIdz9SgkBe+QxG8TiioAFYuTqdkw==\n;; Received 836 bytes from 192.48.79.30#53(j.gtld-servers.net) in 115 ms\n\ngoogle.com.\t\t300\tIN\tA\t142.251.132.46\n;; Received 55 bytes from 216.239.34.10#53(ns2.google.com) in 55 ms\n"
+					"timings": { "total": 8 },
+					"resolver": "8.8.8.8"
 				}
 			}
 		]
 	},
 	"mtr1": {
-		"id": "eRELkeQEZi3tnHjO",
+		"id": "HgDbh56ZVZKqpBZh",
 		"type": "mtr",
 		"status": "finished",
-		"createdAt": "2022-08-12T12:33:55.077Z",
-		"updatedAt": "2022-08-12T12:34:00.264Z",
+		"createdAt": "2024-12-03T10:45:11.312Z",
+		"updatedAt": "2024-12-03T10:45:16.385Z",
+		"target": "google.com",
 		"probesCount": 1,
+		"locations": [
+			{ "magic": "world" }
+		],
 		"results": [
 			{
 				"probe": {
-					"continent": "OC",
-					"region": "Australasia",
-					"country": "AU",
+					"continent": "NA",
+					"region": "Northern America",
+					"country": "CA",
 					"state": null,
-					"city": "Sydney",
-					"asn": 396982,
-					"longitude": 151.2073,
-					"latitude": -33.8678,
-					"network": "Google LLC",
+					"city": "Beauharnois",
+					"asn": 16276,
+					"longitude": -73.8725,
+					"latitude": 45.31341,
+					"network": "OVH SAS",
+					"tags": [
+						"datacenter-network"
+					],
 					"resolvers": [
 						"private"
 					]
 				},
 				"result": {
-					"resolvedAddress": "216.24.57.253",
-					"resolvedHostname": "undefined",
+					"status": "finished",
+					"rawOutput": "Host                                                      Loss% Drop Rcv Avg  StDev  Javg \n 1. AS16276 _gateway (158.69.59.1)                         0.0%    0   3 0.2    0.0   0.1\n 2. AS???   192.168.143.254 (192.168.143.254)              0.0%    0   3 0.6    0.5   0.7\n 3. AS16276 149.56.50.254 (149.56.50.254)                  0.0%    0   3 0.3    0.1   0.2\n 4. AS???   10.98.243.13 (10.98.243.13)                    0.0%    0   3 0.3    0.1   0.2\n 5. AS???   10.196.145.48 (10.196.145.48)                  0.0%    0   3 0.4    0.1   0.3\n 6. AS???   10.74.10.8 (10.74.10.8)                        0.0%    0   3 0.4    0.1   0.3\n 7. AS???   10.95.81.8 (10.95.81.8)                        0.0%    0   3 1.5    1.0   1.5\n 8. AS16276 142.44.208.172 (142.44.208.172)               66.7%    2   1 3.0    0.0   3.0\n 9. AS???   10.200.3.3 (10.200.3.3)                        0.0%    0   3 3.3    1.0   2.3\n10. AS???   (waiting for reply)                         \n11. AS15169 142.251.51.179 (142.251.51.179)                0.0%    0   3 2.7    1.6   2.4\n12. AS15169 142.250.238.147 (142.250.238.147)              0.0%    0   3 2.5    0.2   1.2\n13. AS15169 qro02s19-in-f14.1e100.net (142.250.69.46)      0.0%    0   3 1.5    0.1   0.8\n",
+					"resolvedAddress": "142.250.69.46",
+					"resolvedHostname": "qro02s19-in-f14.1e100.net",
 					"hops": [
+						{
+							"stats": {
+								"min": 0.213,
+								"max": 0.234,
+								"avg": 0.2,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0,
+								"jMin": 0,
+								"jMax": 0.2,
+								"jAvg": 0.1
+							},
+							"asn": [
+								16276
+							],
+							"timings": [
+								{ "rtt": 0.213 },
+								{ "rtt": 0.234 },
+								{ "rtt": 0.217 }
+							],
+							"resolvedAddress": "158.69.59.1",
+							"resolvedHostname": "158.69.59.1"
+						},
+						{
+							"stats": {
+								"min": 0.278,
+								"max": 1.33,
+								"avg": 0.6,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.5,
+								"jMin": 0.3,
+								"jMax": 1.1,
+								"jAvg": 0.7
+							},
+							"asn": [],
+							"timings": [
+								{ "rtt": 1.33 },
+								{ "rtt": 0.278 },
+								{ "rtt": 0.301 }
+							],
+							"resolvedAddress": "192.168.143.254",
+							"resolvedHostname": "192.168.143.254"
+						},
+						{
+							"stats": {
+								"min": 0.29,
+								"max": 0.421,
+								"avg": 0.3,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.1,
+								"jMin": 0,
+								"jMax": 0.4,
+								"jAvg": 0.2
+							},
+							"asn": [
+								16276
+							],
+							"timings": [
+								{ "rtt": 0.29 },
+								{ "rtt": 0.333 },
+								{ "rtt": 0.421 }
+							],
+							"resolvedAddress": "149.56.50.254",
+							"resolvedHostname": "149.56.50.254"
+						},
+						{
+							"stats": {
+								"min": 0.286,
+								"max": 0.393,
+								"avg": 0.3,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.1,
+								"jMin": 0.1,
+								"jMax": 0.4,
+								"jAvg": 0.2
+							},
+							"asn": [],
+							"timings": [
+								{ "rtt": 0.286 },
+								{ "rtt": 0.364 },
+								{ "rtt": 0.393 }
+							],
+							"resolvedAddress": "10.98.243.13",
+							"resolvedHostname": "10.98.243.13"
+						},
+						{
+							"stats": {
+								"min": 0.424,
+								"max": 0.492,
+								"avg": 0.4,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.1,
+								"jMin": 0,
+								"jMax": 0.5,
+								"jAvg": 0.3
+							},
+							"asn": [],
+							"timings": [
+								{ "rtt": 0.432 },
+								{ "rtt": 0.424 },
+								{ "rtt": 0.492 }
+							],
+							"resolvedAddress": "10.196.145.48",
+							"resolvedHostname": "10.196.145.48"
+						},
+						{
+							"stats": {
+								"min": 0.298,
+								"max": 0.504,
+								"avg": 0.4,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.1,
+								"jMin": 0.2,
+								"jMax": 0.3,
+								"jAvg": 0.3
+							},
+							"asn": [],
+							"timings": [
+								{ "rtt": 0.504 },
+								{ "rtt": 0.298 },
+								{ "rtt": 0.343 }
+							],
+							"resolvedAddress": "10.74.10.8",
+							"resolvedHostname": "10.74.10.8"
+						},
+						{
+							"stats": {
+								"min": 0.727,
+								"max": 2.835,
+								"avg": 1.5,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 1,
+								"jMin": 0.1,
+								"jMax": 2.8,
+								"jAvg": 1.5
+							},
+							"asn": [],
+							"timings": [
+								{ "rtt": 0.727 },
+								{ "rtt": 0.858 },
+								{ "rtt": 2.835 }
+							],
+							"resolvedAddress": "10.95.81.8",
+							"resolvedHostname": "10.95.81.8"
+						},
+						{
+							"stats": {
+								"min": 2.985,
+								"max": 2.985,
+								"avg": 3,
+								"total": 3,
+								"loss": 66.7,
+								"rcv": 1,
+								"drop": 2,
+								"stDev": 0,
+								"jMin": 3,
+								"jMax": 3,
+								"jAvg": 3
+							},
+							"asn": [
+								16276
+							],
+							"timings": [
+								{ "rtt": 2.985 }
+							],
+							"resolvedAddress": "142.44.208.172",
+							"resolvedHostname": null
+						},
+						{
+							"stats": {
+								"min": 2.56,
+								"max": 4.656,
+								"avg": 3.3,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 1,
+								"jMin": 2,
+								"jMax": 2.6,
+								"jAvg": 2.3
+							},
+							"asn": [],
+							"timings": [
+								{ "rtt": 2.617 },
+								{ "rtt": 4.656 },
+								{ "rtt": 2.56 }
+							],
+							"resolvedAddress": "10.200.3.3",
+							"resolvedHostname": "10.200.3.3"
+						},
 						{
 							"stats": {
 								"min": 0,
 								"max": 0,
 								"avg": 0,
-								"total": 0,
+								"total": 3,
+								"loss": 100,
 								"rcv": 0,
 								"drop": 3,
 								"stDev": 0,
@@ -1220,1549 +991,665 @@
 								"jAvg": 0
 							},
 							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+							"timings": [],
+							"resolvedAddress": null,
+							"resolvedHostname": null
 						},
 						{
 							"stats": {
-								"min": 1.857,
-								"max": 7.754,
-								"avg": 4.2,
+								"min": 1.555,
+								"max": 4.847,
+								"avg": 2.7,
 								"total": 3,
+								"loss": 0,
 								"rcv": 3,
 								"drop": 0,
-								"stDev": 2.5,
-								"jMin": 1.9,
-								"jMax": 4.6,
-								"jAvg": 3.2
+								"stDev": 1.6,
+								"jMin": 1.6,
+								"jMax": 3.3,
+								"jAvg": 2.4
 							},
 							"asn": [
-								13335
+								15169
 							],
 							"timings": [
-								{
-									"rtt": 7.754
-								},
-								{
-									"rtt": 3.13
-								},
-								{
-									"rtt": 1.857
-								}
+								{ "rtt": 4.847 },
+								{ "rtt": 1.558 },
+								{ "rtt": 1.555 }
 							],
-							"resolvedAddress": "108.162.247.39",
-							"duplicate": false,
-							"resolvedHostname": "108.162.247.39"
+							"resolvedAddress": "142.251.51.179",
+							"resolvedHostname": "142.251.51.179"
 						},
 						{
 							"stats": {
-								"min": 1.826,
-								"max": 51.722,
-								"avg": 18.5,
+								"min": 2.146,
+								"max": 2.716,
+								"avg": 2.5,
 								"total": 3,
+								"loss": 0,
 								"rcv": 3,
 								"drop": 0,
-								"stDev": 23.5,
-								"jMin": 1.8,
-								"jMax": 49.9,
-								"jAvg": 25.9
+								"stDev": 0.2,
+								"jMin": 0.2,
+								"jMax": 2.1,
+								"jAvg": 1.2
 							},
 							"asn": [
-								13335
+								15169
 							],
 							"timings": [
-								{
-									"rtt": 51.722
-								},
-								{
-									"rtt": 1.826
-								},
-								{
-									"rtt": 1.842
-								}
+								{ "rtt": 2.52 },
+								{ "rtt": 2.716 },
+								{ "rtt": 2.146 }
 							],
-							"resolvedAddress": "172.68.64.3",
-							"duplicate": false,
-							"resolvedHostname": "172.68.64.3"
+							"resolvedAddress": "142.250.238.147",
+							"resolvedHostname": "142.250.238.147"
 						},
 						{
 							"stats": {
-								"min": 1.382,
-								"max": 2.077,
-								"avg": 1.6,
+								"min": 1.417,
+								"max": 1.479,
+								"avg": 1.5,
 								"total": 3,
+								"loss": 0,
 								"rcv": 3,
 								"drop": 0,
-								"stDev": 0.3,
-								"jMin": 0.7,
-								"jMax": 1.4,
-								"jAvg": 1.1
+								"stDev": 0.1,
+								"jMin": 0.1,
+								"jMax": 1.5,
+								"jAvg": 0.8
 							},
 							"asn": [
-								397273
+								15169
 							],
 							"timings": [
-								{
-									"rtt": 1.382
-								},
-								{
-									"rtt": 2.077
-								},
-								{
-									"rtt": 1.415
-								}
+								{ "rtt": 1.479 },
+								{ "rtt": 1.417 },
+								{ "rtt": 1.465 }
 							],
-							"resolvedAddress": "216.24.57.253",
-							"duplicate": false
-						},
-						{
-							"stats": {
-								"min": 1.04,
-								"max": 1.04,
-								"avg": 1,
-								"total": 1,
-								"rcv": 1,
-								"drop": 0,
-								"stDev": 0,
-								"jMin": 1,
-								"jMax": 1,
-								"jAvg": 1
-							},
-							"asn": [
-								397273
-							],
-							"timings": [
-								{
-									"rtt": 1.04
-								}
-							],
-							"resolvedAddress": "216.24.57.253",
-							"duplicate": true
+							"resolvedAddress": "142.250.69.46",
+							"resolvedHostname": "qro02s19-in-f14.1e100.net"
 						}
-					],
-					"rawOutput": "Host                                          Loss% Drop Rcv  Avg  StDev  Javg \n1. AS13335  _gateway (108.162.247.39)          0.0%    0   3  4.2    2.5   3.2\n2. AS13335  172.68.64.3 (172.68.64.3)          0.0%    0   3 18.5   23.5  25.9\n3. AS397273 216.24.57.253 (216.24.57.253)      0.0%    0   3  1.6    0.3   1.1\n",
-					"data": [
-						"x 0 33000",
-						"x 1 33001",
-						"h 1 108.162.247.39",
-						"p 1 7754 33001",
-						"x 2 33002",
-						"x 3 33003",
-						"h 3 216.24.57.253",
-						"p 3 1382 33003",
-						"h 2 172.68.64.3",
-						"p 2 51722 33002",
-						"x 4 33004",
-						"h 4 216.24.57.253",
-						"p 4 1040 33004",
-						"x 0 33005",
-						"x 1 33006",
-						"d 1 108.162.247.39",
-						"p 1 3130 33006",
-						"x 2 33007",
-						"d 2 172.68.64.3",
-						"p 2 1826 33007",
-						"x 3 33008",
-						"p 3 2077 33008",
-						"x 0 33009",
-						"x 1 33010",
-						"p 1 1857 33010",
-						"x 2 33011",
-						"p 2 1842 33011",
-						"x 3 33012",
-						"p 3 1415 33012"
 					]
 				}
 			}
 		]
 	},
 	"mtr2": {
-		"id": "PSM3GpGkyEe9M7Qs",
+		"id": "dGkbH0SvJrzap1Yw",
 		"type": "mtr",
 		"status": "finished",
-		"createdAt": "2022-08-12T12:37:44.965Z",
-		"updatedAt": "2022-08-12T12:37:51.346Z",
+		"createdAt": "2024-12-03T10:45:53.104Z",
+		"updatedAt": "2024-12-03T10:45:58.474Z",
+		"target": "google.com",
+		"limit": 2,
 		"probesCount": 2,
+		"locations": [
+			{ "magic": "world" }
+		],
 		"results": [
 			{
 				"probe": {
-					"continent": "OC",
-					"region": "Australasia",
-					"country": "AU",
+					"continent": "AS",
+					"region": "Eastern Asia",
+					"country": "JP",
 					"state": null,
-					"city": "Sydney",
-					"asn": 199524,
-					"longitude": 151.194,
-					"latitude": -33.9092,
-					"network": "G-Core Labs S.A.",
+					"city": "Tokyo",
+					"asn": 16509,
+					"longitude": 139.69,
+					"latitude": 35.69,
+					"network": "Amazon.com, Inc.",
+					"tags": [
+						"aws-ap-northeast-1",
+						"datacenter-network"
+					],
 					"resolvers": [
-						"private"
+						"1.1.1.1"
 					]
 				},
 				"result": {
-					"resolvedAddress": "172.69.60.3",
-					"resolvedHostname": "108.162.250.5",
+					"status": "finished",
+					"rawOutput": "Host                                                     Loss% Drop Rcv  Avg  StDev  Javg \n1. AS???   (waiting for reply)                         \n2. AS???   (waiting for reply)                         \n3. AS???   (waiting for reply)                         \n4. AS???   (waiting for reply)                         \n5. AS15169 108.170.248.171 (108.170.248.171)              0.0%    0   3 42.1   53.6  58.9\n6. AS15169 142.250.214.149 (142.250.214.149)              0.0%    0   3 27.7   34.6  38.3\n7. AS15169 nrt13s52-in-f14.1e100.net (142.250.199.110)    0.0%    0   3  8.0    6.8   8.7\n",
+					"resolvedAddress": "142.250.199.110",
+					"resolvedHostname": "nrt13s52-in-f14.1e100.net",
 					"hops": [
 						{
 							"stats": {
-								"min": 0.368,
-								"max": 3.219,
-								"avg": 1.1,
-								"total": 4,
-								"rcv": 4,
+								"min": 0,
+								"max": 0,
+								"avg": 0,
+								"total": 3,
+								"loss": 100,
+								"rcv": 0,
+								"drop": 3,
+								"stDev": 0,
+								"jMin": 0,
+								"jMax": 0,
+								"jAvg": 0
+							},
+							"asn": [],
+							"timings": [],
+							"resolvedAddress": null,
+							"resolvedHostname": null
+						},
+						{
+							"stats": {
+								"min": 0,
+								"max": 0,
+								"avg": 0,
+								"total": 3,
+								"loss": 100,
+								"rcv": 0,
+								"drop": 3,
+								"stDev": 0,
+								"jMin": 0,
+								"jMax": 0,
+								"jAvg": 0
+							},
+							"asn": [],
+							"timings": [],
+							"resolvedAddress": null,
+							"resolvedHostname": null
+						},
+						{
+							"stats": {
+								"min": 0,
+								"max": 0,
+								"avg": 0,
+								"total": 3,
+								"loss": 100,
+								"rcv": 0,
+								"drop": 3,
+								"stDev": 0,
+								"jMin": 0,
+								"jMax": 0,
+								"jAvg": 0
+							},
+							"asn": [],
+							"timings": [],
+							"resolvedAddress": null,
+							"resolvedHostname": null
+						},
+						{
+							"stats": {
+								"min": 0,
+								"max": 0,
+								"avg": 0,
+								"total": 3,
+								"loss": 100,
+								"rcv": 0,
+								"drop": 3,
+								"stDev": 0,
+								"jMin": 0,
+								"jMax": 0,
+								"jAvg": 0
+							},
+							"asn": [],
+							"timings": [],
+							"resolvedAddress": null,
+							"resolvedHostname": null
+						},
+						{
+							"stats": {
+								"min": 4.172,
+								"max": 117.868,
+								"avg": 42.1,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
 								"drop": 0,
-								"stDev": 1.2,
-								"jMin": 0.1,
-								"jMax": 2.9,
-								"jAvg": 1.5
+								"stDev": 53.6,
+								"jMin": 4.2,
+								"jMax": 113.5,
+								"jAvg": 58.9
 							},
 							"asn": [
-								199524
+								15169
 							],
 							"timings": [
-								{
-									"rtt": 0.552
-								},
-								{
-									"rtt": 0.435
-								},
-								{
-									"rtt": 0.368
-								},
-								{
-									"rtt": 3.219
-								}
+								{ "rtt": 117.868 },
+								{ "rtt": 4.332 },
+								{ "rtt": 4.172 }
 							],
-							"resolvedAddress": "87.121.33.1",
-							"duplicate": false,
-							"resolvedHostname": "_gateway"
+							"resolvedAddress": "108.170.248.171",
+							"resolvedHostname": "108.170.248.171"
 						},
 						{
 							"stats": {
-								"min": 0.264,
-								"max": 0.445,
-								"avg": 0.3,
-								"total": 4,
-								"rcv": 4,
+								"min": 3.182,
+								"max": 76.676,
+								"avg": 27.7,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
 								"drop": 0,
-								"stDev": 0.1,
-								"jMin": 0,
-								"jMax": 0.1,
-								"jAvg": 0.1
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": 0.445
-								},
-								{
-									"rtt": 0.315
-								},
-								{
-									"rtt": 0.288
-								},
-								{
-									"rtt": 0.264
-								}
-							],
-							"resolvedAddress": "10.255.15.181",
-							"duplicate": false,
-							"resolvedHostname": "10.255.15.182"
-						},
-						{
-							"stats": {
-								"min": 0.314,
-								"max": 1.499,
-								"avg": 0.6,
-								"total": 4,
-								"rcv": 4,
-								"drop": 0,
-								"stDev": 0.5,
-								"jMin": 0,
-								"jMax": 1.2,
-								"jAvg": 0.6
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": 1.499
-								},
-								{
-									"rtt": 0.314
-								},
-								{
-									"rtt": 0.346
-								},
-								{
-									"rtt": 0.374
-								}
-							],
-							"resolvedAddress": "10.255.15.177",
-							"duplicate": false,
-							"resolvedHostname": "10.255.15.178"
-						},
-						{
-							"stats": {
-								"min": 0.987,
-								"max": 1.669,
-								"avg": 1.4,
-								"total": 4,
-								"rcv": 4,
-								"drop": 0,
-								"stDev": 0.3,
-								"jMin": 0.3,
-								"jMax": 0.6,
-								"jAvg": 0.5
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": 1.635
-								},
-								{
-									"rtt": 0.987
-								},
-								{
-									"rtt": 1.669
-								},
-								{
-									"rtt": 1.349
-								}
-							],
-							"resolvedAddress": "218.100.52.11",
-							"duplicate": false,
-							"resolvedHostname": "as13335.sydney.megaport.com"
-						},
-						{
-							"stats": {
-								"min": 0.966,
-								"max": 1.894,
-								"avg": 1.5,
-								"total": 4,
-								"rcv": 4,
-								"drop": 0,
-								"stDev": 0.3,
-								"jMin": 0.2,
-								"jMax": 0.6,
-								"jAvg": 0.4
+								"stDev": 34.6,
+								"jMin": 3.2,
+								"jMax": 73.4,
+								"jAvg": 38.3
 							},
 							"asn": [
-								13335
+								15169
 							],
 							"timings": [
-								{
-									"rtt": 1.894
-								},
-								{
-									"rtt": 1.651
-								},
-								{
-									"rtt": 1.592
-								},
-								{
-									"rtt": 0.966
-								}
+								{ "rtt": 76.676 },
+								{ "rtt": 3.322 },
+								{ "rtt": 3.182 }
 							],
-							"resolvedAddress": "172.69.60.3",
-							"duplicate": false,
-							"resolvedHostname": "108.162.250.5"
+							"resolvedAddress": "142.250.214.149",
+							"resolvedHostname": "142.250.214.149"
 						},
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"min": 3.049,
+								"max": 17.598,
+								"avg": 8,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 6.8,
+								"jMin": 3,
+								"jMax": 14.3,
+								"jAvg": 8.7
 							},
-							"asn": [],
+							"asn": [
+								15169
+							],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 17.598 },
+								{ "rtt": 3.324 },
+								{ "rtt": 3.049 }
+							],
+							"resolvedAddress": "142.250.199.110",
+							"resolvedHostname": "nrt13s52-in-f14.1e100.net"
 						}
-					],
-					"rawOutput": "Host                                                       Loss% Drop Rcv Avg  StDev  Javg \n 1. AS199524 _gateway (87.121.33.1)                         0.0%    0   4 1.1    1.2   1.5\n 2. AS???    10.255.15.182 (10.255.15.181)                  0.0%    0   4 0.3    0.1   0.1\n 3. AS???    10.255.15.178 (10.255.15.177)                  0.0%    0   4 0.6    0.5   0.6\n 4. AS???    as13335.sydney.megaport.com (218.100.52.11)    0.0%    0   4 1.4    0.3   0.5\n 5. AS13335  108.162.250.5 (172.69.60.3)                    0.0%    0   4 1.5    0.3   0.4\n 6. AS???    (waiting for reply)                         \n",
-					"data": [
-						"x 0 33000",
-						"h 0 87.121.33.1",
-						"p 0 552 33000",
-						"x 1 33001",
-						"h 1 10.255.15.182",
-						"p 1 445 33001",
-						"x 2 33002",
-						"h 2 10.255.15.178",
-						"p 2 1499 33002",
-						"x 3 33003",
-						"h 3 103.26.68.78",
-						"p 3 1635 33003",
-						"x 4 33004",
-						"h 4 172.68.208.3",
-						"p 4 1894 33004",
-						"x 5 33005",
-						"x 6 33006",
-						"x 7 33007",
-						"x 8 33008",
-						"x 9 33009",
-						"x 10 33010",
-						"x 11 33011",
-						"x 12 33012",
-						"x 13 33013",
-						"x 14 33014",
-						"x 15 33015",
-						"x 16 33016",
-						"x 17 33017",
-						"x 18 33018",
-						"x 0 33019",
-						"d 0 _gateway",
-						"p 0 435 33019",
-						"x 1 33020",
-						"h 1 10.255.15.182",
-						"h 1 10.255.15.181",
-						"p 1 315 33020",
-						"x 2 33021",
-						"h 2 10.255.15.178",
-						"h 2 10.255.15.177",
-						"p 2 314 33021",
-						"x 3 33022",
-						"h 3 103.26.68.78",
-						"h 3 218.100.52.11",
-						"p 3 987 33022",
-						"x 4 33023",
-						"h 4 172.68.208.3",
-						"h 4 108.162.250.5",
-						"p 4 1651 33023",
-						"x 5 33024",
-						"x 6 33025",
-						"x 7 33026",
-						"x 8 33027",
-						"x 9 33028",
-						"x 10 33029",
-						"x 11 33030",
-						"x 12 33031",
-						"x 13 33032",
-						"x 14 33033",
-						"x 15 33034",
-						"x 16 33035",
-						"x 17 33036",
-						"x 18 33037",
-						"x 0 33038",
-						"p 0 368 33038",
-						"x 1 33039",
-						"h 1 10.255.15.181",
-						"h 1 10.255.15.182",
-						"d 1 10.255.15.182",
-						"p 1 288 33039",
-						"x 2 33040",
-						"h 2 10.255.15.177",
-						"h 2 10.255.15.178",
-						"d 2 10.255.15.178",
-						"p 2 346 33040",
-						"x 3 33041",
-						"h 3 218.100.52.11",
-						"h 3 103.26.68.78",
-						"d 3 as13335.sydney.megaport.com",
-						"p 3 1669 33041",
-						"x 4 33042",
-						"d 4 108.162.250.5",
-						"p 4 1592 33042",
-						"x 5 33043",
-						"x 6 33044",
-						"x 7 33045",
-						"x 8 33046",
-						"x 9 33047",
-						"x 10 33048",
-						"x 11 33049",
-						"x 12 33050",
-						"x 13 33051",
-						"x 14 33052",
-						"x 15 33053",
-						"x 16 33054",
-						"x 17 33055",
-						"x 18 33056",
-						"x 0 33057",
-						"p 0 3219 33057",
-						"x 1 33058",
-						"h 1 10.255.15.181",
-						"p 1 264 33058",
-						"x 2 33059",
-						"h 2 10.255.15.177",
-						"p 2 374 33059",
-						"x 3 33060",
-						"h 3 218.100.52.11",
-						"p 3 1349 33060",
-						"x 4 33061",
-						"h 4 108.162.250.5",
-						"h 4 172.69.60.3",
-						"p 4 966 33061",
-						"x 5 33062",
-						"x 6 33063",
-						"x 7 33064",
-						"x 8 33065",
-						"x 9 33066",
-						"x 10 33067",
-						"x 11 33068",
-						"x 12 33069",
-						"x 13 33070",
-						"x 14 33071",
-						"x 15 33072",
-						"x 16 33073",
-						"x 17 33074",
-						"x 18 33075"
 					]
 				}
 			},
 			{
 				"probe": {
-					"continent": "OC",
-					"region": "Australasia",
-					"country": "AU",
+					"continent": "EU",
+					"region": "Western Europe",
+					"country": "DE",
 					"state": null,
-					"city": "Melbourne",
-					"asn": 396982,
-					"longitude": 144.9633,
-					"latitude": -37.814,
-					"network": "Google LLC",
+					"city": "Falkenstein",
+					"asn": 24940,
+					"longitude": 12.37,
+					"latitude": 50.48,
+					"network": "Hetzner Online GmbH",
+					"tags": [
+						"datacenter-network"
+					],
 					"resolvers": [
 						"private"
 					]
 				},
 				"result": {
-					"resolvedAddress": "108.162.250.5",
-					"resolvedHostname": "108.162.250.5",
+					"status": "finished",
+					"rawOutput": "Host                                                            Loss% Drop Rcv    Avg  StDev  Javg \n 1. AS???   _gateway (172.31.1.1)                                0.0%    0   3    3.3    0.3   1.7\n 2. AS24940 25493.your-cloud.host (49.12.29.88)                  0.0%    0   3    0.4    0.1   0.3\n 3. AS???   (waiting for reply)                               \n 4. AS24940 spine5.cloud2.fsn1.hetzner.com (213.239.234.201)     0.0%    0   3    1.3    0.3   1.0\n 5. AS24940 spine15.cloud2.fsn1.hetzner.com (213.239.239.77)     0.0%    0   3 1793.7   35.7 932.1\n 6. AS24940 core23.fsn1.hetzner.com (213.239.227.202)            0.0%    0   3    0.7    0.2   0.4\n 7. AS24940 core4.fra.hetzner.com (213.239.224.74)               0.0%    0   3    5.2    0.2   2.7\n 8. AS15169 72.14.218.94 (72.14.218.94)                          0.0%    0   3    6.2    0.1   3.2\n 9. AS15169 142.251.65.131 (142.251.65.131)                      0.0%    0   3    5.9    0.0   3.0\n10. AS15169 142.250.236.31 (142.250.236.31)                      0.0%    0   3    5.2    0.2   2.8\n11. AS15169 fra16s49-in-f14.1e100.net (142.250.185.110)          0.0%    0   3    5.2    0.1   2.6\n",
+					"resolvedAddress": "142.250.185.110",
+					"resolvedHostname": "fra16s49-in-f14.1e100.net",
 					"hops": [
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"min": 2.977,
+								"max": 3.758,
+								"avg": 3.3,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.3,
+								"jMin": 0.5,
+								"jMax": 3,
+								"jAvg": 1.7
 							},
 							"asn": [],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 3.758 },
+								{ "rtt": 3.24 },
+								{ "rtt": 2.977 }
+							],
+							"resolvedAddress": "172.31.1.1",
+							"resolvedHostname": "_gateway"
 						},
 						{
 							"stats": {
-								"min": 14.431,
-								"max": 20.868,
-								"avg": 16.2,
-								"total": 4,
-								"rcv": 4,
+								"min": 0.309,
+								"max": 0.606,
+								"avg": 0.4,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
 								"drop": 0,
-								"stDev": 2.7,
+								"stDev": 0.1,
 								"jMin": 0.3,
-								"jMax": 5.9,
-								"jAvg": 3.1
+								"jMax": 0.4,
+								"jAvg": 0.3
 							},
 							"asn": [
-								13335
+								24940
 							],
 							"timings": [
-								{
-									"rtt": 14.932
-								},
-								{
-									"rtt": 20.868
-								},
-								{
-									"rtt": 14.708
-								},
-								{
-									"rtt": 14.431
-								}
+								{ "rtt": 0.606 },
+								{ "rtt": 0.309 },
+								{ "rtt": 0.353 }
 							],
-							"resolvedAddress": "108.162.247.39",
-							"duplicate": false,
-							"resolvedHostname": "108.162.247.39"
+							"resolvedAddress": "49.12.29.88",
+							"resolvedHostname": "25493.your-cloud.host"
 						},
 						{
 							"stats": {
-								"min": 14.343,
-								"max": 95.084,
-								"avg": 36.2,
-								"total": 4,
-								"rcv": 4,
+								"min": 0,
+								"max": 0,
+								"avg": 0,
+								"total": 3,
+								"loss": 100,
+								"rcv": 0,
+								"drop": 3,
+								"stDev": 0,
+								"jMin": 0,
+								"jMax": 0,
+								"jAvg": 0
+							},
+							"asn": [],
+							"timings": [],
+							"resolvedAddress": null,
+							"resolvedHostname": null
+						},
+						{
+							"stats": {
+								"min": 0.999,
+								"max": 1.661,
+								"avg": 1.3,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
 								"drop": 0,
-								"stDev": 34.1,
-								"jMin": 6.4,
-								"jMax": 80.2,
-								"jAvg": 43.3
+								"stDev": 0.3,
+								"jMin": 0.3,
+								"jMax": 1.7,
+								"jAvg": 1
 							},
 							"asn": [
-								13335
+								24940
 							],
 							"timings": [
-								{
-									"rtt": 95.084
-								},
-								{
-									"rtt": 14.865
-								},
-								{
-									"rtt": 20.708
-								},
-								{
-									"rtt": 14.343
-								}
+								{ "rtt": 1.274 },
+								{ "rtt": 0.999 },
+								{ "rtt": 1.661 }
 							],
-							"resolvedAddress": "108.162.250.5",
-							"duplicate": false,
-							"resolvedHostname": "108.162.250.5"
+							"resolvedAddress": "213.239.234.201",
+							"resolvedHostname": "spine5.cloud2.fsn1.hetzner.com"
 						},
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"min": 1758.417,
+								"max": 1842.524,
+								"avg": 1793.7,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 35.7,
+								"jMin": 21.7,
+								"jMax": 1842.5,
+								"jAvg": 932.1
 							},
-							"asn": [],
+							"asn": [
+								24940
+							],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 1758.417 },
+								{ "rtt": 1780.078 },
+								{ "rtt": 1842.524 }
+							],
+							"resolvedAddress": "213.239.239.77",
+							"resolvedHostname": "spine15.cloud2.fsn1.hetzner.com"
 						},
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"min": 0.53,
+								"max": 0.97,
+								"avg": 0.7,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.2,
+								"jMin": 0.3,
+								"jMax": 0.5,
+								"jAvg": 0.4
 							},
-							"asn": [],
+							"asn": [
+								24940
+							],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 0.97 },
+								{ "rtt": 0.646 },
+								{ "rtt": 0.53 }
+							],
+							"resolvedAddress": "213.239.227.202",
+							"resolvedHostname": "core23.fsn1.hetzner.com"
 						},
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"min": 5.087,
+								"max": 5.507,
+								"avg": 5.2,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.2,
+								"jMin": 0.4,
+								"jMax": 5.1,
+								"jAvg": 2.7
 							},
-							"asn": [],
+							"asn": [
+								24940
+							],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 5.507 },
+								{ "rtt": 5.1 },
+								{ "rtt": 5.087 }
+							],
+							"resolvedAddress": "213.239.224.74",
+							"resolvedHostname": "core4.fra.hetzner.com"
 						},
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"min": 6.092,
+								"max": 6.364,
+								"avg": 6.2,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.1,
+								"jMin": 0.3,
+								"jMax": 6.2,
+								"jAvg": 3.2
 							},
-							"asn": [],
+							"asn": [
+								15169
+							],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 6.364 },
+								{ "rtt": 6.092 },
+								{ "rtt": 6.166 }
+							],
+							"resolvedAddress": "72.14.218.94",
+							"resolvedHostname": "72.14.218.94"
 						},
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
+								"min": 5.868,
+								"max": 5.963,
+								"avg": 5.9,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
 								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"jMin": 0.1,
+								"jMax": 5.9,
+								"jAvg": 3
 							},
-							"asn": [],
+							"asn": [
+								15169
+							],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 5.963 },
+								{ "rtt": 5.873 },
+								{ "rtt": 5.868 }
+							],
+							"resolvedAddress": "142.251.65.131",
+							"resolvedHostname": "142.251.65.131"
 						},
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"min": 5.052,
+								"max": 5.418,
+								"avg": 5.2,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.2,
+								"jMin": 0.4,
+								"jMax": 5.2,
+								"jAvg": 2.8
 							},
-							"asn": [],
+							"asn": [
+								15169
+							],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 5.418 },
+								{ "rtt": 5.052 },
+								{ "rtt": 5.178 }
+							],
+							"resolvedAddress": "142.250.236.31",
+							"resolvedHostname": "142.250.236.31"
 						},
 						{
 							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
+								"min": 5.068,
+								"max": 5.317,
+								"avg": 5.2,
+								"total": 3,
+								"loss": 0,
+								"rcv": 3,
+								"drop": 0,
+								"stDev": 0.1,
+								"jMin": 0.2,
+								"jMax": 5.1,
+								"jAvg": 2.6
 							},
-							"asn": [],
+							"asn": [
+								15169
+							],
 							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
-						},
-						{
-							"stats": {
-								"min": 0,
-								"max": 0,
-								"avg": 0,
-								"total": 0,
-								"rcv": 0,
-								"drop": 4,
-								"stDev": 0,
-								"jMin": 0,
-								"jMax": 0,
-								"jAvg": 0
-							},
-							"asn": [],
-							"timings": [
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								},
-								{
-									"rtt": null
-								}
-							]
+								{ "rtt": 5.317 },
+								{ "rtt": 5.132 },
+								{ "rtt": 5.068 }
+							],
+							"resolvedAddress": "142.250.185.110",
+							"resolvedHostname": "fra16s49-in-f14.1e100.net"
 						}
-					],
-					"rawOutput": "Host                                          Loss% Drop Rcv  Avg  StDev  Javg \n 1. AS13335 _gateway (108.162.247.39)          0.0%    0   4 16.2    2.7   3.1\n 2. AS13335 108.162.250.5 (108.162.250.5)      0.0%    0   4 36.2   34.1  43.3\n 3. AS???   (waiting for reply)             \n",
-					"data": [
-						"x 0 33000",
-						"x 1 33001",
-						"h 1 108.162.247.39",
-						"p 1 14932 33001",
-						"x 2 33002",
-						"x 3 33003",
-						"h 2 172.68.64.3",
-						"p 2 95084 33002",
-						"x 4 33004",
-						"x 5 33005",
-						"x 6 33006",
-						"x 7 33007",
-						"x 8 33008",
-						"x 9 33009",
-						"x 10 33010",
-						"x 11 33011",
-						"x 12 33012",
-						"x 13 33013",
-						"x 14 33014",
-						"x 15 33015",
-						"x 0 33016",
-						"x 1 33017",
-						"d 1 108.162.247.39",
-						"p 1 20868 33017",
-						"x 2 33018",
-						"h 2 172.68.64.3",
-						"h 2 108.162.250.5",
-						"p 2 14865 33018",
-						"x 3 33019",
-						"x 4 33020",
-						"x 5 33021",
-						"x 6 33022",
-						"x 7 33023",
-						"x 8 33024",
-						"x 9 33025",
-						"x 10 33026",
-						"x 11 33027",
-						"x 12 33028",
-						"x 13 33029",
-						"x 14 33030",
-						"x 15 33031",
-						"x 0 33032",
-						"x 1 33033",
-						"p 1 14708 33033",
-						"x 2 33034",
-						"h 2 108.162.250.5",
-						"h 2 172.68.208.3",
-						"p 2 20708 33034",
-						"x 3 33035",
-						"x 4 33036",
-						"x 5 33037",
-						"x 6 33038",
-						"x 7 33039",
-						"x 8 33040",
-						"x 9 33041",
-						"x 10 33042",
-						"x 11 33043",
-						"x 12 33044",
-						"x 13 33045",
-						"x 14 33046",
-						"x 15 33047",
-						"x 0 33048",
-						"x 1 33049",
-						"p 1 14431 33049",
-						"x 2 33050",
-						"h 2 172.68.208.3",
-						"h 2 108.162.250.5",
-						"d 2 108.162.250.5",
-						"p 2 14343 33050",
-						"x 3 33051",
-						"x 4 33052",
-						"x 5 33053",
-						"x 6 33054",
-						"x 7 33055",
-						"x 8 33056",
-						"x 9 33057",
-						"x 10 33058",
-						"x 11 33059",
-						"x 12 33060",
-						"x 13 33061",
-						"x 14 33062",
-						"x 15 33063"
 					]
 				}
 			}
 		]
 	},
 	"http1": {
-		"id": "5lamPx4iA1i7c0rZ",
+		"id": "3KrXt3M4b85vHbhk",
 		"type": "http",
 		"status": "finished",
-		"createdAt": "2022-08-14T22:10:42.761Z",
-		"updatedAt": "2022-08-14T22:10:44.358Z",
+		"createdAt": "2024-12-03T10:47:45.463Z",
+		"updatedAt": "2024-12-03T10:47:45.719Z",
+		"target": "www.jsdelivr.com",
 		"probesCount": 1,
+		"locations": [
+			{ "magic": "world" }
+		],
 		"results": [
 			{
 				"probe": {
-					"continent": "AS",
-					"region": "Eastern Asia",
-					"country": "CN",
+					"continent": "EU",
+					"region": "Eastern Europe",
+					"country": "MD",
 					"state": null,
-					"city": "Shanghai",
-					"asn": 45090,
-					"longitude": 121.4581,
-					"latitude": 31.2222,
-					"network": "Shenzhen Tencent Computer Systems Company Limited",
+					"city": "Chisinau",
+					"asn": 44477,
+					"longitude": 28.86,
+					"latitude": 47.01,
+					"network": "STARK INDUSTRIES SOLUTIONS LTD",
+					"tags": [
+						"datacenter-network"
+					],
 					"resolvers": [
-						"private"
+						"8.8.4.4",
+						"8.8.8.8"
 					]
 				},
 				"result": {
-					"resolvedAddress": "216.24.57.253",
+					"status": "finished",
+					"resolvedAddress": "104.21.23.24",
 					"headers": {
-						"date": "Sun, 14 Aug 2022 22:10:44 GMT",
+						"date": "Tue, 03 Dec 2024 10:47:45 GMT",
 						"content-type": "text/html; charset=utf-8",
 						"connection": "close",
-						"location": "https://www.jsdelivr.com/",
-						"cf-ray": "73ad05aedd0b2572-SJC",
-						"cf-cache-status": "DYNAMIC",
-						"expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+						"cache-control": "public, max-age=300, must-revalidate, stale-while-revalidate=600, stale-if-error=86400",
+						"link": "<https://www.jsdelivr.com/>; rel=\"canonical\"",
+						"strict-transport-security": "max-age=31536000; includeSubDomains; preload",
 						"vary": "Accept-Encoding",
+						"rndr-id": "f8e3fdf9-a7f2-467d",
+						"x-render-origin-server": "Render",
+						"x-response-time": "13ms",
+						"cf-cache-status": "HIT",
+						"age": "69",
+						"report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=1NnOrZFGJZrAsZO0%2BEBgx6wR1p0nyru1gmA6gafGuREqfLaeNV%2BuArd3OzVmXeMLcW0aHB3JTsF56lUTQ0lQLmSmLGtuFyUGIvUOWYfd9SmVIugy5YHdQ575%2B7U5BdjlCStt\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+						"nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+						"x-content-type-options": "nosniff",
 						"server": "cloudflare",
-						"alt-svc": "h3=\":443\"; ma=86400, h3-29=\":443\"; ma=86400"
+						"cf-ray": "8ec2fafe6c315ac3-VIE",
+						"content-encoding": "br",
+						"alt-svc": "h3=\":443\"; ma=86400",
+						"server-timing": "cfL4;desc=\"?proto=TCP&rtt=28841&min_rtt=28839&rtt_var=10820&sent=3&recv=5&lost=0&retrans=0&sent_bytes=2333&recv_bytes=645&delivery_rate=100339&cwnd=251&unsent_bytes=0&cid=d95d15257d29de39&ts=61&x=0\""
 					},
-					"rawHeaders": "Date: Sun, 14 Aug 2022 22:10:44 GMT\nContent-Type: text/html; charset=utf-8\nConnection: close\nLocation: https://www.jsdelivr.com/\nCF-Ray: 73ad05aedd0b2572-SJC\nCF-Cache-Status: DYNAMIC\nExpect-CT: max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"\nVary: Accept-Encoding\nServer: cloudflare\nalt-svc: h3=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
-					"rawBody": "",
-					"statusCode": 301,
+					"rawHeaders": "Date: Tue, 03 Dec 2024 10:47:45 GMT\nContent-Type: text/html; charset=utf-8\nConnection: close\nCache-Control: public, max-age=300, must-revalidate, stale-while-revalidate=600, stale-if-error=86400\nLink: <https://www.jsdelivr.com/>; rel=\"canonical\"\nStrict-Transport-Security: max-age=31536000; includeSubDomains; preload\nVary: Accept-Encoding\nrndr-id: f8e3fdf9-a7f2-467d\nx-render-origin-server: Render\nx-response-time: 13ms\nCF-Cache-Status: HIT\nAge: 69\nReport-To: {\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=1NnOrZFGJZrAsZO0%2BEBgx6wR1p0nyru1gmA6gafGuREqfLaeNV%2BuArd3OzVmXeMLcW0aHB3JTsF56lUTQ0lQLmSmLGtuFyUGIvUOWYfd9SmVIugy5YHdQ575%2B7U5BdjlCStt\"}],\"group\":\"cf-nel\",\"max_age\":604800}\nNEL: {\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}\nX-Content-Type-Options: nosniff\nServer: cloudflare\nCF-RAY: 8ec2fafe6c315ac3-VIE\nContent-Encoding: br\nalt-svc: h3=\":443\"; ma=86400\nserver-timing: cfL4;desc=\"?proto=TCP&rtt=28841&min_rtt=28839&rtt_var=10820&sent=3&recv=5&lost=0&retrans=0&sent_bytes=2333&recv_bytes=645&delivery_rate=100339&cwnd=251&unsent_bytes=0&cid=d95d15257d29de39&ts=61&x=0\"",
+					"rawBody": null,
+					"rawOutput": "HTTP/1.1 200\nDate: Tue, 03 Dec 2024 10:47:45 GMT\nContent-Type: text/html; charset=utf-8\nConnection: close\nCache-Control: public, max-age=300, must-revalidate, stale-while-revalidate=600, stale-if-error=86400\nLink: <https://www.jsdelivr.com/>; rel=\"canonical\"\nStrict-Transport-Security: max-age=31536000; includeSubDomains; preload\nVary: Accept-Encoding\nrndr-id: f8e3fdf9-a7f2-467d\nx-render-origin-server: Render\nx-response-time: 13ms\nCF-Cache-Status: HIT\nAge: 69\nReport-To: {\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=1NnOrZFGJZrAsZO0%2BEBgx6wR1p0nyru1gmA6gafGuREqfLaeNV%2BuArd3OzVmXeMLcW0aHB3JTsF56lUTQ0lQLmSmLGtuFyUGIvUOWYfd9SmVIugy5YHdQ575%2B7U5BdjlCStt\"}],\"group\":\"cf-nel\",\"max_age\":604800}\nNEL: {\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}\nX-Content-Type-Options: nosniff\nServer: cloudflare\nCF-RAY: 8ec2fafe6c315ac3-VIE\nContent-Encoding: br\nalt-svc: h3=\":443\"; ma=86400\nserver-timing: cfL4;desc=\"?proto=TCP&rtt=28841&min_rtt=28839&rtt_var=10820&sent=3&recv=5&lost=0&retrans=0&sent_bytes=2333&recv_bytes=645&delivery_rate=100339&cwnd=251&unsent_bytes=0&cid=d95d15257d29de39&ts=61&x=0\"",
+					"truncated": false,
+					"statusCode": 200,
+					"statusCodeName": "OK",
 					"timings": {
-						"firstByte": 655,
-						"dns": 194,
-						"tls": 161,
-						"tcp": 152,
-						"total": 1162,
-						"download": 0
+						"total": 161,
+						"download": 2,
+						"firstByte": 45,
+						"dns": 38,
+						"tls": 45,
+						"tcp": 31
 					},
 					"tls": {
 						"authorized": true,
-						"createdAt": "2022-07-05T00:00:00.000Z",
-						"expiresAt": "2023-07-04T23:59:59.000Z",
-						"issuer": {
-							"C": "US",
-							"O": "Cloudflare, Inc.",
-							"CN": "Cloudflare Inc ECC CA-3"
-						},
+						"createdAt": "2024-11-09T23:42:06.000Z",
+						"expiresAt": "2025-02-07T23:42:05.000Z",
+						"issuer": { "C": "US",
+							"O": "Let's Encrypt",
+							"CN": "E6" },
 						"subject": {
-							"C": "US",
-							"ST": "California",
-							"L": "San Francisco",
-							"O": "Cloudflare, Inc.",
-							"CN": "jsdelivr.com",
-							"alt": "DNS:jsdelivr.com"
-						}
-					},
-					"rawOutput": "HTTP/1.1 301\nDate: Sun, 14 Aug 2022 22:10:44 GMT\nContent-Type: text/html; charset=utf-8\nConnection: close\nLocation: https://www.jsdelivr.com/\nCF-Ray: 73ad05aedd0b2572-SJC\nCF-Cache-Status: DYNAMIC\nExpect-CT: max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"\nVary: Accept-Encoding\nServer: cloudflare\nalt-svc: h3=\":443\"; ma=86400, h3-29=\":443\"; ma=86400"
+							"CN": "www.jsdelivr.com",
+							"alt": "DNS:www.jsdelivr.com"
+						},
+						"keyType": "EC",
+						"keyBits": 256,
+						"serialNumber": "04:F7:8C:6D:25:44:42:1D:C3:0C:9D:77:0C:E1:89:60:95:2F",
+						"fingerprint256": "46:CF:F6:55:D2:66:13:4E:65:83:25:3E:4D:5D:E5:AA:88:15:BE:FA:FC:4E:A8:6A:42:CE:B0:63:FF:0E:88:83",
+						"publicKey": "04:D4:76:48:93:6E:84:66:7F:DE:62:37:C7:04:96:EC:39:EB:B1:CD:E8:CD:AB:75:BA:5D:5E:A4:A8:19:15:55:9A:4C:3E:15:42:6B:29:D0:63:BC:88:52:13:BC:B1:5B:9B:3D:C9:1D:6B:A3:45:4C:8F:E5:D8:B7:A9:9D:48:DB:56"
+					}
 				}
 			}
 		]

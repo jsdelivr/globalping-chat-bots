@@ -36,13 +36,14 @@ export class Bot {
 		ack, respond, client, payload, context,
 	}: SlackCommandMiddlewareArgs & AllMiddlewareArgs<StringIndexed>) {
 		const logData = {
+			command: payload.command,
 			commandText: payload.text,
 			teamDomain: payload.team_domain,
 			channelName: payload.channel_name,
 			userName: payload.user_name,
 			triggerId: payload.trigger_id,
 		};
-		this.logger.info(logData, '/globalping request');
+		this.logger.info(logData, 'HandleCommand: request');
 
 		try {
 			// Acknowledge command request
@@ -51,7 +52,7 @@ export class Bot {
 			const err = error as Error;
 			this.logger.info(
 				{ errorMsg: err.message, ...logData },
-				'/globalping ack failed',
+				'HandleCommand: ack failed',
 			);
 
 			await respond({
@@ -60,7 +61,7 @@ export class Bot {
 		}
 
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const { channel_id, user_id, channel_name, text: commandText } = payload;
+		const { channel_id, user_id, channel_name, text } = payload;
 
 		let channelConversationsInfo;
 
@@ -73,7 +74,7 @@ export class Bot {
 			const err = error as Error;
 			this.logger.info(
 				{ errorMsg: err.message, ...logData },
-				'/globalping channel info not available',
+				'HandleCommand: channel info not available',
 			);
 		}
 
@@ -95,11 +96,11 @@ export class Bot {
 					) {
 						this.logger.error(
 							{ errorMsg: 'request in dm', ...logData },
-							'/globalping response - dm',
+							'HandleCommand: response - dm',
 						);
 
 						await respond({
-							text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
+							text: 'Unable to run `' + payload.command + '` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
 						});
 					} else {
 						throw new Error('Unable to open a DM with the Globalping App.');
@@ -111,11 +112,11 @@ export class Bot {
 				if (channel_name.startsWith('mpdm-')) {
 					this.logger.error(
 						{ errorMsg: 'request in mpdm', ...logData },
-						'/globalping response - mpdm',
+						'HandleCommand: response - mpdm',
 					);
 
 					await respond({
-						text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
+						text: 'Unable to run `' + payload.command + '` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
 					});
 
 					return;
@@ -124,7 +125,7 @@ export class Bot {
 				// If not DM, try checking the properties of the channel
 				this.logger.error(
 					{ errorMsg: 'asked for invite to channel', ...logData },
-					'/globalping response - channel invite needed',
+					'HandleCommand: channel invite needed',
 				);
 
 				await respond('Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.');
@@ -136,13 +137,25 @@ export class Bot {
 				user_id,
 				installationId: getInstallationId(context),
 			};
+			let commandText = text;
+
+			switch (payload.command) {
+				case '/dns':
+				case '/http':
+				case '/mtr':
+				case '/ping':
+				case '/traceroute':
+					commandText = payload.command.substring(1) + ' ' + text;
+					break;
+			}
+
 			await this.processCommand(client, channelPayload, commandText);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error({ errorMsg, ...logData }, '/globalping failed');
+			this.logger.error({ errorMsg, ...logData }, 'HandleCommand: failed');
 
 			await respond({
-				text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}`,
+				text: `Failed to process command \`${text}\`.\n${formatAPIError(errorMsg)}`,
 			});
 		}
 	}
