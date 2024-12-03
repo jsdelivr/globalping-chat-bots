@@ -1,19 +1,18 @@
 /* eslint-disable no-await-in-loop */
 import {
 	errorParse,
-	formatAPIError,
-	getAPIErrorMessage,
+	getMeasurement,
+	postMeasurement,
 } from '@globalping/bot-utils';
-import { App, AppOptions, GenericMessageEvent, LogLevel } from '@slack/bolt';
+import { App, AppOptions, LogLevel } from '@slack/bolt';
 
-import { initOAuthClient } from './auth.js';
+import { initOAuthClient, oauth } from './auth.js';
 import { config } from './config.js';
 import { installationStore, knex } from './db.js';
-import { getRawTextFromBlocks, handleMention } from './mention.js';
-import { postAPI } from './post.js';
 import { routes } from './routes.js';
-import { channelWelcome, getInstallationId, logger } from './utils.js';
+import { channelWelcome, logger } from './utils.js';
 import { handleAppHomeMessagesOpened } from './welcome.js';
+import { Bot } from './bot.js';
 
 const baseAppConfig: AppOptions = {
 	signingSecret: config.slackSigningSecret,
@@ -69,118 +68,7 @@ if (config.env !== 'production') {
 }
 
 initOAuthClient(config, logger, installationStore, app.client);
-
-app.command(
-	'/globalping',
-	async ({ payload, ack, client, respond, context }) => {
-		const logData = {
-			commandText: payload.text,
-			teamDomain: payload.team_domain,
-			channelName: payload.channel_name,
-			userName: payload.user_name,
-			triggerId: payload.trigger_id,
-		};
-		logger.info(logData, '/globalping request');
-
-		try {
-			logger.info(logData, '/globalping ack');
-			// Acknowledge command request
-			await ack();
-		} catch (error) {
-			const err = error as Error;
-			logger.info(
-				{ errorMsg: err.message, ...logData },
-				'/globalping ack failed',
-			);
-
-			await respond({
-				text: `Unable to acknowledge the request.\n${formatAPIError(err.message)}`,
-			});
-		}
-
-		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const { channel_id, user_id, channel_name, text: commandText } = payload;
-
-		let channelConversationsInfo;
-
-		// Check if channel is accessible just to be sure
-		try {
-			channelConversationsInfo = await client.conversations.info({
-				channel: channel_id,
-			});
-		} catch (error) {
-			const err = error as Error;
-			logger.info(
-				{ errorMsg: err.message, ...logData },
-				'/globalping channel info not available',
-			);
-		}
-
-		try {
-			// If channel is not accessible, respond with errors
-			if (!channelConversationsInfo) {
-				// This is a user DM
-				if (channel_name === 'directmessage' || channel_id.startsWith('D')) {
-					logger.debug('Channel is a DM');
-					const conversation = await client.conversations.open({
-						users: user_id,
-					});
-					logger.debug(`Open conversation: ${JSON.stringify(conversation)}`);
-
-					// If the DM is not the Globalping DM, we cancel the request
-					if (
-						conversation.channel?.id
-						&& channel_id !== conversation.channel.id
-					) {
-						logger.error(
-							{ errorMsg: 'request in dm', ...logData },
-							'/globalping response - dm',
-						);
-
-						await respond({
-							text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
-						});
-					} else {
-						throw new Error('Unable to open a DM with the Globalping App.');
-					}
-				} else if (channel_name.startsWith('mpdm-')) {
-					logger.error(
-						{ errorMsg: 'request in mpdm', ...logData },
-						'/globalping response - mpdm',
-					);
-
-					await respond({
-						text: 'Unable to run `/globalping` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
-					});
-				} else {
-					// If not DM, try checking the properties of the channel
-					logger.error(
-						{ errorMsg: 'asked for invite to channel', ...logData },
-						'/globalping response - channel invite needed',
-					);
-
-					await respond('Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.');
-				}
-			} else {
-				const channelPayload = {
-					channel_id,
-					user_id,
-					installationId: getInstallationId(context),
-				};
-				logger.info(logData, '/globalping processing starting');
-				await postAPI(client, channelPayload, commandText);
-				logger.info(logData, '/globalping response - OK');
-			}
-		} catch (error) {
-			const errorMsg = getAPIErrorMessage(error);
-			logger.error({ errorMsg, ...logData }, '/globalping failed');
-
-			await respond({
-				text: `Failed to process command \`${commandText}\`.\n${formatAPIError(errorMsg)}`,
-			});
-		}
-	},
-);
+const bot = new Bot(logger, oauth, postMeasurement, getMeasurement);
 
 app.event('app_home_opened', async ({ context, event, say, client }) => {
 	if (event.tab === 'messages') {
@@ -218,83 +106,12 @@ app.event('member_joined_channel', async ({ event, context, say }) => {
 	}
 });
 
-app.event('app_mention', async ({ payload, event, context, client }) => {
-	let { botUserId } = context;
+app.command('/globalping', args => bot.HandleCommand(args));
+app.event('app_mention', args => bot.HandleMention(args));
+app.event('message', args => bot.HandleMessage(args));
 
-	if (botUserId === undefined) {
-		botUserId = '';
-	}
 
-	const fullText = getRawTextFromBlocks(botUserId, payload.blocks);
-	const eventTs = payload.event_ts;
-	const teamId = event.team;
-	const channelId = event.channel;
-	const threadTs = event.thread_ts;
-	let userId = event.user;
-	const installationId = getInstallationId(context);
-
-	if (userId === undefined) {
-		userId = '';
-	}
-
-	await handleMention(
-		fullText,
-		teamId,
-		channelId,
-		userId,
-		eventTs,
-		threadTs,
-		installationId,
-		client,
-	);
-});
-
-app.event('message', async ({ payload, event, context, client }) => {
-	// Filter im events
-	if (event.channel_type !== 'im') {
-		return;
-	}
-
-	if (event.subtype === 'message_changed') {
-		return;
-	}
-
-	const messageEvent = event as GenericMessageEvent;
-
-	let { botUserId } = context;
-
-	if (botUserId === undefined) {
-		botUserId = '';
-	}
-
-	let fullText = getRawTextFromBlocks(botUserId, messageEvent.blocks);
-	const eventTs = payload.event_ts;
-	const teamId = messageEvent.team;
-	const channelId = event.channel;
-	const threadTs = messageEvent.thread_ts;
-	let userId = messageEvent.user;
-	const installationId = getInstallationId(context);
-
-	if (userId === undefined) {
-		userId = '';
-	}
-
-	if (fullText === undefined) {
-		fullText = '';
-	}
-
-	await handleMention(
-		fullText,
-		teamId,
-		channelId,
-		userId,
-		eventTs,
-		threadTs,
-		installationId,
-		client,
-	);
-});
-
+// Start the app
 (async () => {
 	logger.info('Running migrations');
 	await knex.migrate.latest();

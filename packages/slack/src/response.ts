@@ -52,7 +52,7 @@ const reponseTextRegular = (
 		? result.result.rawBody
 		: result.result.rawOutput;
 
-	// Slack has a limit of 3000 characters per block - truncate if necessary
+	// Slack has a limit of characters per block - truncate if necessary
 	const finalResponseText
 		= responseText.length > truncationLimit
 			? `${responseText.slice(0, truncationLimit)}\n... (truncated)`
