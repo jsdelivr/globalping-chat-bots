@@ -246,6 +246,7 @@ export interface PingMeasurementResponse extends SharedMeasurementResponse {
 	results: PingResult[];
 }
 
+// TODO: Update types
 export type MeasurementResponse = PingMeasurementResponse;
 
 export interface AuthToken {
