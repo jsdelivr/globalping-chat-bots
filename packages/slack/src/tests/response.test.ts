@@ -1,4 +1,4 @@
-import { PingResult } from '@globalping/bot-utils';
+import { ProbeMeasurement } from '@globalping/bot-utils';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -28,9 +28,7 @@ describe('Response', () => {
 
 	describe('responseHeader', () => {
 		it('no state no tag', () => {
-			const pingResult: PingResult = {
-				resolvedAddress: '',
-				resolvedHostname: '',
+			const pingResult: ProbeMeasurement = {
 				probe: {
 					continent: 'EU',
 					region: '',
@@ -45,16 +43,8 @@ describe('Response', () => {
 					tags: [],
 				},
 				result: {
+					status: 'in-progress',
 					rawOutput: '',
-					rawHeaders: '',
-					rawBody: '',
-					stats: {
-						loss: 0,
-						min: 0,
-						avg: 0,
-						max: 0,
-					},
-					timings: undefined,
 				},
 			};
 			const tag = undefined;
@@ -65,9 +55,7 @@ describe('Response', () => {
 
 	describe('responseHeader', () => {
 		it('state and tags', () => {
-			const pingResult: PingResult = {
-				resolvedAddress: '',
-				resolvedHostname: '',
+			const pingResult: ProbeMeasurement = {
 				probe: {
 					continent: 'NA',
 					region: '',
@@ -82,16 +70,8 @@ describe('Response', () => {
 					tags: [ 'tag-1', 'tag-2' ],
 				},
 				result: {
+					status: 'in-progress',
 					rawOutput: '',
-					rawHeaders: '',
-					rawBody: '',
-					stats: {
-						loss: 0,
-						min: 0,
-						avg: 0,
-						max: 0,
-					},
-					timings: undefined,
 				},
 			};
 			const text = responseHeader(pingResult, 'tag-1', boldSeparator);

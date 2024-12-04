@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { postMeasurement } from '../src/post.js';
 import { postMeasurementHandlers, setupAPIServer } from './mocks/index.js';
-import { PostMeasurement } from '../src/types.js';
+import { MeasurementCreate } from '../src/types.js';
 
 describe('Post', () => {
 	setupAPIServer(postMeasurementHandlers);
@@ -14,7 +14,7 @@ describe('Post', () => {
 				type: 'ping',
 				limit: 1,
 				locations: [{ magic: 'gb' }],
-			} as PostMeasurement);
+			} as MeasurementCreate);
 			expect(res).toEqual({ id: 'testId', probesCount: 1 });
 		});
 	});

@@ -13,19 +13,19 @@ import {
 	isHttpProtocol,
 	isMtrProtocol,
 	isTraceProtocol,
-	Locations,
-	PostMeasurement,
+	Location,
+	MeasurementCreate,
 } from './types.js';
 import { throwArgError } from './utils.js';
 
-function buildLocations (from: string): Locations[] {
+function buildLocations (from: string): Location[] {
 	return from
 		.split(',')
 		.map(f => f.trim())
-		.map((l): Locations => ({ magic: l }));
+		.map((l): Location => ({ magic: l }));
 }
 
-export const buildPostMeasurements = (args: Flags): PostMeasurement => {
+export const buildPostMeasurements = (args: Flags): MeasurementCreate => {
 	const {
 		cmd,
 		target,

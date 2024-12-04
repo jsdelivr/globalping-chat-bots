@@ -1,13 +1,17 @@
 import got, { HTTPError } from 'got';
 
 import { PostError } from './errors.js';
-import type { PostMeasurement, PostMeasurementResponse } from './types.js';
+import type {
+	Location,
+	MeasurementCreate,
+	MeasurementCreateResponse,
+} from './types.js';
 import { userAgent } from './user-agent.js';
 
 export const postMeasurement = async (
-	opts: PostMeasurement,
+	opts: MeasurementCreate,
 	token?: string,
-): Promise<PostMeasurementResponse> => {
+): Promise<MeasurementCreateResponse> => {
 	try {
 		const headers: { [key: string]: string } = {
 			'Content-Type': 'application/json',
@@ -27,7 +31,7 @@ export const postMeasurement = async (
 
 		if (res.statusCode !== 202) {
 			const body = JSON.parse(res.body);
-			body.location = opts.locations[0].magic;
+			body.location = (opts.locations as Location[])[0].magic;
 			throw new Error(body);
 		}
 
@@ -35,7 +39,7 @@ export const postMeasurement = async (
 	} catch (error) {
 		if (error instanceof HTTPError) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			const location = opts.locations[0].magic!;
+			const location = (opts.locations as Location[])[0].magic!;
 			const newError = new PostError(error.response, location, error.message);
 
 			throw newError;

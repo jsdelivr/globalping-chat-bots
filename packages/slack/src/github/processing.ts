@@ -6,9 +6,9 @@ import {
 	getAPIErrorMessage,
 	getMeasurement,
 	getTag,
-	PingMeasurementResponse,
+	Measurement,
+	MeasurementCreateResponse,
 	postMeasurement,
-	PostMeasurementResponse,
 } from '@globalping/bot-utils';
 import { Octokit } from 'octokit';
 
@@ -58,13 +58,10 @@ export const processCommand = async (
 
 	const opts = buildPostMeasurements(flags);
 
-	let measurementResponse: PostMeasurementResponse;
+	let measurementResponse: MeasurementCreateResponse;
 
 	try {
-		measurementResponse = await postMeasurement(
-			opts,
-			config.globalpingToken,
-		);
+		measurementResponse = await postMeasurement(opts, config.globalpingToken);
 	} catch (error) {
 		const errorMsg = getAPIErrorMessage(error);
 		logger.error(
@@ -81,7 +78,7 @@ export const processCommand = async (
 		throw error;
 	}
 
-	let res: PingMeasurementResponse;
+	let res: Measurement;
 
 	try {
 		res = await getMeasurement(measurementResponse.id);
@@ -130,7 +127,7 @@ async function measurementsResponse (
 	githubClient: Octokit,
 	githubTarget: GithubTarget,
 	measurementId: string,
-	res: PingMeasurementResponse,
+	res: Measurement,
 	flags: Flags,
 	cmdText: string,
 ) {
@@ -146,7 +143,8 @@ async function measurementsResponse (
 	/* eslint-disable no-await-in-loop */
 	for (const result of resultsForDisplay) {
 		const tag = getTag(result.probe.tags);
-		const text = `${responseHeader(result, tag, githubBoldSeparator)
+		const text = `${
+			responseHeader(result, tag, githubBoldSeparator)
 			+ responseText(result, flags, githubTruncationLimit)
 		}\r\n`;
 		fullText += text;

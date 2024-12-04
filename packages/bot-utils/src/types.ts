@@ -1,15 +1,20 @@
-// types
+// Docs: https://globalping.io/docs/api.globalping.io
+
 export const ALLOWED_QUERY_TYPES = [
 	'ping',
 	'traceroute',
 	'dns',
 	'mtr',
 	'http',
-	'auth',
-	'limits',
 ] as const;
 export type QueryType = (typeof ALLOWED_QUERY_TYPES)[number];
-export const isQueryType = (type: string): type is QueryType => ALLOWED_QUERY_TYPES.includes(type as QueryType);
+
+export const ALLOWED_ADDITIONAL_QUERY_TYPES = [ 'auth', 'limits' ] as const;
+export type AdditionalQueryType =
+	(typeof ALLOWED_ADDITIONAL_QUERY_TYPES)[number];
+
+export const isQueryType = (type: string): type is QueryType => ALLOWED_QUERY_TYPES.includes(type as QueryType)
+	|| ALLOWED_ADDITIONAL_QUERY_TYPES.includes(type as AdditionalQueryType);
 
 // filters
 export const ALLOWED_LOCATION_TYPES = [
@@ -38,6 +43,7 @@ export const ALLOWED_DNS_TYPES = [
 	'CNAME',
 	'DNSKEY',
 	'DS',
+	'HTTPS',
 	'MX',
 	'NS',
 	'NSEC',
@@ -69,185 +75,310 @@ export type HttpMethod = (typeof ALLOWED_HTTP_METHODS)[number];
 export const isHttpMethod = (type: string): type is HttpMethod => ALLOWED_HTTP_METHODS.includes(type as HttpMethod);
 
 // Post Types
-export interface Locations {
+export interface Location {
 	continent?: string;
 	region?: string;
 	country?: string;
 	state?: string;
 	city?: string;
-	network?: string;
 	asn?: number;
+	network?: string;
+	tags?: string[];
 	magic?: string;
+	limit?: number;
 }
 
-interface SharedMeasurement {
+interface MeasurementCreateOptionsBase {
+	ipVersion?: number; // 4 | 6. Only allowed if the target is a hostname.
+}
+
+// https://globalping.io/docs/api.globalping.io#post-/v1/measurements
+interface MeasurementCreateBase {
 	target: string;
-	limit: number;
 	inProgressUpdates: boolean;
-	locations: Locations[];
+	locations: string | Location[];
+	limit: number;
 }
 
-export interface PingMeasurement extends SharedMeasurement {
+export interface PingMeasurementCreateOptions
+	extends MeasurementCreateOptionsBase {
+	packets?: number;
+}
+
+export interface PingMeasurementCreate extends MeasurementCreateBase {
 	type: 'ping';
-	measurementOptions?: {
-		packets?: number;
-	};
+	measurementOptions?: PingMeasurementCreateOptions;
 }
-export interface TraceMeasurement extends SharedMeasurement {
+
+export interface TracerouteMeasurementCreateOptions
+	extends MeasurementCreateOptionsBase {
+	port?: number;
+	protocol?: TraceProtocol;
+}
+
+export interface TracerouteMeasurementCreate extends MeasurementCreateBase {
 	type: 'traceroute';
-	measurementOptions?: {
-		protocol?: TraceProtocol;
-		port?: number;
-	};
+	measurementOptions: TracerouteMeasurementCreateOptions;
 }
 
-export interface DnsMeasurement extends SharedMeasurement {
+export interface DnsMeasurementCreateOptions
+	extends MeasurementCreateOptionsBase {
+	query?: {
+		type: DnsType;
+	};
+	resolver?: string;
+	port?: number;
+	protocol?: DnsProtocol;
+	trace?: boolean;
+}
+
+export interface DnsMeasurementCreate extends MeasurementCreateBase {
 	type: 'dns';
-	measurementOptions?: {
-		query?: {
-			type: DnsType;
-		};
-		protocol?: DnsProtocol;
-		port?: number;
-		resolver?: string;
-		trace?: boolean;
-	};
+	measurementOptions?: DnsMeasurementCreateOptions;
 }
 
-export interface MtrMeasurement extends SharedMeasurement {
+export interface MtrMeasurementCreateOptions
+	extends MeasurementCreateOptionsBase {
+	port?: number;
+	protocol?: MtrProtocol;
+	packets?: number;
+}
+
+export interface MtrMeasurementCreate extends MeasurementCreateBase {
 	type: 'mtr';
-	measurementOptions?: {
-		protocol?: MtrProtocol;
-		port?: number;
-		packets?: number;
-	};
+	measurementOptions?: MtrMeasurementCreateOptions;
 }
 
-export interface HttpMeasurement extends SharedMeasurement {
+export interface HttpMeasurementCreateOptions
+	extends MeasurementCreateOptionsBase {
+	request?: {
+		host?: string;
+		path?: string;
+		query?: string;
+		method?: HttpMethod;
+		headers?: Record<string, string>;
+	};
+	resolver?: string;
+	port?: number;
+	protocol?: HttpProtocol;
+}
+
+export interface HttpMeasurementCreate extends MeasurementCreateBase {
 	type: 'http';
-	measurementOptions?: {
-		port?: number;
-		protocol?: HttpProtocol;
-		request?: {
-			path?: string;
-			query?: string;
-			method?: HttpMethod;
-			host?: string;
-			headers?: Record<string, string | string[] | undefined>;
-		};
-	};
+	measurementOptions?: HttpMeasurementCreateOptions;
 }
 
-export type PostMeasurement =
-	| PingMeasurement
-	| TraceMeasurement
-	| DnsMeasurement
-	| MtrMeasurement
-	| HttpMeasurement;
+export type MeasurementCreate =
+	| PingMeasurementCreate
+	| TracerouteMeasurementCreate
+	| DnsMeasurementCreate
+	| MtrMeasurementCreate
+	| HttpMeasurementCreate;
 
-export interface PostMeasurementResponse {
+export interface MeasurementCreateResponse {
 	id: string;
 	probesCount: number;
 }
 
-// Get Types
-
-interface SharedResults {
-	probe: {
-		continent: string;
-		region: string;
-		country: string;
-		state: string | null;
-		city: string;
-		asn: number;
-		longitude: number;
-		latitude: number;
-		network: string;
-		resolvers: string[];
-		tags: string[];
-	};
-	result: {
-		rawOutput: string;
-		rawHeaders: string;
-		rawBody: string;
-		stats: {
-			loss: number;
-			min: number;
-			avg: number;
-			max: number;
-		};
-		/* eslint-disable  @typescript-eslint/no-explicit-any */
-		timings: any;
-	};
+export interface ProbeDetails {
+	continent: string;
+	region: string;
+	country: string;
+	state: string | null;
+	city: string;
+	asn: number;
+	network: string;
+	latitude: number;
+	longitude: number;
+	tags: string[];
+	resolvers: string[];
 }
 
-// Ping
-export interface PingResult extends SharedResults {
-	resolvedAddress: string;
-	resolvedHostname: string;
+export interface InProgressProbeResult {
+	status: 'in-progress';
+	rawOutput: string;
 }
 
-// Trace
-interface TraceTimings {
+export interface PingTiming {
 	rtt: number;
-}
-interface TraceHops {
-	resolvedAddress: string;
-	resolvedHostname: string;
-	timings: TraceTimings[];
-}
-export interface TraceResult extends SharedResults {
-	resolvedAddress: string;
-	resolvedHostname: string;
-	hops: TraceHops[];
+	ttl: number;
 }
 
-// DNS
-interface DnsTimings {
+export interface PingStats {
+	min: number | null;
+	avg: number | null;
+	max: number | null;
 	total: number;
+	rcv: number;
+	drop: number;
+	loss: number;
 }
 
-interface DnsAnswers {
+export interface PingProbeResult {
+	status: 'finished';
+	rawOutput: string;
+	resolvedAddress: string | null;
+	resolvedHostname: string | null;
+	stats: PingStats;
+	timings: PingTiming[];
+}
+
+export interface TracerouteTiming {
+	ttl: number;
+}
+
+export interface TracerouHop {
+	resolvedAddress: string | null;
+	resolvedHostname: string | null;
+	timings: TracerouteTiming[];
+}
+
+export interface TracerouteProbeResult {
+	status: 'finished';
+	rawOutput: string;
+	resolvedAddress: string | null;
+	resolvedHostname: string | null;
+	hops: TracerouHop[];
+}
+
+export interface DnsAnswer {
 	name: string;
-	type: DnsType;
+	type: string;
 	ttl: number;
 	class: string;
 	value: string;
 }
 
-export interface DnsResultAnswer {
-	answers: DnsAnswers[];
+export interface DnsTimings {
+	total: number;
+}
+
+export interface DnsProbeResult {
+	status: 'finished';
+	rawOutput: string;
+	statusCode: number;
+	statusCodeName: string;
 	resolver: string;
+	answers: DnsAnswer[];
 	timings: DnsTimings;
 }
-export interface DnsResultBase extends SharedResults {
-	result: DnsResultAnswer;
+
+export interface TraceDnsHop {
+	resolver: string;
+	answers: DnsAnswer[];
+	timings: DnsTimings;
 }
-export interface DnsResultTrace extends SharedResults {
-	result: {
-		hops: DnsResultAnswer[];
+
+export interface TraceDnsProbeResult {
+	status: 'finished';
+	rawOutput: string;
+	hops: TraceDnsHop[];
+}
+
+export interface MtrStats {
+	min: number;
+	avg: number;
+	max: number;
+	stDev: number;
+	jMin: number;
+	jAvg: number;
+	jMax: number;
+	total: number;
+	rcv: number;
+	drop: number;
+	loss: number;
+}
+
+export interface MtrTiming {
+	rtt: number;
+}
+
+export interface MtrHop {
+	resolvedAddress: string | null;
+	resolvedHostname: string | null;
+	asn: number[];
+	stats: MtrStats;
+	timings: MtrTiming[];
+}
+
+export interface MtrProbeResult {
+	status: 'finished';
+	rawOutput: string;
+	resolvedAddress: string | null;
+	resolvedHostname: string | null;
+	hops: MtrHop[];
+}
+
+export type HttpHeaders = Record<string, string>;
+
+export interface HttpTimings {
+	total: number;
+	dns: number;
+	tcp: number;
+	tls: number;
+	firstByte: number;
+	download: number;
+}
+
+export interface HttpTLS {
+	authorized: boolean;
+	error?: string;
+	createdAt: string;
+	expiresAt: string;
+	subject: {
+		CN: string;
+		alt: string;
 	};
+	issuer: {
+		C: string;
+		O: string;
+		CN: string;
+	};
+	keyType: string | null;
+	keyBits: number | null;
+	serialNumber: string;
+	fingerprint256: string;
+	publicKey: string | null;
 }
 
-export type DnsResult<Trace> = Trace extends boolean
-	? DnsResultTrace
-	: DnsResultBase;
+export interface HttpProbeResult {
+	status: 'finished';
+	rawOutput: string;
+	rawHeaders: string;
+	rawBody: string | null;
+	truncated: boolean;
+	headers: HttpHeaders;
+	statusCode: number;
+	statusCodeName: string;
+	resolvedAddress: string | null;
+	timings: HttpTimings;
+	tls: HttpTLS | null;
+}
 
-interface SharedMeasurementResponse {
+export interface ProbeMeasurement {
+	probe: ProbeDetails;
+	result:
+		| InProgressProbeResult
+		| PingProbeResult
+		| TracerouteProbeResult
+		| DnsProbeResult
+		| TraceDnsProbeResult
+		| MtrProbeResult
+		| HttpProbeResult;
+}
+
+export interface Measurement {
 	id: string;
 	type: QueryType;
+	target: string;
 	status: 'in-progress' | 'finished';
 	createdAt: string;
 	updatedAt: string;
+	probesCount: number;
+	locations: Location[];
+	limit: number;
+	results: ProbeMeasurement[];
 }
-
-export interface PingMeasurementResponse extends SharedMeasurementResponse {
-	type: 'ping';
-	results: PingResult[];
-}
-
-// TODO: Update types
-export type MeasurementResponse = PingMeasurementResponse;
 
 export interface AuthToken {
 	access_token: string;
