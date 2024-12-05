@@ -1,14 +1,38 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CreateLimitType } from '../auth.js';
 import {
-	CreateLimitType,
-	IntrospectionResponse,
-	LimitsResponse,
-} from '../auth.js';
-import { Bot, getLimitsOutput, getMoreCreditsRequiredAuthError, getMoreCreditsRequiredNoAuthError, getNoCreditsAuthError, getNoCreditsNoAuthError, getRawTextFromBlocks } from '../bot.js';
-import { getDefaultDnsResponse, getDefaultHttpResponse, getDefaultMtrResponse, getDefaultPingResponse, getDefaultTracerouteResponse, mockAuthClient, mockGetMeasurement, mockLogger, mockPostMeasurement, mockSlackClient } from './utils.js';
+	Bot,
+	getMoreCreditsRequiredAuthError,
+	getMoreCreditsRequiredNoAuthError,
+	getNoCreditsAuthError,
+	getNoCreditsNoAuthError,
+	getRawTextFromBlocks,
+} from '../bot.js';
+import {
+	getDefaultDnsResponse,
+	getDefaultHttpResponse,
+	getDefaultMtrResponse,
+	getDefaultPingResponse,
+	getDefaultTracerouteResponse,
+	mockAuthClient,
+	mockGetMeasurement,
+	mockLogger,
+	mockPostMeasurement,
+	mockSlackClient,
+} from './utils.js';
 import { Context, SlashCommand } from '@slack/bolt';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
 import { AuthToken } from '@globalping/bot-utils';
+import {
+	authHelp,
+	dnsHelp,
+	generalHelp,
+	httpHelp,
+	limitsHelp,
+	mtrHelp,
+	pingHelp,
+	tracerouteHelp,
+} from '../format-help.js';
 
 describe('Bot', () => {
 	afterEach(() => {
@@ -24,7 +48,12 @@ describe('Bot', () => {
 	const respondMock = vi.fn();
 	const slackClientMock = mockSlackClient();
 
-	const bot = new Bot(loggerMock, oauthClientMock, postMeasurementMock, getMeasurementMock);
+	const bot = new Bot(
+		loggerMock,
+		oauthClientMock,
+		postMeasurementMock,
+		getMeasurementMock,
+	);
 
 	describe('HandleCommand', () => {
 		it('should handle the command - /globalping', async () => {
@@ -68,14 +97,17 @@ describe('Bot', () => {
 
 			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'ping',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {},
-			}, 'tok3n');
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				text: '```Processing the request...```',
@@ -155,16 +187,19 @@ ${expectedResponse.results[0].result.rawOutput}
 
 			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'dns',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'Berlin' }],
-				measurementOptions: {
-					resolver: '1.1.1.1',
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'dns',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'Berlin' }],
+					measurementOptions: {
+						resolver: '1.1.1.1',
+					},
 				},
-			}, 'tok3n');
+				'tok3n',
+			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				text: '```Processing the request...```',
@@ -244,23 +279,26 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 
 			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'http',
-				target: 'jsdelivr.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {
-					port: 443,
-					protocol: 'HTTPS',
-					request: {
-						headers: {},
-						host: 'www.jsdelivr.com',
-						path: '/package/npm/test',
-						query: 'nav=stats',
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'http',
+					target: 'jsdelivr.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						port: 443,
+						protocol: 'HTTPS',
+						request: {
+							headers: {},
+							host: 'www.jsdelivr.com',
+							path: '/package/npm/test',
+							query: 'nav=stats',
+						},
 					},
 				},
-			}, 'tok3n');
+				'tok3n',
+			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				text: '```Processing the request...```',
@@ -340,15 +378,17 @@ ${expectedResponse.results[0].result.rawOutput}
 
 			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'mtr',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'mtr',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
 				},
-			}, 'tok3n');
+				'tok3n',
+			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				text: '```Processing the request...```',
@@ -428,14 +468,17 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 
 			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'ping',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 2,
-				locations: [{ magic: 'New York' }],
-				measurementOptions: {},
-			}, 'tok3n');
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 2,
+					locations: [{ magic: 'New York' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				text: '```Processing the request...```',
@@ -515,15 +558,17 @@ ${expectedResponse.results[0].result.rawOutput}
 
 			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'traceroute',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'traceroute',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
 				},
-			}, 'tok3n');
+				'tok3n',
+			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				text: '```Processing the request...```',
@@ -559,6 +604,1275 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - auth login', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'auth login',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(slackClientMock.users, 'info').mockResolvedValue({
+				user: {
+					is_owner: true,
+				},
+			} as any);
+
+			vi.spyOn(oauthClientMock, 'Authorize').mockResolvedValue({
+				url: 'https://globalping.io/auth',
+			});
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.users.info).toHaveBeenCalledWith({
+				user: payload.user_id,
+			});
+
+			expect(oauthClientMock.Authorize).toHaveBeenCalledWith({
+				installationId: context.teamId,
+				channel_id: payload.channel_id,
+				user_id: payload.user_id,
+				thread_ts: payload.thread_ts,
+			});
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `Please <https://globalping.io/auth|click here> to authenticate.`,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - auth logout', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'auth logout',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(slackClientMock.users, 'info').mockResolvedValue({
+				user: {
+					is_owner: true,
+				},
+			} as any);
+
+			vi.spyOn(oauthClientMock, 'Logout').mockResolvedValue(null);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.users.info).toHaveBeenCalledWith({
+				user: payload.user_id,
+			});
+
+			expect(oauthClientMock.Logout).toHaveBeenCalledWith(context.teamId);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: 'You are now logged out.',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - auth status', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'auth status',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(slackClientMock.users, 'info').mockResolvedValue({
+				user: {
+					is_owner: true,
+				},
+			} as any);
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+				},
+				null,
+			]);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.users.info).toHaveBeenCalledWith({
+				user: payload.user_id,
+			});
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith(context.teamId);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: 'Logged in as john.',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - auth status anonymous', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'auth status',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(slackClientMock.users, 'info').mockResolvedValue({
+				user: {
+					is_owner: true,
+				},
+			} as any);
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+				},
+				null,
+			]);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.users.info).toHaveBeenCalledWith({
+				user: payload.user_id,
+			});
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith(context.teamId);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: 'Not logged in.',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - limits', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'limits',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+				},
+				null,
+			]);
+
+			vi.spyOn(oauthClientMock, 'Limits').mockResolvedValue([
+				{
+					rateLimit: {
+						measurements: {
+							create: {
+								type: CreateLimitType.User,
+								limit: 500,
+								remaining: 350,
+								reset: 600,
+							},
+						},
+					},
+					credits: {
+						remaining: 1000,
+					},
+				},
+				null,
+			]);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith(context.teamId);
+
+			const expectedText = `Authentication: token (john)
+
+Creating measurements:
+ - 500 tests per hour
+ - 150 consumed, 350 remaining
+ - resets in 10 minutes
+
+Credits:
+ - 1000 credits remaining (may be used to create measurements above the hourly limits)
+`;
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: expectedText,
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - limits IP', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'limits',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+				},
+				null,
+			]);
+
+			vi.spyOn(oauthClientMock, 'Limits').mockResolvedValue([
+				{
+					rateLimit: {
+						measurements: {
+							create: {
+								type: CreateLimitType.IP,
+								limit: 500,
+								remaining: 500,
+								reset: 0,
+							},
+						},
+					},
+				},
+				null,
+			]);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith(context.teamId);
+
+			const expectedText = `Authentication: workspace
+
+Creating measurements:
+ - 500 tests per hour
+ - 0 consumed, 500 remaining
+`;
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: expectedText,
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - ping latency', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'ping google.com --latency',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
+\`\`\`
+Min: 0.419 ms
+Max: 0.489 ms
+Avg: 0.419 ms
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - dns latency', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'dns google.com --latency',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultDnsResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'dns',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `>*Helsinki, FI, EU, Hetzner Online GmbH (AS24940)*
+\`\`\`
+Total: 7 ms
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - http latency', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'http jsdelivr.com --latency',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultHttpResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'http',
+					target: 'jsdelivr.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						protocol: 'HTTP',
+						request: {
+							headers: {},
+							host: 'jsdelivr.com',
+							path: '/',
+						},
+					},
+				},
+				'tok3n',
+			);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `>*Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)*
+\`\`\`
+Total: 161 ms
+Download: 2 ms
+First byte: 45 ms
+DNS: 38 ms
+TLS: 45 ms
+TCP: 31 ms
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should return help text - empty command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: '',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: generalHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return help text - help command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'help',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: generalHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return help text - ping command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'help ping',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: pingHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return help text - dns command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'help dns',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: dnsHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return help text - mtr command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'help mtr',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: mtrHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return help text - http command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'help http',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: httpHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return help text - traceroute command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'help traceroute',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: tracerouteHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return help text - auth command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'help auth',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: authHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return help text - limits command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'help limits',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: limitsHelp('*', '/globalping'),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+		});
+
+		it('should return error message - wrong command', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'xyz',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+
+			expect(respondMock).toHaveBeenCalledWith({
+				text: `Failed to process command \`xyz\`.
+\`\`\`
+Invalid argument "xyz" for "command"!
+Expected "ping, traceroute, dns, mtr, http, auth, limits".
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`,
+			});
+		});
+
+		it('should return error message - wrong ping flag', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'ping google.com --xyz',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+
+			expect(respondMock).toHaveBeenCalledWith({
+				text: `Failed to process command \`ping google.com --xyz\`.
+\`\`\`
+Invalid option "xyz" for "ping"!
+Expected "packets, latency, target, from, limit, share".
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`,
+			});
+		});
+
+		it('should return error message - wrong dns flag', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'dns google.com --xyz',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+
+			expect(respondMock).toHaveBeenCalledWith({
+				text: `Failed to process command \`dns google.com --xyz\`.
+\`\`\`
+Invalid option "xyz" for "dns"!
+Expected "query, protocol, port, resolver, trace, latency, target, from, limit, share".
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`,
+			});
+		});
+
+		it('should return error message - wrong mtr flag', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'mtr google.com --xyz',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+
+			expect(respondMock).toHaveBeenCalledWith({
+				text: `Failed to process command \`mtr google.com --xyz\`.
+\`\`\`
+Invalid option "xyz" for "mtr"!
+Expected "protocol, port, packets, target, from, limit, share".
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`,
+			});
+		});
+
+		it('should return error message - wrong traceroute flag', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'traceroute google.com --xyz',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+
+			expect(respondMock).toHaveBeenCalledWith({
+				text: `Failed to process command \`traceroute google.com --xyz\`.
+\`\`\`
+Invalid option "xyz" for "traceroute"!
+Expected "protocol, port, target, from, limit, share".
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`,
+			});
+		});
+
+		it('should return error message - wrong http flag', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'http google.com --xyz',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
+
+			expect(respondMock).toHaveBeenCalledWith({
+				text: `Failed to process command \`http google.com --xyz\`.
+\`\`\`
+Invalid option "xyz" for "http"!
+Expected "protocol, port, resolver, method, path, query, host, header, latency, full, target, from, limit, share".
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`,
 			});
 		});
 	});
@@ -602,7 +1916,6 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 				botUserId: 'U07QAK46BGU',
 			} as Context & StringIndexed;
 
-
 			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
 				access_token: 'tok3n',
 			} as AuthToken);
@@ -623,14 +1936,17 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 
 			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'ping',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {},
-			}, 'tok3n');
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				text: '```Processing the request...```',
@@ -726,14 +2042,17 @@ ${expectedResponse.results[0].result.rawOutput}
 
 			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'ping',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {},
-			}, 'tok3n');
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				text: '```Processing the request...```',
@@ -773,10 +2092,8 @@ ${expectedResponse.results[0].result.rawOutput}
 		});
 
 		it('should ignore the message - channel type is not im', async () => {
-			const event = {
-			};
-			const context = {
-			} as Context & StringIndexed;
+			const event = {};
+			const context = {} as Context & StringIndexed;
 
 			await bot.HandleMessage({
 				event,
@@ -796,8 +2113,7 @@ ${expectedResponse.results[0].result.rawOutput}
 				channel_type: 'im',
 				subtype: 'message_changed',
 			};
-			const context = {
-			} as Context & StringIndexed;
+			const context = {} as Context & StringIndexed;
 
 			await bot.HandleMessage({
 				event,
@@ -810,71 +2126,6 @@ ${expectedResponse.results[0].result.rawOutput}
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
-		});
-	});
-
-	describe('getLimitsOutput', () => {
-		it('should return correct text', () => {
-			const introspection: IntrospectionResponse = {
-				active: true,
-				username: 'john',
-			};
-			const limits: LimitsResponse = {
-				rateLimit: {
-					measurements: {
-						create: {
-							type: CreateLimitType.User,
-							limit: 500,
-							remaining: 350,
-							reset: 600,
-						},
-					},
-				},
-				credits: {
-					remaining: 1000,
-				},
-			};
-
-			const expectedText = `Authentication: token (john)
-
-Creating measurements:
- - 500 tests per hour
- - 150 consumed, 350 remaining
- - resets in 10 minutes
-
-Credits:
- - 1000 credits remaining (may be used to create measurements above the hourly limits)
-`;
-
-			expect(getLimitsOutput(limits, introspection)).toBe(expectedText);
-		});
-
-		it('should return correct text - limit type IP', () => {
-			const introspection: IntrospectionResponse = {
-				active: true,
-				username: 'john',
-			};
-			const limits: LimitsResponse = {
-				rateLimit: {
-					measurements: {
-						create: {
-							type: CreateLimitType.IP,
-							limit: 500,
-							remaining: 500,
-							reset: 0,
-						},
-					},
-				},
-			};
-
-			const expectedText = `Authentication: workspace
-
-Creating measurements:
- - 500 tests per hour
- - 0 consumed, 500 remaining
-`;
-
-			expect(getLimitsOutput(limits, introspection)).toBe(expectedText);
 		});
 	});
 

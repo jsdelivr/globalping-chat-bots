@@ -2,6 +2,7 @@ import parser from 'yargs-parser';
 
 import { parseTargetQuery } from './target-query.js';
 import {
+	ALLOWED_ADDITIONAL_QUERY_TYPES,
 	ALLOWED_QUERY_TYPES,
 	DnsProtocol,
 	DnsType,
@@ -105,7 +106,11 @@ const checkFlags = (cmd: string, args: Record<string, string>): void => {
 	const flags = Object.keys(args).filter(item => !skipFlags.has(item));
 
 	if (!isQueryType(cmd)) {
-		throwArgError(cmd, 'command', [ ...ALLOWED_QUERY_TYPES ].join(', '));
+		throwArgError(
+			cmd,
+			'command',
+			[ ...ALLOWED_QUERY_TYPES, ...ALLOWED_ADDITIONAL_QUERY_TYPES ].join(', '),
+		);
 	}
 
 	if (cmd === 'ping') {
