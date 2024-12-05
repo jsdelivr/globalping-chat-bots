@@ -2,10 +2,15 @@
 import {
 	Flags,
 	getTag,
-	help,
+	dnsHelpTexts,
+	pingHelpTexts,
+	tracerouteHelpTexts,
+	httpHelpTexts,
+	mtrHelpTexts,
 	loggerInit,
-	MeasurementResponse,
+	Measurement,
 	throwArgError,
+	generalHelpTexts,
 } from '@globalping/bot-utils';
 import { ChatInputCommandInteraction, codeBlock } from 'discord.js';
 import * as dotenv from 'dotenv';
@@ -78,7 +83,7 @@ export const expandFlags = (flags: Flags): string => {
 };
 
 export const expandResults = async (
-	response: MeasurementResponse,
+	response: Measurement,
 	interaction: ChatInputCommandInteraction,
 ) => {
 	const { results } = response;
@@ -111,27 +116,27 @@ export const expandResults = async (
 
 export const helpCmd = (cmd: string): string => {
 	if (cmd === 'help') {
-		return `${help.help.preamble}\n\n**Usage:**\n\`\`\`${help.help.usage}\`\`\`\n**Arguments**:\n\`\`\`${help.help.args}\`\`\`\nMore help can be found here:\n\`\`\`${help.help.endDiscord}\`\`\``;
+		return `${generalHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${generalHelpTexts.usage}\`\`\``;
 	}
 
 	if (cmd === 'ping') {
-		return `${help.ping.preamble}\n\n**Usage:**\n\`\`\`${help.ping.usage}\`\`\`\n**Options:**\n\`\`\`${help.ping.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.ping.examples}\`\`\``;
+		return `${pingHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${pingHelpTexts.usage}\`\`\`\n\n**Examples:**\n\`\`\`${pingHelpTexts.examples}\`\`\``;
 	}
 
 	if (cmd === 'traceroute') {
-		return `${help.traceroute.preamble}\n\n**Usage:**\n\`\`\`${help.traceroute.usage}\`\`\`\n**Options:**\n\`\`\`${help.traceroute.options}\`\`\`\n**Examples:**\n\`\`\`${help.traceroute.examples}\`\`\``;
+		return `${tracerouteHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${tracerouteHelpTexts.usage}\`\`\`\n**Examples:**\n\`\`\`${tracerouteHelpTexts.examples}\`\`\``;
 	}
 
 	if (cmd === 'dns') {
-		return `${help.dns.preamble}\n\n**Usage:**\n\`\`\`${help.dns.usage}\`\`\`\n**Options:**\n\`\`\`${help.dns.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.dns.examples}\`\`\``;
+		return `${dnsHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${dnsHelpTexts.usage}\`\`\`\n\n**Examples:**\n\`\`\`${dnsHelpTexts.examples}\`\`\``;
 	}
 
 	if (cmd === 'mtr') {
-		return `${help.mtr.preamble}\n\n**Usage:**\n\`\`\`${help.mtr.usage}\`\`\`\n**Options:**\n\`\`\`${help.mtr.options}\`\`\`\n\n**Examples:**\n\`\`\`${help.mtr.examples}\`\`\``;
+		return `${mtrHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${mtrHelpTexts.usage}\`\`\`\n\n**Examples:**\n\`\`\`${mtrHelpTexts.examples}\`\`\``;
 	}
 
 	if (cmd === 'http') {
-		return `${help.http.preamble}\n\n**Usage:**\n\`\`\`${help.http.usage}\`\`\`\n**Options:**\n\`\`\`${help.http.options}\`\`\`\n**Examples:**\n\`\`\`${help.http.examples}\`\`\``;
+		return `${httpHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${httpHelpTexts.usage}\`\`\`\n**Examples:**\n\`\`\`${httpHelpTexts.examples}\`\`\``;
 	}
 
 	return 'Unknown command! Please call `/globalping help` for a list of commands.';

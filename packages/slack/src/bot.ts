@@ -1,5 +1,15 @@
-import { AllMiddlewareArgs, SlackCommandMiddlewareArgs, SlackEventMiddlewareArgs } from '@slack/bolt';
-import { formatSeconds, getInstallationId, helpCmd, Logger, pluralize } from './utils.js';
+import {
+	AllMiddlewareArgs,
+	SlackCommandMiddlewareArgs,
+	SlackEventMiddlewareArgs,
+} from '@slack/bolt';
+import {
+	formatSeconds,
+	getInstallationId,
+	helpCmd,
+	Logger,
+	pluralize,
+} from './utils.js';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
 import {
 	formatAPIError,
@@ -8,13 +18,25 @@ import {
 	AuthSubcommand,
 	buildPostMeasurements,
 	PostError,
-	PostMeasurementResponse,
 	Flags,
-	MeasurementResponse,
-	PostMeasurement,
+	MeasurementCreate,
+	Measurement,
+	MeasurementCreateResponse,
 } from '@globalping/bot-utils';
-import type { Block, GenericMessageEvent, KnownBlock, RichTextBlockElement, WebClient } from '@slack/web-api';
-import { AuthorizeErrorType, CreateLimitType, IntrospectionResponse, LimitsResponse, OAuthClient } from './auth.js';
+import type {
+	Block,
+	GenericMessageEvent,
+	KnownBlock,
+	RichTextBlockElement,
+	WebClient,
+} from '@slack/web-api';
+import {
+	AuthorizeErrorType,
+	CreateLimitType,
+	IntrospectionResponse,
+	LimitsResponse,
+	OAuthClient,
+} from './auth.js';
 import { formatMeasurementResponse } from './response.js';
 
 interface ChannelPayload {
@@ -28,12 +50,19 @@ export class Bot {
 	constructor (
 		private logger: Logger,
 		private oauth: OAuthClient,
-		private postMeasurement: (opts: PostMeasurement, token?: string) => Promise<PostMeasurementResponse>,
-		private getMeasurement: (id: string) => Promise<MeasurementResponse>,
-	) { }
+		private postMeasurement: (
+			opts: MeasurementCreate,
+			token?: string,
+		) => Promise<MeasurementCreateResponse>,
+		private getMeasurement: (id: string) => Promise<Measurement>,
+	) {}
 
 	async HandleCommand ({
-		ack, respond, client, payload, context,
+		ack,
+		respond,
+		client,
+		payload,
+		context,
 	}: SlackCommandMiddlewareArgs & AllMiddlewareArgs<StringIndexed>) {
 		const logData = {
 			command: payload.command,
@@ -100,7 +129,10 @@ export class Bot {
 						);
 
 						await respond({
-							text: 'Unable to run `' + payload.command + '` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
+							text:
+								'Unable to run `'
+								+ payload.command
+								+ '` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
 						});
 					} else {
 						throw new Error('Unable to open a DM with the Globalping App.');
@@ -116,7 +148,10 @@ export class Bot {
 					);
 
 					await respond({
-						text: 'Unable to run `' + payload.command + '` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
+						text:
+							'Unable to run `'
+							+ payload.command
+							+ '` in a private DM! You can DM the Globalping App directly to run commands, or create a new group DM with the Globalping App to include multiple users.',
 					});
 
 					return;
@@ -129,6 +164,7 @@ export class Bot {
 				);
 
 				await respond('Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.');
+
 				return;
 			}
 
@@ -160,7 +196,12 @@ export class Bot {
 		}
 	}
 
-	async HandleMention ({ event, context, client }: SlackEventMiddlewareArgs<'app_mention'> & AllMiddlewareArgs<StringIndexed>) {
+	async HandleMention ({
+		event,
+		context,
+		client,
+	}: SlackEventMiddlewareArgs<'app_mention'> &
+		AllMiddlewareArgs<StringIndexed>) {
 		await this.processMention(
 			getRawTextFromBlocks(context.botUserId || '', event.blocks),
 			event.team,
@@ -173,7 +214,11 @@ export class Bot {
 		);
 	}
 
-	async HandleMessage ({ event, context, client }: SlackEventMiddlewareArgs<'message'> & AllMiddlewareArgs<StringIndexed>) {
+	async HandleMessage ({
+		event,
+		context,
+		client,
+	}: SlackEventMiddlewareArgs<'message'> & AllMiddlewareArgs<StringIndexed>) {
 		if (event.channel_type !== 'im') {
 			return;
 		}
@@ -268,11 +313,7 @@ export class Bot {
 		await this.createMeasurement(client, payload, cmdText, flags);
 	}
 
-	private async help (
-		client: WebClient,
-		payload: ChannelPayload,
-		flags: Flags,
-	) {
+	private async help (client: WebClient, payload: ChannelPayload, flags: Flags) {
 		await client.chat.postEphemeral({
 			text: helpCmd(flags.cmd, flags.target, 'slack'),
 			user: payload.user_id,
@@ -290,7 +331,7 @@ export class Bot {
 		const opts = buildPostMeasurements(flags);
 
 		this.logger.debug(`Posting measurement: ${JSON.stringify(opts)}`);
-		let measurementResponse: PostMeasurementResponse;
+		let measurementResponse: MeasurementCreateResponse;
 
 		const token = await this.oauth.GetToken(payload.installationId);
 
@@ -361,7 +402,12 @@ export class Bot {
 		const res = await this.getMeasurement(measurementResponse.id);
 		this.logger.debug(`Get response: ${JSON.stringify(res)}`);
 
-		const blocks = formatMeasurementResponse(payload.user_id, cmdText, res, flags);
+		const blocks = formatMeasurementResponse(
+			payload.user_id,
+			cmdText,
+			res,
+			flags,
+		);
 
 		await client.chat.postMessage({
 			blocks,
@@ -521,7 +567,11 @@ export function getRawTextFromBlocks (
 
 	let text = '';
 	traverseBlocks(blocks, (block) => {
-		if (block.type === 'user' && 'user_id' in block && block.user_id === botUserId) {
+		if (
+			block.type === 'user'
+			&& 'user_id' in block
+			&& block.user_id === botUserId
+		) {
 			// ignore text before the bot mention
 			text = '';
 		} else if ('text' in block && typeof block.text === 'string') {
@@ -534,7 +584,10 @@ export function getRawTextFromBlocks (
 	return text.trim();
 }
 
-function traverseBlocks (blocks: (KnownBlock | Block)[], callback: (block: KnownBlock | Block | RichTextBlockElement) => void) {
+function traverseBlocks (
+	blocks: (KnownBlock | Block)[],
+	callback: (block: KnownBlock | Block | RichTextBlockElement) => void,
+) {
 	for (const block of blocks) {
 		if ('text' in block || block.type === 'user') {
 			callback(block);
@@ -545,7 +598,6 @@ function traverseBlocks (blocks: (KnownBlock | Block)[], callback: (block: Known
 		}
 	}
 }
-
 
 export function getLimitsOutput (
 	limits: LimitsResponse,

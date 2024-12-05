@@ -1,18 +1,23 @@
 import {
+	DnsProbeResult,
 	Flags,
 	getTag,
-	PingMeasurementResponse,
-	PingResult,
+	HttpProbeResult,
+	Measurement,
+	PingProbeResult,
+	ProbeMeasurement,
 } from '@globalping/bot-utils';
 import { KnownBlock } from '@slack/web-api';
 
 export function responseHeader (
-	result: PingResult,
+	result: ProbeMeasurement,
 	tag: string | undefined,
 	boldSeparator: string,
 ): string {
-	return `>${boldSeparator}${result.probe.city}${result.probe.state ? ` (${result.probe.state})` : ''
-	}, ${result.probe.country}, ${result.probe.continent}, ${result.probe.network
+	return `>${boldSeparator}${result.probe.city}${
+		result.probe.state ? ` (${result.probe.state})` : ''
+	}, ${result.probe.country}, ${result.probe.continent}, ${
+		result.probe.network
 	} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}${boldSeparator}\n`;
 }
 
@@ -44,13 +49,15 @@ export function fullResultsFooter (
 }
 
 const reponseTextRegular = (
-	result: PingResult,
+	result: ProbeMeasurement,
 	flags: Flags,
 	truncationLimit: number,
 ): string => {
-	const responseText = isBodyOnlyHttpGet(flags)
-		? result.result.rawBody
-		: result.result.rawOutput;
+	let responseText = result.result.rawOutput;
+
+	if (isBodyOnlyHttpGet(flags)) {
+		responseText = (result.result as HttpProbeResult).rawBody || '';
+	}
 
 	// Slack has a limit of characters per block - truncate if necessary
 	const finalResponseText
@@ -68,38 +75,39 @@ const formatResponseText = (text: string): string => `\`\`\`
 ${text}
 \`\`\``;
 
-const latencyText = (result: PingResult, flags: Flags): string => {
+const latencyText = (result: ProbeMeasurement, flags: Flags): string => {
 	let text = '';
 
-	switch (flags.cmd) {
-		case 'ping':
-			text += `Min: ${result.result.stats.min} ms\n`;
-			text += `Max: ${result.result.stats.max} ms\n`;
-			text += `Avg: ${result.result.stats.min} ms\n`;
-			break;
-
-		case 'dns':
-			text += `Total: ${result.result.timings.total} ms\n`;
-			break;
-
-		case 'http':
-			text += `Total: ${result.result.timings.total} ms\n`;
-			text += `Download: ${result.result.timings.download} ms\n`;
-			text += `First byte: ${result.result.timings.firstByte} ms\n`;
-			text += `DNS: ${result.result.timings.dns} ms\n`;
-			text += `TLS: ${result.result.timings.tls} ms\n`;
-			text += `TCP: ${result.result.timings.tcp} ms\n`;
-			break;
-
-		default:
-			throw new Error(`unknown command: ${flags.cmd}`);
+	if (flags.cmd === 'ping') {
+		const stats = (result.result as PingProbeResult).stats;
+		text += `Min: ${stats.min} ms\n`;
+		text += `Max: ${stats.max} ms\n`;
+		text += `Avg: ${stats.min} ms\n`;
+		return text;
 	}
 
-	return text;
+	if (flags.cmd === 'dns') {
+		const timings = (result.result as DnsProbeResult).timings;
+		text += `Total: ${timings.total} ms\n`;
+		return text;
+	}
+
+	if (flags.cmd === 'http') {
+		const timings = (result.result as HttpProbeResult).timings;
+		text += `Total: ${timings.total} ms\n`;
+		text += `Download: ${timings.download} ms\n`;
+		text += `First byte: ${timings.firstByte} ms\n`;
+		text += `DNS: ${timings.dns} ms\n`;
+		text += `TLS: ${timings.tls} ms\n`;
+		text += `TCP: ${timings.tcp} ms\n`;
+		return text;
+	}
+
+	throw new Error(`unknown command: ${flags.cmd}`);
 };
 
 export const responseText = (
-	result: PingResult,
+	result: ProbeMeasurement,
 	flags: Flags,
 	truncationLimit: number,
 ): string => {
@@ -115,7 +123,7 @@ const maxDisplayedResults = 4;
 export const formatMeasurementResponse = (
 	userId: string,
 	cmdText: string,
-	res: PingMeasurementResponse,
+	res: Measurement,
 	flags: Flags,
 ) => {
 	const blocks: KnownBlock[] = [

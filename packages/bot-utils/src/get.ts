@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import got, { Headers, Response } from 'got';
 
-import type { MeasurementResponse } from './types.js';
+import type { Measurement } from './types.js';
 import { userAgent } from './user-agent.js';
 
 class MeasurementsFetcher {
@@ -12,7 +12,7 @@ class MeasurementsFetcher {
 	etags: Record<string, string>;
 
 	// caches Measurements by ETag
-	measurements: Record<string, MeasurementResponse>;
+	measurements: Record<string, Measurement>;
 
 	constructor (apiUrl: string) {
 		this.apiUrl = apiUrl;
@@ -20,7 +20,7 @@ class MeasurementsFetcher {
 		this.measurements = {};
 	}
 
-	async fetchMeasurement (id: string): Promise<MeasurementResponse> {
+	async fetchMeasurement (id: string): Promise<Measurement> {
 		const headers: Headers = {
 			'User-Agent': userAgent(),
 			'Accept-Encoding': 'br',
@@ -59,7 +59,7 @@ class MeasurementsFetcher {
 			}
 		}
 
-		const measurementResponse: MeasurementResponse = JSON.parse(res.body);
+		const measurementResponse: Measurement = JSON.parse(res.body);
 
 		// save etag and response to cache
 		etag = res.headers.etag;
@@ -78,7 +78,7 @@ export const ApiUrl = 'https://api.globalping.io/v1/measurements';
 // api poll interval in milliseconds
 const apiPollInterval = 1000;
 
-export const getMeasurement = async (id: string): Promise<MeasurementResponse> => {
+export const getMeasurement = async (id: string): Promise<Measurement> => {
 	const measurementsFetcher = new MeasurementsFetcher(ApiUrl);
 
 	let data = await measurementsFetcher.fetchMeasurement(id);
@@ -93,11 +93,15 @@ export const getMeasurement = async (id: string): Promise<MeasurementResponse> =
 };
 
 export const getTag = (tags: string[]): string | undefined => {
-	if (tags.length === 0) { return undefined; }
+	if (tags.length === 0) {
+		return undefined;
+	}
 
 	// Iterarate through tags and return the first one that has its last character be a number
 	for (const tag of tags) {
-		if (Number.isInteger(Number(tag.slice(-1)))) { return `${tag}`; }
+		if (Number.isInteger(Number(tag.slice(-1)))) {
+			return `${tag}`;
+		}
 	}
 
 	return undefined;
