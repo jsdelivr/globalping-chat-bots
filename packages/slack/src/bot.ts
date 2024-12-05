@@ -454,7 +454,7 @@ export class Bot {
 		}
 
 		text
-			= introspection && introspection.active
+			= introspection && introspection.active && introspection.username
 				? `Logged in as ${introspection?.username}.`
 				: 'Not logged in.';
 

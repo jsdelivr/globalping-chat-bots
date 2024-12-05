@@ -20,6 +20,9 @@ export const mockSlackClient = (): SlackClient => ({
 	conversations: {
 		info: vi.fn(),
 	},
+	users: {
+		info: vi.fn(),
+	},
 }) as any;
 
 export const mockInstallationStore = (): InstallationStore => ({
