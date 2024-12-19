@@ -10,3 +10,28 @@ services:
       - ./data:/var/lib/mysql
     ports:
       - 3306:3306
+
+  app:
+    build:
+      context: ./
+    depends_on:
+      - db
+    volumes:
+      - ./:/app
+      - /app/data
+      - /app/node_modules
+      - /app/packages/bot-utils/node_modules
+      - /app/packages/discord/node_modules
+      - /app/packages/github/node_modules
+      - /app/packages/slack/node_modules
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: dev
+      DB_PASSWORD: dev
+      DB_DATABASE: dev
+      PORT: 3000
+    ports:
+      - 3000:3000
