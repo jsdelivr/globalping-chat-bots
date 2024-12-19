@@ -22,9 +22,9 @@ import {
 } from './utils.js';
 import { Context, SlashCommand } from '@slack/bolt';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
-import { AuthToken } from '@globalping/bot-utils';
 import {
 	authHelp,
+	AuthToken,
 	dnsHelp,
 	generalHelp,
 	httpHelp,
@@ -32,7 +32,7 @@ import {
 	mtrHelp,
 	pingHelp,
 	tracerouteHelp,
-} from '../format-help.js';
+} from '@globalping/bot-utils';
 
 describe('Bot', () => {
 	afterEach(() => {

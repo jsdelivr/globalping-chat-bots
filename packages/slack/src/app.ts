@@ -7,12 +7,12 @@ import {
 import { App, AppOptions, LogLevel } from '@slack/bolt';
 
 import { initOAuthClient, oauth } from './auth.js';
-import { config } from './config.js';
 import { installationStore, knex } from './db.js';
 import { routes } from './routes.js';
 import { channelWelcome, logger } from './utils.js';
 import { handleAppHomeMessagesOpened } from './welcome.js';
 import { Bot } from './bot.js';
+import { config } from './config.js';
 
 const baseAppConfig: AppOptions = {
 	signingSecret: config.slackSigningSecret,
@@ -114,7 +114,6 @@ app.command('/ping', args => bot.HandleCommand(args));
 app.command('/traceroute', args => bot.HandleCommand(args));
 app.event('app_mention', args => bot.HandleMention(args));
 app.event('message', args => bot.HandleMessage(args));
-
 
 // Start the app
 (async () => {

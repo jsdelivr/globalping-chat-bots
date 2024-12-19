@@ -14,3 +14,10 @@ export interface GithubTarget {
 	repo: string;
 	id: number;
 }
+
+export interface Config {
+	globalpingToken: string;
+	githubPersonalAccessToken: string;
+	githubBotApiKey: string;
+	githubBotHandle: string;
+}

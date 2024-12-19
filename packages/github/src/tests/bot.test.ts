@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-
 import {
 	cleanUpCommandText,
 	isMentionNotification,
 	parseCommandfromMention,
 	parseFooter,
 	splitMessageFooter,
-} from '../mention.js';
+} from '../bot.js';
+
 import { GithubTargetType } from '../types.js';
 
 describe('Mention', () => {
