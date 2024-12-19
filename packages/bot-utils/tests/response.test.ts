@@ -1,11 +1,11 @@
-import { ProbeMeasurement } from '@globalping/bot-utils';
 import { describe, expect, it } from 'vitest';
 
 import {
 	fullResultsFooter,
 	responseHeader,
 	shareMessageFooter,
-} from '../response.js';
+} from '../src/response.js';
+import { ProbeMeasurement } from '../src/types.js';
 
 describe('Response', () => {
 	const boldSeparator = '*';
