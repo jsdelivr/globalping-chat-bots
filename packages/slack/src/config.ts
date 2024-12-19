@@ -29,11 +29,11 @@ export const config = {
 	slackSocketMode: !!process.env.SLACK_SOCKET_MODE,
 	slackAppToken: process.env.SLACK_APP_TOKEN,
 
-	githubPersonalAccessToken: process.env.GITHUB_PERSONAL_ACCESS_TOKEN,
-	githubBotApiKey: process.env.GITHUB_BOT_API_KEY,
+	githubPersonalAccessToken: process.env.GITHUB_PERSONAL_ACCESS_TOKEN as string,
+	githubBotApiKey: process.env.GITHUB_BOT_API_KEY as string,
 	githubBotHandle: process.env.GITHUB_BOT_HANDLE || 'globalping',
 
-	globalpingToken: process.env.GLOBALPING_TOKEN,
+	globalpingToken: process.env.GLOBALPING_TOKEN as string,
 };
 
 export type Config = typeof config;
@@ -41,6 +41,10 @@ export type Config = typeof config;
 function validateConfig (c: Config) {
 	if (process.env.NODE_ENV === 'test') {
 		return;
+	}
+
+	if (!c.dbHost || !c.dbPort || !c.dbUser || !c.dbPassword || !c.dbDatabase) {
+		throw new Error('DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production');
 	}
 
 	if (
@@ -52,16 +56,20 @@ function validateConfig (c: Config) {
 		throw new Error('SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set for production');
 	}
 
-	if (!c.dbHost || !c.dbPort || !c.dbUser || !c.dbPassword || !c.dbDatabase) {
-		throw new Error('DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set for production');
-	}
-
 	if (!c.serverHost) {
 		throw new Error('SERVER_HOST environment variable must be set for production');
 	}
 
 	if (!c.dashboardUrl || !c.authUrl || !c.authClientId || !c.authClientSecret) {
 		throw new Error('DASHBOARD_URL AUTH_URL, AUTH_CLIENT_ID and AUTH_CLIENT_SECRET environment variable must be set for production');
+	}
+
+	if (
+		!c.githubPersonalAccessToken
+		|| !c.githubBotApiKey
+		|| !c.globalpingToken
+	) {
+		throw new Error('GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_BOT_API_KEY and GLOBALPING_TOKEN environment variable must be set for production');
 	}
 }
 

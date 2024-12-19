@@ -1,13 +1,27 @@
-import { rest } from 'msw';
+import { http } from 'msw';
 
 import dataImport from './probedata.json';
 
 const data: Record<string, object> = dataImport;
 
 export const postMeasurementHandlers = [
-	rest.post('https://api.globalping.io/v1/measurements', (_req, res, ctx) => res(ctx.status(202), ctx.json({ id: 'testId', probesCount: 1 }))),
+	http.post('https://api.globalping.io/v1/measurements', () => {
+		return new Response(JSON.stringify({ id: 'testId', probesCount: 1 }), {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			status: 202,
+		});
+	}),
 ];
 
 export const getMeasurementHandlers = [
-	rest.get('https://api.globalping.io/v1/measurements/:id', (req, res, ctx) => res(ctx.status(200), ctx.json(data[req.params.id as string]))),
+	http.get('https://api.globalping.io/v1/measurements/:id', ({ params }) => {
+		return new Response(JSON.stringify(data[params.id as string]), {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			status: 200,
+		});
+	}),
 ];
