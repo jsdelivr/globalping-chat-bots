@@ -6,7 +6,6 @@ import {
 import {
 	formatSeconds,
 	getInstallationId,
-	helpCmd,
 	Logger,
 	pluralize,
 } from './utils.js';
@@ -22,6 +21,7 @@ import {
 	MeasurementCreate,
 	Measurement,
 	MeasurementCreateResponse,
+	helpCmd,
 } from '@globalping/bot-utils';
 import type {
 	Block,
