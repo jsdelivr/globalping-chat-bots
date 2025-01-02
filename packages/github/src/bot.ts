@@ -13,6 +13,7 @@ import {
 	helpCmd,
 	Logger,
 	Measurement,
+	MeasurementCreate,
 	MeasurementCreateResponse,
 	postMeasurement,
 	responseHeader,
@@ -33,7 +34,7 @@ import strip from 'strip-markdown';
 export const initBot = (config: Config, logger: Logger) => {
 	const octokit = new Octokit({ auth: config.githubPersonalAccessToken });
 
-	return new Bot(config, logger, octokit);
+	return new Bot(config, logger, octokit, postMeasurement, getMeasurement);
 };
 
 export class Bot {
@@ -43,6 +44,11 @@ export class Bot {
 		private config: Config,
 		private logger: Logger,
 		private githubClient: Octokit,
+		private postMeasurement: (
+			opts: MeasurementCreate,
+			token?: string,
+		) => Promise<MeasurementCreateResponse>,
+		private getMeasurement: (id: string) => Promise<Measurement>,
 	) {}
 
 	async HandleRequest (req: IncomingMessage, res: ServerResponse) {
@@ -223,7 +229,7 @@ export class Bot {
 		let measurementResponse: MeasurementCreateResponse;
 
 		try {
-			measurementResponse = await postMeasurement(
+			measurementResponse = await this.postMeasurement(
 				opts,
 				this.config.globalpingToken,
 			);
@@ -246,7 +252,7 @@ export class Bot {
 		let res: Measurement;
 
 		try {
-			res = await getMeasurement(measurementResponse.id);
+			res = await this.getMeasurement(measurementResponse.id);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
 			this.logger.error(
@@ -303,7 +309,7 @@ export class Bot {
 
 		let fullText = '';
 
-		fullText += `Here are the results for \`${cmdText}\`\r\n`;
+		fullText += `Here are the results for \`${cmdText}\`\n`;
 
 		/* eslint-disable no-await-in-loop */
 		for (const result of resultsForDisplay) {
@@ -311,7 +317,7 @@ export class Bot {
 			const text = `${
 				responseHeader(result, tag, githubBoldSeparator)
 				+ responseText(result, flags, githubTruncationLimit)
-			}\r\n`;
+			}\n`;
 			fullText += text;
 		}
 
