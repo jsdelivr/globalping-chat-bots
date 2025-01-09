@@ -1,11 +1,10 @@
-import { AuthToken } from '@globalping/bot-utils';
+import { AuthToken, Logger } from '@globalping/bot-utils';
 import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage.js';
 import { createHash, randomBytes } from 'node:crypto';
 import { IncomingMessage, ServerResponse } from 'node:http';
 
-import { Config } from './config.js';
-import { AuthorizeSession, Installation, InstallationStore } from './db.js';
-import { Logger, SlackClient } from './utils.js';
+import { AuthorizeSession, DBClient, Installation } from './db.js';
+import { Config, SlackClient } from './types.js';
 
 export const CALLBACK_PATH = '/slack/oauth/callback';
 export const enum AuthorizeErrorType {
@@ -78,9 +77,13 @@ export class OAuthClient {
 	constructor (
 		private config: Config,
 		private logger: Logger,
-		private installationStore: InstallationStore,
-		private slackClient: SlackClient,
+		private installationStore: DBClient,
+		private slackClient?: SlackClient,
 	) {}
+
+	async SetSlackClient (client: SlackClient) {
+		this.slackClient = client;
+	}
 
 	async Authorize (opts: {
 		installationId: string;
@@ -573,7 +576,7 @@ export let oauth: OAuthClient;
 export function initOAuthClient (
 	config: Config,
 	logger: Logger,
-	installationStore: InstallationStore,
+	installationStore: DBClient,
 	slackClient: SlackClient,
 ) {
 	oauth = new OAuthClient(config, logger, installationStore, slackClient);

@@ -8,3 +8,4 @@ export * from './types.js';
 export * from './utils.js';
 export * from './help.js';
 export * from './response.js';
+export * from './db.js';

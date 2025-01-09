@@ -12,6 +12,8 @@
 	"license": "MIT",
 	"dependencies": {
 		"got": "^12.6.0",
+		"knex": "^2.5.1",
+		"mysql": "^2.18.1",
 		"pino": "^8.11.0",
 		"pino-std-serializers": "^6.2.0",
 		"yargs-parser": "^21.1.1"

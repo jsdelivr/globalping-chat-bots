@@ -15,6 +15,7 @@ import {
 	getDefaultPingResponse,
 	getDefaultTracerouteResponse,
 	mockAuthClient,
+	mockDBClient,
 	mockGetMeasurement,
 	mockLogger,
 	mockPostMeasurement,
@@ -40,6 +41,7 @@ describe('Bot', () => {
 	});
 
 	const loggerMock = mockLogger();
+	const dbClientMock = mockDBClient();
 	const oauthClientMock = mockAuthClient();
 	const postMeasurementMock = mockPostMeasurement();
 	const getMeasurementMock = mockGetMeasurement();
@@ -50,6 +52,7 @@ describe('Bot', () => {
 
 	const bot = new Bot(
 		loggerMock,
+		dbClientMock,
 		oauthClientMock,
 		postMeasurementMock,
 		getMeasurementMock,

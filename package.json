@@ -2,8 +2,8 @@
 	"name": "globalping-chat-bots",
 	"private": true,
 	"scripts": {
-		"start": "pnpm --filter slack-bot start",
-		"dev": "pnpm --filter slack-bot start-pretty",
+		"start": "pnpm --filter main start",
+		"dev": "pnpm --filter main start-pretty",
 		"test": "vitest",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix"

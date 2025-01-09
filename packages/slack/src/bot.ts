@@ -1,14 +1,10 @@
 import {
 	AllMiddlewareArgs,
+	InstallationQuery,
 	SlackCommandMiddlewareArgs,
 	SlackEventMiddlewareArgs,
 } from '@slack/bolt';
-import {
-	formatSeconds,
-	getInstallationId,
-	Logger,
-	pluralize,
-} from './utils.js';
+import { channelWelcome, getInstallationId, welcome } from './utils.js';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
 import {
 	formatAPIError,
@@ -22,6 +18,9 @@ import {
 	Measurement,
 	MeasurementCreateResponse,
 	helpCmd,
+	Logger,
+	pluralize,
+	formatSeconds,
 } from '@globalping/bot-utils';
 import type {
 	Block,
@@ -38,6 +37,27 @@ import {
 	OAuthClient,
 } from './auth.js';
 import { formatMeasurementResponse } from './response.js';
+import { DBClient } from './db.js';
+
+const welcomeMap: Record<string, boolean> = {};
+const welcomeMapTimeout = 10_000;
+
+function welcomeMapKey (teamId: string | undefined, user: string): string {
+	return `team:${teamId}-user:${user}`;
+}
+
+function markWelcomeSent (teamId: string | undefined, user: string) {
+	welcomeMap[welcomeMapKey(teamId, user)] = true;
+
+	// delete from the map after timout as the message should be in the slack history by then
+	setTimeout(() => {
+		delete welcomeMap[welcomeMapKey(teamId, user)];
+	}, welcomeMapTimeout);
+}
+
+function welcomeSent (teamId: string | undefined, user: string): boolean {
+	return welcomeMap[welcomeMapKey(teamId, user)];
+}
 
 interface ChannelPayload {
 	installationId: string;
@@ -49,6 +69,7 @@ interface ChannelPayload {
 export class Bot {
 	constructor (
 		private logger: Logger,
+		private dbClient: DBClient,
 		private oauth: OAuthClient,
 		private postMeasurement: (
 			opts: MeasurementCreate,
@@ -56,6 +77,79 @@ export class Bot {
 		) => Promise<MeasurementCreateResponse>,
 		private getMeasurement: (id: string) => Promise<Measurement>,
 	) {}
+
+	async HandleHomeOpened ({
+		context,
+		event,
+		say,
+		client,
+	}: SlackEventMiddlewareArgs<'app_home_opened'> &
+		AllMiddlewareArgs<StringIndexed>) {
+		if (event.tab !== 'messages') {
+			return;
+		}
+
+		const { botToken, teamId } = context;
+		const { user, channel, event_ts: eventTs } = event;
+
+		const logData = { teamId, user, eventTs };
+
+		this.logger.info(logData, 'app home messages tab open');
+
+		if (welcomeSent(teamId, user)) {
+			this.logger.info(logData, 'not sending welcome message, record present');
+
+			return;
+		}
+
+		const history = await client.conversations.history({
+			token: botToken,
+			channel,
+			count: 1, // we only need to check if >=1 messages exist
+		});
+
+		const historyLength = history?.messages?.length;
+
+		if (historyLength !== undefined && historyLength > 0) {
+			this.logger.info(logData, 'not sending welcome message, history present');
+
+			return;
+		}
+
+		// no previous messages
+		markWelcomeSent(teamId, user);
+		this.logger.info(logData, 'sending welcome message');
+
+		await say({
+			text: welcome(user),
+		});
+	}
+
+	async HandleUninstalled ({
+		context,
+	}: SlackEventMiddlewareArgs<'app_uninstalled'> &
+		AllMiddlewareArgs<StringIndexed>) {
+		const ctx = context as InstallationQuery<boolean>;
+		await this.dbClient.deleteInstallation(ctx);
+	}
+
+	async HandleMemberJoinedChannel ({
+		event,
+		context,
+		say,
+	}: SlackEventMiddlewareArgs<'member_joined_channel'> &
+		AllMiddlewareArgs<StringIndexed>) {
+		this.logger.debug(`Member joined channel: ${JSON.stringify(event)}`);
+		this.logger.debug(`Context: ${JSON.stringify(context)}`);
+
+		if (event.user === context.botUserId) {
+			this.logger.debug('Bot joined channel, sending welcome message');
+
+			await say({
+				text: channelWelcome,
+			});
+		}
+	}
 
 	async HandleCommand ({
 		ack,
