@@ -1,8 +1,6 @@
-import { Knex } from 'knex';
+import { KnexClient, Tables } from '@globalping/bot-utils';
 
-import { Tables } from '../src/db.js';
-
-export const up = async (knex: Knex) => {
+export const up = async (knex: KnexClient) => {
 	console.log('Adding token and authorize_session columns to installations table');
 
 	await knex.schema.table(Tables.Installations, (table) => {
@@ -11,7 +9,7 @@ export const up = async (knex: Knex) => {
 	});
 };
 
-export const down = async (knex: Knex) => {
+export const down = async (knex: KnexClient) => {
 	console.log('Dropping token and authorize_session columns from installations table');
 
 	await knex.schema.table(Tables.Installations, (table) => {

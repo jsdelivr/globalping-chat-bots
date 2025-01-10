@@ -1,9 +1,6 @@
-import { Knex } from 'knex';
+import { AuthToken, KnexClient, Tables } from '@globalping/bot-utils';
 
-import { Tables } from '../src/db.js';
-import { AuthToken } from '@globalping/bot-utils';
-
-export const up = async (knex: Knex) => {
+export const up = async (knex: KnexClient) => {
 	console.log('Adding installation_token columns to installations table');
 
 	await knex.schema.table(Tables.Installations, (table) => {
@@ -33,7 +30,7 @@ export const up = async (knex: Knex) => {
 	}
 };
 
-export const down = async (knex: Knex) => {
+export const down = async (knex: KnexClient) => {
 	console.log('Dropping installation_token columns from installations table');
 
 	await knex.schema.table(Tables.Installations, (table) => {

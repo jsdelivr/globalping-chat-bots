@@ -8,9 +8,9 @@ import {
 	IntrospectionResponse,
 	OAuthClient,
 } from '../auth.js';
-import { Config } from '../config.js';
 import { AuthorizeSession, Installation } from '../db.js';
-import { mockInstallationStore, mockLogger, mockSlackClient } from './utils.js';
+import { Config } from '../types.js';
+import { mockDBClient, mockLogger, mockSlackClient } from './utils.js';
 
 describe('Auth', () => {
 	const config: Config = {
@@ -22,13 +22,13 @@ describe('Auth', () => {
 	} as Config;
 
 	const loggerMock = mockLogger();
-	const installationStoreMock = mockInstallationStore();
+	const dbClientMock = mockDBClient();
 	const slackClientMock = mockSlackClient();
 
 	const oauth: OAuthClient = new OAuthClient(
 		config,
 		loggerMock,
-		installationStoreMock,
+		dbClientMock,
 		slackClientMock,
 	);
 
@@ -50,7 +50,7 @@ describe('Auth', () => {
 				thread_ts: threadTs,
 			});
 
-			expect(installationStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
+			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledWith(
 				installationId,
 				{
 					callbackVerifier: expect.any(String),
@@ -90,13 +90,13 @@ describe('Auth', () => {
 				status: 200,
 			} as Response);
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(token);
 
 			const err = await oauth.Logout(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(installationId);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
+			expect(dbClientMock.updateToken).toHaveBeenCalledWith(
 				installationId,
 				null,
 			);
@@ -121,13 +121,13 @@ describe('Auth', () => {
 
 			const fetchSpy = vi.spyOn(global, 'fetch');
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(null);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(null);
 
 			const err = await oauth.Logout(insallationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(insallationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(insallationId);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
+			expect(dbClientMock.updateToken).toHaveBeenCalledTimes(0);
 			expect(fetchSpy).toHaveBeenCalledTimes(0);
 
 			expect(err).toBeNull();
@@ -149,13 +149,13 @@ describe('Auth', () => {
 				status: 200,
 			} as Response);
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(token);
 
 			const err = await oauth.Logout(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(installationId);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
+			expect(dbClientMock.updateToken).toHaveBeenCalledTimes(0);
 
 			expect(fetchSpy).toHaveBeenCalledTimes(0);
 
@@ -185,11 +185,11 @@ describe('Auth', () => {
 				json: async () => expectedIntrospection,
 			} as Response);
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(token);
 
 			const [ introspection, error ] = await oauth.Introspect(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(installationId);
 
 			expect(fetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/introspect`,
@@ -227,11 +227,11 @@ describe('Auth', () => {
 				status: 200,
 			} as Response);
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(token);
 
 			const [ introspection, error ] = await oauth.Introspect(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(installationId);
 
 			expect(fetchSpy).toHaveBeenCalledTimes(0);
 
@@ -268,13 +268,13 @@ describe('Auth', () => {
 				json: async () => expectedToken,
 			} as Response);
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(token);
 
 			const newToken = await oauth.GetToken(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(installationId);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
+			expect(dbClientMock.updateToken).toHaveBeenCalledWith(
 				installationId,
 				expectedToken,
 			);
@@ -315,13 +315,13 @@ describe('Auth', () => {
 				json: async () => expectedError,
 			} as Response);
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(token);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(token);
 
 			const newToken = await oauth.GetToken(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(installationId);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
+			expect(dbClientMock.updateToken).toHaveBeenCalledTimes(0);
 
 			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
 				method: 'POST',
@@ -355,19 +355,16 @@ describe('Auth', () => {
 				json: async () => expectedToken,
 			} as Response);
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(null);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(null);
 
 			const newToken = await oauth.GetToken(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(installationId);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
-				installationId,
-				{
-					...expectedToken,
-					isAnonymous: true,
-				},
-			);
+			expect(dbClientMock.updateToken).toHaveBeenCalledWith(installationId, {
+				...expectedToken,
+				isAnonymous: true,
+			});
 
 			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
 				method: 'POST',
@@ -404,7 +401,7 @@ describe('Auth', () => {
 
 			vi.spyOn(Date, 'now').mockReturnValue(now.getTime() + 1000000);
 
-			vi.spyOn(installationStoreMock, 'getToken').mockResolvedValue(currentToken);
+			vi.spyOn(dbClientMock, 'getToken').mockResolvedValue(currentToken);
 
 			const fetchSpy = vi.spyOn(global, 'fetch');
 			fetchSpy.mockResolvedValueOnce({
@@ -424,15 +421,12 @@ describe('Auth', () => {
 
 			const newToken = await oauth.GetToken(installationId);
 
-			expect(installationStoreMock.getToken).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getToken).toHaveBeenCalledWith(installationId);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
-				installationId,
-				{
-					...expectedToken,
-					isAnonymous: true,
-				},
-			);
+			expect(dbClientMock.updateToken).toHaveBeenCalledWith(installationId, {
+				...expectedToken,
+				isAnonymous: true,
+			});
 
 			expect(fetchSpy).toHaveBeenCalledTimes(2);
 
@@ -488,7 +482,7 @@ describe('Auth', () => {
 
 			const errorMsg = await oauth.TryToRefreshToken(installationId, token);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
+			expect(dbClientMock.updateToken).toHaveBeenCalledWith(
 				installationId,
 				expectedToken,
 			);
@@ -547,7 +541,7 @@ describe('Auth', () => {
 			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
 
 			vi.spyOn(
-				installationStoreMock,
+				dbClientMock,
 				'getInstallationForAuthorization',
 			).mockResolvedValue({
 				token,
@@ -571,14 +565,14 @@ describe('Auth', () => {
 
 			await oauth.OnCallback(req, res);
 
-			expect(installationStoreMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
 
-			expect(installationStoreMock.updateAuthorizeSession).toHaveBeenCalledWith(
+			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledWith(
 				installationId,
 				null,
 			);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledWith(
+			expect(dbClientMock.updateToken).toHaveBeenCalledWith(
 				installationId,
 				newToken,
 			);
@@ -651,7 +645,7 @@ describe('Auth', () => {
 			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
 
 			vi.spyOn(
-				installationStoreMock,
+				dbClientMock,
 				'getInstallationForAuthorization',
 			).mockResolvedValue({
 				token,
@@ -674,11 +668,11 @@ describe('Auth', () => {
 
 			await oauth.OnCallback(req, res);
 
-			expect(installationStoreMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
+			expect(dbClientMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
 
-			expect(installationStoreMock.updateAuthorizeSession).toHaveBeenCalledTimes(0);
+			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledTimes(0);
 
-			expect(installationStoreMock.updateToken).toHaveBeenCalledTimes(0);
+			expect(dbClientMock.updateToken).toHaveBeenCalledTimes(0);
 
 			expect(fetchSpy).toHaveBeenCalledTimes(0);
 

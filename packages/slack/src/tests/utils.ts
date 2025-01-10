@@ -1,10 +1,10 @@
 import { vi } from 'vitest';
 
-import { InstallationStore } from '../db.js';
-import { Logger, SlackClient } from '../utils.js';
+import { SlackClient } from '../types.js';
 import { OAuthClient } from '../auth.js';
-import probeData from '../../../bot-utils/tests/mocks/probedata.json';
-import { Measurement } from '@globalping/bot-utils';
+import probeData from '@globalping/bot-utils/tests/mocks/probedata.json';
+import { Logger, Measurement } from '@globalping/bot-utils';
+import { DBClient } from '../db.js';
 
 export const mockLogger = (): Logger => ({
 	info: vi.fn(),
@@ -25,7 +25,7 @@ export const mockSlackClient = (): SlackClient => ({
 	},
 }) as any;
 
-export const mockInstallationStore = (): InstallationStore => ({
+export const mockDBClient = (): DBClient => ({
 	getToken: vi.fn(),
 	updateToken: vi.fn(),
 	updateAuthorizeSession: vi.fn(),

@@ -24,6 +24,7 @@ services:
       - /app/packages/discord/node_modules
       - /app/packages/github/node_modules
       - /app/packages/slack/node_modules
+      - /app/packages/main/node_modules
     env_file:
       - .env
     environment:

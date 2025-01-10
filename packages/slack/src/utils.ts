@@ -1,15 +1,3 @@
-/* eslint-disable no-await-in-loop */
-import { loggerInit } from '@globalping/bot-utils';
-import type { WebClient } from '@slack/web-api';
-
-import { config } from './config.js';
-
-export const logger = loggerInit('slack', config.logLevel);
-
-export type Logger = typeof logger;
-
-export type SlackClient = WebClient;
-
 export const welcome = (id: string) => `Hi <@${id}>! :wave:\nI help make running networking commands easy. To learn more about me, try running \`/globalping help!\`\n\n:zap: Here are some quick example commands to help you get started:
 \`/globalping ping jsdelivr.com from new york --packets 4\`
 \`/globalping traceroute jsdelivr.com from united kingdom --limit 2\`
@@ -34,28 +22,4 @@ export const getInstallationId = (p: {
 	}
 
 	return p.teamId;
-};
-
-export const pluralize = (count: number, singular: string): string => {
-	if (count === 1) {
-		return `${count} ${singular}`;
-	}
-
-	return `${count} ${singular}s`;
-};
-
-export const formatSeconds = (seconds: number): string => {
-	if (seconds < 60) {
-		return pluralize(seconds, 'second');
-	}
-
-	if (seconds < 3600) {
-		return pluralize(Math.round(seconds / 60), 'minute');
-	}
-
-	if (seconds < 86400) {
-		return pluralize(Math.round(seconds / 3600), 'hour');
-	}
-
-	return pluralize(Math.round(seconds / 86400), 'day');
 };
