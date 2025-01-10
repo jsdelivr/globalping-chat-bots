@@ -1,4 +1,4 @@
-import { loggerInit, initKnexClient } from '@globalping/bot-utils';
+import { scopedLogger, initKnexClient } from '@globalping/bot-utils';
 import { initBot } from 'github-bot';
 import { initApp, CustomRoute } from 'slack-bot';
 import { config } from './config.js';
@@ -7,9 +7,9 @@ import { faviconHandler, homeHandler, robotsHandler } from './handlers.js';
 
 const knex = initKnexClient(config, './migrations');
 
-const logger = loggerInit('main', config.logLevel);
+const logger = scopedLogger('main');
 
-const githubBot = initBot(config, logger);
+const githubBot = initBot(config, scopedLogger('github'));
 
 const routes: CustomRoute[] = [
 	{

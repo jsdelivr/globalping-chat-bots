@@ -54,7 +54,7 @@ export class Bot {
 	async HandleRequest (req: IncomingMessage, res: ServerResponse) {
 		const reqId = uuidv4();
 		const logData = { reqId };
-		this.logger.info(logData, '/github-bot request');
+		this.logger.info('Request received.', logData);
 
 		if (req.headers['api-key'] !== this.config.githubBotApiKey) {
 			res.writeHead(401);
@@ -70,13 +70,7 @@ export class Bot {
 			ghRequest = JSON.parse(rawBody.toString());
 		} catch (error) {
 			const e = error as Error;
-			this.logger.error(
-				{
-					errorMsg: `Failed to parse the request body: ${e.message}`,
-					...logData,
-				},
-				'/github-bot failed',
-			);
+			this.logger.error('Failed to parse the request body.', e, logData);
 
 			res.writeHead(400);
 			res.write(JSON.stringify({ err: e.message }));
@@ -85,7 +79,7 @@ export class Bot {
 		}
 
 		try {
-			this.logger.info({ ghRequest, ...logData }, '/github-bot processing');
+			this.logger.info('Processing.', { ghRequest, ...logData });
 
 			const e = await this.handleMention(reqId, ghRequest);
 
@@ -100,13 +94,10 @@ export class Bot {
 			res.write(JSON.stringify({}));
 			res.end();
 
-			this.logger.info(logData, '/github-bot response - OK');
+			this.logger.info('OK', logData);
 		} catch (error) {
 			const e = error as Error;
-			this.logger.error(
-				{ errorMsg: `Request handling failed: ${e.message}`, ...logData },
-				'/github-bot failed',
-			);
+			this.logger.error('Request handling failed.', e, logData);
 
 			res.writeHead(500);
 			res.write(JSON.stringify({ err: e.message }));
@@ -127,7 +118,7 @@ export class Bot {
 		if (parts.length === 0) {
 			const err = new Error('Not a valid notification email');
 			// not a valid notification email, do nothing
-			this.logger.info(logData, `/github-bot - ${err.message} - Skipping`);
+			this.logger.info(`HandleMention: ${err.message} - skipping.`, logData);
 			return err;
 		}
 
@@ -136,7 +127,7 @@ export class Bot {
 		if (!isMentionNotification(footer)) {
 			const err = new Error('Not a mention notification');
 			// not a mention, do nothing
-			this.logger.info(logData, `/github-bot - ${err.message} - Skipping`);
+			this.logger.info(`HandleMention: ${err.message} - skipping.`, logData);
 			return err;
 		}
 
@@ -148,24 +139,21 @@ export class Bot {
 		if (commandText === undefined) {
 			const err = new Error('Mention not found');
 			// Mention not found, do nothing
-			this.logger.info(logData, `/github-bot - ${err.message} - Skipping`);
+			this.logger.info(`HandleMention: ${err.message} - skipping.`, logData);
 			return err;
 		}
 
-		this.logger.info({ commandText, ...logData }, '/github-bot - Command text');
+		this.logger.info(`HandleMention: command text.`, { commandText, ...logData });
 		commandText = await cleanUpCommandText(commandText);
 
-		this.logger.info(
-			{ commandText, ...logData },
-			'/github-bot - Cleaned up command text',
-		);
+		this.logger.info(`HandleMention: clean up command text.`, { commandText, ...logData });
 
 		const githubTarget = parseFooter(footer);
 
 		if (githubTarget === undefined) {
 			const err = new Error('Invalid footer');
 			// invalid footer, do nothing
-			this.logger.info(logData, `/github-bot - ${err.message} - Skipping`);
+			this.logger.info(`HandleMention: ${err.message} - skipping.`, logData);
 			return err;
 		}
 
@@ -173,12 +161,7 @@ export class Bot {
 			await this.processCommand(reqId, githubTarget, commandText);
 		} catch (error) {
 			const err = error as Error;
-			// invalid footer, do nothing
-			this.logger.info(
-				logData,
-				`/github-bot - ${err.message} - Processing failed`,
-			);
-
+			this.logger.info(`HandleMention: ${err.message} - processing failed.`, logData);
 			return err;
 		}
 
@@ -198,10 +181,7 @@ export class Bot {
 			flags = argsToFlags(cmdText);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error(
-				{ errorMsg, ...logData },
-				'/github-bot - argsToFlags failed',
-			);
+			this.logger.error(`ProcessCommand: argsToFlags failed.`, { errorMsg, ...logData });
 
 			await this.postComment(
 				this.githubClient,
@@ -235,10 +215,7 @@ export class Bot {
 			);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error(
-				{ errorMsg, ...logData },
-				'/github-bot - postMeasurement failed',
-			);
+			this.logger.error(`ProcessCommand: postMeasurement failed.`, { errorMsg, ...logData });
 
 			await this.postComment(
 				this.githubClient,
@@ -255,10 +232,7 @@ export class Bot {
 			res = await this.getMeasurement(measurementResponse.id);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error(
-				{ errorMsg, ...logData },
-				'/github-bot - getMeasurement failed',
-			);
+			this.logger.error(`ProcessCommand: getMeasurement failed.`, { errorMsg, ...logData });
 
 			await this.postComment(
 				this.githubClient,

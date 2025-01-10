@@ -7,7 +7,7 @@ import {
 	tracerouteHelpTexts,
 	httpHelpTexts,
 	mtrHelpTexts,
-	loggerInit,
+	scopedLogger,
 	Measurement,
 	throwArgError,
 	generalHelpTexts,
@@ -17,7 +17,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-export const logger = loggerInit('discord', process.env.LOG_LEVEL ?? 'info');
+export const logger = scopedLogger('discord');
 
 export const getFlags = (interaction: ChatInputCommandInteraction): Flags => {
 	const cmd = interaction.options.getSubcommand();

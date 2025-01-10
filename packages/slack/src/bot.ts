@@ -94,10 +94,10 @@ export class Bot {
 
 		const logData = { teamId, user, eventTs };
 
-		this.logger.info(logData, 'app home messages tab open');
+		this.logger.info('App home messages tab open.', logData);
 
 		if (welcomeSent(teamId, user)) {
-			this.logger.info(logData, 'not sending welcome message, record present');
+			this.logger.info('Not sending welcome message, record present.', logData);
 
 			return;
 		}
@@ -111,14 +111,14 @@ export class Bot {
 		const historyLength = history?.messages?.length;
 
 		if (historyLength !== undefined && historyLength > 0) {
-			this.logger.info(logData, 'not sending welcome message, history present');
+			this.logger.info('Not sending welcome message, history present.', logData);
 
 			return;
 		}
 
 		// no previous messages
 		markWelcomeSent(teamId, user);
-		this.logger.info(logData, 'sending welcome message');
+		this.logger.info('Sending welcome message.', logData);
 
 		await say({
 			text: welcome(user),
@@ -166,7 +166,7 @@ export class Bot {
 			userName: payload.user_name,
 			triggerId: payload.trigger_id,
 		};
-		this.logger.info(logData, 'HandleCommand: request');
+		this.logger.info('HandleCommand: request', logData);
 
 		try {
 			// Acknowledge command request
@@ -174,8 +174,9 @@ export class Bot {
 		} catch (error) {
 			const err = error as Error;
 			this.logger.info(
-				{ errorMsg: err.message, ...logData },
 				'HandleCommand: ack failed',
+				err,
+				logData,
 			);
 
 			await respond({
@@ -196,8 +197,9 @@ export class Bot {
 		} catch (error) {
 			const err = error as Error;
 			this.logger.info(
-				{ errorMsg: err.message, ...logData },
 				'HandleCommand: channel info not available',
+				err,
+				logData,
 			);
 		}
 
@@ -218,8 +220,8 @@ export class Bot {
 						&& channel_id !== conversation.channel.id
 					) {
 						this.logger.error(
-							{ errorMsg: 'request in dm', ...logData },
 							'HandleCommand: response - dm',
+							{ errorMsg: 'request in dm', ...logData },
 						);
 
 						await respond({
@@ -237,8 +239,8 @@ export class Bot {
 
 				if (channel_name.startsWith('mpdm-')) {
 					this.logger.error(
-						{ errorMsg: 'request in mpdm', ...logData },
 						'HandleCommand: response - mpdm',
+						{ errorMsg: 'request in mpdm', ...logData },
 					);
 
 					await respond({
@@ -253,8 +255,8 @@ export class Bot {
 
 				// If not DM, try checking the properties of the channel
 				this.logger.error(
-					{ errorMsg: 'asked for invite to channel', ...logData },
 					'HandleCommand: channel invite needed',
+					{ errorMsg: 'asked for invite to channel', ...logData },
 				);
 
 				await respond('Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.');
@@ -282,7 +284,7 @@ export class Bot {
 			await this.processCommand(client, channelPayload, commandText);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error({ errorMsg, ...logData }, 'HandleCommand: failed');
+			this.logger.error('HandleCommand: failed', error, { errorMsg, ...logData });
 
 			await respond({
 				text: `Failed to process command \`${text}\`.\n${formatAPIError(errorMsg)}`,
@@ -355,12 +357,12 @@ export class Bot {
 				thread_ts: threadTs,
 				installationId,
 			};
-			this.logger.info(logData, '@globalping processing starting');
+			this.logger.info('@globalping processing starting', logData);
 			await this.processCommand(client, channelPayload, fullText);
-			this.logger.info(logData, '@globalping response - OK');
+			this.logger.info('@globalping response - OK', logData);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error({ errorMsg, ...logData }, '@globalping failed');
+			this.logger.error('@globalping failed', error, { errorMsg, ...logData });
 
 			await client.chat.postMessage({
 				channel: channelId,

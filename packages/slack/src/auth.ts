@@ -317,7 +317,7 @@ export class OAuthClient {
 
 		if (res.status !== 200) {
 			const err = (await res.json()) as AuthorizeError;
-			this.logger.error(err, 'Failed to get anonymous token');
+			this.logger.error('Failed to get anonymous token.', err);
 			return [ null, err ];
 		}
 
@@ -369,7 +369,7 @@ export class OAuthClient {
 		const state = url.searchParams.get('state');
 
 		if (!state) {
-			this.logger.error(callbackError, '/oauth/callback missing state');
+			this.logger.error('/oauth/callback missing state', { callbackError });
 
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
@@ -403,7 +403,7 @@ export class OAuthClient {
 		}
 
 		if (!session) {
-			this.logger.error({ installationId }, '/oauth/callback missing session');
+			this.logger.error('/oauth/callback missing session', { installationId });
 
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
@@ -415,10 +415,10 @@ export class OAuthClient {
 
 		if (callbackVerifier !== session.callbackVerifier) {
 			this.logger.error(
+				'/oauth/callback invalid verifier',
 				{
 					installationId,
 				},
-				'/oauth/callback invalid verifier',
 			);
 
 			res.writeHead(302, {
@@ -433,7 +433,7 @@ export class OAuthClient {
 			// Delete session
 			await this.installationStore.updateAuthorizeSession(installationId, null);
 		} catch (error) {
-			this.logger.error(error, '/oauth/callback failed to delete session');
+			this.logger.error('/oauth/callback failed to delete session', error);
 		}
 
 		if (callbackError || !code) {
@@ -446,17 +446,17 @@ export class OAuthClient {
 					thread_ts: session.threadTs,
 				});
 			} catch (error) {
-				this.logger.error(error, '/oauth/callback failed to post ephemeral');
+				this.logger.error('/oauth/callback failed to post ephemeral', error);
 			}
 
 			this.logger.error(
+				'/oauth/callback failed',
 				{
 					error: callbackError,
 					errorDescription,
 					code,
 					installationId,
 				},
-				'/oauth/callback failed',
 			);
 
 			res.writeHead(302, {
@@ -482,11 +482,11 @@ export class OAuthClient {
 					await this.revokeToken(oldToken.refresh_token);
 				} catch (error) {
 					this.logger.error(
+						'/oauth/callback failed to revoke token',
 						{
 							installationId,
 							error,
 						},
-						'/oauth/callback failed to revoke token',
 					);
 				}
 			}
@@ -500,7 +500,7 @@ export class OAuthClient {
 		let message = '';
 
 		if (exchangeError) {
-			this.logger.error(exchangeError, '/oauth/callback failed');
+			this.logger.error('/oauth/callback failed', exchangeError);
 			message = `Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`;
 		} else {
 			message = 'Success! You are now authenticated.';
@@ -515,7 +515,7 @@ export class OAuthClient {
 				thread_ts: session.threadTs,
 			});
 		} catch (error) {
-			this.logger.error(error, '/oauth/callback failed to post ephemeral');
+			this.logger.error('/oauth/callback failed to post ephemeral', error);
 		}
 
 		res.writeHead(302, {
