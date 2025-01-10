@@ -29,6 +29,16 @@ export function initApp (
 
 	const bot = new Bot(logger, db, oauth, postMeasurement, getMeasurement);
 
+	const logMessages = (log: Logger['info'], messages: unknown[]) => {
+		for (const message of messages) {
+			if (typeof message === 'string') {
+				log(message);
+			} else {
+				log('Context:', message);
+			}
+		}
+	};
+
 	const baseAppConfig: AppOptions = {
 		signingSecret: config.slackSigningSecret,
 		clientId: config.slackClientId,
@@ -52,18 +62,16 @@ export function initApp (
 		logLevel: LogLevel.INFO,
 		logger: {
 			debug: (...msgs: unknown[]) => {
-				logger.debug('', msgs);
+				logMessages(logger.debug.bind(logger), msgs);
 			},
 			info: (...msgs: unknown[]) => {
-				logger.info('', msgs);
+				logMessages(logger.info.bind(logger), msgs);
 			},
 			warn: (...msgs: unknown[]) => {
-				logger.warn('', msgs);
+				logMessages(logger.warn.bind(logger), msgs);
 			},
 			error: (...msgs: unknown[]) => {
-				for (const msg of msgs) {
-					logger.error('', msg);
-				}
+				logMessages(logger.error.bind(logger), msgs);
 			},
 			setLevel: () => undefined,
 			getLevel: () => Logger.levelsByValue[logger.writers[0]!.level] as LogLevel,
