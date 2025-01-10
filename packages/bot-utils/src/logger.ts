@@ -1,8 +1,32 @@
-import pino, { type SerializedError } from 'pino';
+import process from 'node:process';
+import ElasticWriter from 'h-logger2-elastic';
+import { ConsoleWriter, Logger } from 'h-logger2';
+import { Client as ElasticSearch } from '@elastic/elasticsearch';
+// eslint-disable-next-line n/no-missing-import
+import type { LogLevelValue } from 'h-logger2/src/types.js';
 
-export const loggerInit = (name: string, logLevel?: string) => pino({ name, level: logLevel ?? 'info' }, pino.destination({ sync: true }));
+let esClient: ElasticSearch | undefined;
 
-export type { Logger } from 'pino';
+// istanbul ignore next
+if (process.env['ELASTIC_SEARCH_URL']) {
+	esClient = new ElasticSearch({
+		node: process.env['ELASTIC_SEARCH_URL'],
+	});
+}
 
-type ErrorParse = (err: Error) => SerializedError;
-export const errorParse: ErrorParse = (err: Error) => pino.stdSerializers.err(err);
+const loggerOptions = {
+	inspectOptions: { breakLength: 120 },
+};
+
+const logger = new Logger(
+	'globalping-chat-bots',
+	esClient ? [
+		new ConsoleWriter(Number(process.env['LOG_LEVEL']) as LogLevelValue || Logger.levels.info, loggerOptions),
+		new ElasticWriter(Number(process.env['LOG_LEVEL']) as LogLevelValue || Logger.levels.info, { esClient }),
+	] : [
+		new ConsoleWriter(Number(process.env['LOG_LEVEL']) as LogLevelValue || Logger.levels.trace, loggerOptions),
+	],
+);
+
+export const scopedLogger = (scope: string, parent: Logger = logger): Logger => parent.scope(scope);
+export { Logger } from 'h-logger2';

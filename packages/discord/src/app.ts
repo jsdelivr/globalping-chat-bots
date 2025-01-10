@@ -27,7 +27,7 @@ const client = new Client({ intents: [ GatewayIntentBits.Guilds ] });
 client.on('ready', () => logger.info('Discord bot is online'));
 client.on('debug', m => logger.debug(m));
 client.on('warn', m => logger.warn(m));
-client.on('error', m => logger.error(m));
+client.on('error', m => logger.error('Error in the Discord client:', m));
 
 client.on('interactionCreate', async (interaction) => {
 	if (!interaction.isChatInputCommand()) {
@@ -42,7 +42,7 @@ client.on('interactionCreate', async (interaction) => {
 
 		try {
 			const flags = getFlags(interaction);
-			logger.debug(`Flags received: ${JSON.stringify(flags)}`);
+			logger.debug(`Flags received`, { flags });
 
 			if (flags.cmd === 'help') {
 				if (typeof flags.help !== 'string') {
@@ -57,7 +57,7 @@ client.on('interactionCreate', async (interaction) => {
 
 				const measurementResponse = await postMeasurement(buildPostMeasurements(flags));
 				const res = await getMeasurement(measurementResponse.id);
-				logger.debug(`Get response: ${JSON.stringify(res)}`);
+				logger.debug(`Get response`, { res });
 
 				await interaction.editReply(`${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`);
 

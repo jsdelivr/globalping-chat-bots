@@ -24,7 +24,7 @@ export class DBClient {
 	) {}
 
 	async storeInstallation (installation: Installation) {
-		this.logger.debug({ installation }, 'Storing installation');
+		this.logger.debug('Storing installation', { installation });
 
 		try {
 			// Bolt will pass your handler an installation object
@@ -50,16 +50,16 @@ export class DBClient {
 				.onConflict('id')
 				.merge();
 
-			this.logger.debug({ id }, 'Installation set');
+			this.logger.debug('Installation set', { id });
 		} catch (error) {
 			const err = new Error(`Failed to set installation: ${error}`);
-			this.logger.error(err);
+			this.logger.error(err.message, error);
 			throw err;
 		}
 	}
 
 	async fetchInstallation (installQuery: InstallationQuery<boolean>) {
-		this.logger.debug({ installQuery }, 'Fetching installation');
+		this.logger.debug('Fetching installation', { installQuery });
 
 		try {
 			// Bolt will pass your handler an installQuery object
@@ -76,8 +76,8 @@ export class DBClient {
 			}
 
 			this.logger.debug(
-				{ installation: res.installation },
 				'Installation retrieved',
+				{ installation: res.installation },
 			);
 
 			if (!res.installation) {
@@ -87,13 +87,13 @@ export class DBClient {
 			return JSON.parse(res.installation);
 		} catch (error) {
 			const err = new Error(`Failed to fetch installation: ${error}`);
-			this.logger.error(err);
+			this.logger.error(err.message, error);
 			throw err;
 		}
 	}
 
 	async deleteInstallation (installQuery: InstallationQuery<boolean>) {
-		this.logger.debug({ installQuery }, 'Deleting installation');
+		this.logger.debug('Deleting installation', { installQuery });
 
 		try {
 			// Bolt will pass your handler  an installQuery object
@@ -103,10 +103,10 @@ export class DBClient {
 				installation: null,
 			});
 
-			this.logger.debug({ id }, 'Installation deleted');
+			this.logger.debug('Installation deleted', { id });
 		} catch (error) {
 			const err = new Error(`Failed to delete installation: ${error}`);
-			this.logger.error(err);
+			this.logger.error(err.message, error);
 			throw err;
 		}
 	}
@@ -137,7 +137,7 @@ export class DBClient {
 			return null;
 		} catch (error) {
 			const err = new Error(`Failed to get token: ${error}`);
-			this.logger.error(err);
+			this.logger.error(err.message, error);
 			throw err;
 		}
 	}
@@ -164,10 +164,10 @@ export class DBClient {
 				.where('id', id)
 				.update(update as never);
 
-			this.logger.debug({ id }, 'Token set');
+			this.logger.debug('Token set', { id });
 		} catch (error) {
 			const err = new Error(`Failed to set token: ${error}`);
-			this.logger.error(err);
+			this.logger.error(err.message, error);
 			throw err;
 		}
 	}
@@ -187,7 +187,7 @@ export class DBClient {
 				});
 		} catch (error) {
 			const err = new Error(`Failed to set authorize session: ${error}`);
-			this.logger.error(err);
+			this.logger.error(err.message, error);
 			throw err;
 		}
 	}
@@ -223,7 +223,7 @@ export class DBClient {
 			};
 		} catch (error) {
 			const err = new Error(`Failed to get authorize session: ${error}`);
-			this.logger.error(err);
+			this.logger.error(err.message, error);
 			throw err;
 		}
 	}

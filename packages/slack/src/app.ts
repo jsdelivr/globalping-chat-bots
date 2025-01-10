@@ -1,9 +1,8 @@
 import {
-	errorParse,
 	getMeasurement,
 	KnexClient,
-	loggerInit,
-	postMeasurement,
+	scopedLogger,
+	postMeasurement, Logger,
 } from '@globalping/bot-utils';
 import { App, AppOptions, CustomRoute, LogLevel } from '@slack/bolt';
 
@@ -17,7 +16,7 @@ export function initApp (
 	knex: KnexClient,
 	routes: CustomRoute[],
 ): App {
-	const logger = loggerInit('slack', config.logLevel);
+	const logger = scopedLogger('slack');
 
 	const db = new DBClient(knex, logger);
 
@@ -53,21 +52,21 @@ export function initApp (
 		logLevel: LogLevel.INFO,
 		logger: {
 			debug: (...msgs: unknown[]) => {
-				logger.debug(JSON.stringify(msgs));
+				logger.debug('', msgs);
 			},
 			info: (...msgs: unknown[]) => {
-				logger.info(JSON.stringify(msgs));
+				logger.info('', msgs);
 			},
 			warn: (...msgs: unknown[]) => {
-				logger.warn(JSON.stringify(msgs));
+				logger.warn('', msgs);
 			},
 			error: (...msgs: unknown[]) => {
 				for (const msg of msgs) {
-					logger.error(JSON.stringify(errorParse(msg as Error)));
+					logger.error('', msg);
 				}
 			},
 			setLevel: () => undefined,
-			getLevel: () => logger.level as LogLevel,
+			getLevel: () => Logger.levelsByValue[logger.writers[0]!.level] as LogLevel,
 			setName: () => undefined,
 		},
 		installationStore: db,
