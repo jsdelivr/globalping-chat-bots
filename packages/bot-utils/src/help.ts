@@ -1,27 +1,6 @@
-import { AuthSubcommand } from './flags.js';
-
-export const generalHelpTexts = {
-	preamble: `Globalping is a platform that allows anyone to run networking commands such as ping, traceroute, dig and mtr on probes distributed all around the world.
-The Globalping bot allows you to interact with the API in a simple and human-friendly way to debug networking issues like anycast routing and script automated tests and benchmarks.`,
-	usage: (rootCommand: string) => `${rootCommand} [command]`,
-	measurementCommands: `  dns           Resolve a DNS record similarly to dig
-  http          Perform a HEAD or GET request to a host
-  mtr           Run an MTR test, similar to traceroute
-  ping          Run a ping test
-  traceroute    Run a traceroute test`,
-	additionalCommands: `  auth          Authenticate with the Globalping API
-  limits        Show the current rate limits
-  help          Help about any command`,
-	flags: `  -F, --from string   Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
-  -h, --help          help for globalping
-      --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
-  -L, --limit int     Limit the number of probes to use (default 1)
-      --share         Prints a link at the end the results, allowing to vizualize the results online (default false)
-
-  Use "globalping [command] --help" for more information about a command.`,
-};
-
 export const dnsHelpTexts = {
+	name: 'dns',
+	short: 'Resolve a DNS record similarly to dig',
 	preamble: `Performs DNS lookups and displays the answers that are returned from the name server(s) that were queried.
 The default nameserver depends on the probe and is defined by the user's local settings or DHCP.
 This command provides 2 different ways to provide the dns resolver:
@@ -71,6 +50,8 @@ dns jsdelivr.com from aws+montreal --latency
 };
 
 export const httpHelpTexts = {
+	name: 'http',
+	short: 'Perform a HEAD or GET request to a host',
 	preamble: `The http command sends an HTTP request to a host and can perform HEAD or GET operations. GET is limited to 10KB responses, everything above will be cut by the API. Detailed performance stats as available for every request.
 The tool supports 2 formats for this command:
 When the full url is supplied, the tool automatically parses the scheme, host, port, domain, path and query. For example:
@@ -140,6 +121,8 @@ http google.com from 123 --resolver 1.1.1.1
 };
 
 export const mtrHelpTexts = {
+	name: 'mtr',
+	short: 'Run an MTR test, similar to traceroute',
 	preamble:
 		'mtr combines the functionality of the traceroute and ping programs in a single network diagnostic tool.',
 	examples: `MTR google.com from 2 probes in New York
@@ -170,6 +153,8 @@ mtr jsdelivr.com from aws+montreal --protocol tcp --port 453
 };
 
 export const pingHelpTexts = {
+	name: 'ping',
+	short: 'Run a ping test',
 	preamble:
 		'The ping command allows sending ping requests to a target. Often used to test the network latency and stability.',
 	examples: `Ping google.com from 2 probes in New York
@@ -198,6 +183,8 @@ ping jsdelivr.com from aws+montreal --latency
 };
 
 export const tracerouteHelpTexts = {
+	name: 'traceroute',
+	short: 'Run a traceroute test',
 	preamble:
 		'traceroute tracks the route packets take from an IP network on their way to a given host.',
 	examples: `Traceroute google.com from 2 probes in New York
@@ -230,104 +217,97 @@ traceroute jsdelivr.com from Paris --port 453
       --share             Prints a link at the end the results, allowing to vizualize the results online (default false)`,
 };
 
-export const authHelpTexts = {
-	preamble: `Authenticate with the Globalping API for higher measurements limits.
-
-*Available Commands:*
-\`\`\`
-  login       Log in to your Globalping account
-  logout      Log out from your Globalping account
-  status      Check the current authentication status
-\`\`\``,
-	usage: (rootCommand: string) => `${rootCommand} auth [command]`,
-	flags: '  -h, --help   Help for auth',
-};
-
 export const authLoginHelpTexts = {
+	name: 'login',
+	short: 'Log in to your Globalping account',
 	preamble: 'Log in to your Globalping account for higher measurements limits.',
 	usage: (rootCommand: string) => `${rootCommand} auth login  [flags]`,
 	flags: '  -h, --help         Help for login',
 };
 
-export const authStatusHelpTexts = {
-	preamble: 'Check the current authentication status.',
-	usage: (rootCommand: string) => `${rootCommand} auth status`,
-	flags: '  -h, --help   Help for status',
-};
-
 export const authLogoutHelpTexts = {
+	name: 'logout',
+	short: 'Log out from your Globalping account',
 	preamble: 'Log out from your Globalping account.',
 	usage: (rootCommand: string) => `${rootCommand} auth logout`,
 	flags: '  -h, --help   Help for logout',
 };
 
+export const authStatusHelpTexts = {
+	name: 'status',
+	short: 'Check the current authentication status',
+	preamble: 'Check the current authentication status.',
+	usage: (rootCommand: string) => `${rootCommand} auth status`,
+	flags: '  -h, --help   Help for status',
+};
+
+export const authHelpTexts = {
+	name: 'auth',
+	short: 'Authenticate with the Globalping API',
+	preamble: `Authenticate with the Globalping API for higher measurements limits.`,
+	commands: [ authLoginHelpTexts, authLogoutHelpTexts, authStatusHelpTexts ],
+	usage: (rootCommand: string) => `${rootCommand} auth [command]`,
+	flags: '  -h, --help   Help for auth',
+};
+
 export const limitsHelpTexts = {
+	name: 'limits',
+	short: 'Show the current rate limits',
 	preamble: `Show the current rate limits.`,
 	usage: (rootCommand: string) => `${rootCommand} limits`,
 	flags: '  -h, --help   Help for limits',
 };
 
-export const helpCmd = (
-	cmd: string,
-	target: string,
-	platform: string,
-	githubHandle?: string,
-): string => {
-	let boldSeparator = '';
-	let rootCommand = '';
-
-	if (platform === 'github') {
-		boldSeparator = '**';
-		rootCommand = `@${githubHandle}`;
-	} else {
-		boldSeparator = '*';
-		rootCommand = '/globalping';
-	}
-
-	switch (cmd) {
-		case 'dns':
-			return dnsHelp(boldSeparator, rootCommand);
-		case 'http':
-			return httpHelp(boldSeparator, rootCommand);
-		case 'mtr':
-			return mtrHelp(boldSeparator, rootCommand);
-		case 'ping':
-			return pingHelp(boldSeparator, rootCommand);
-		case 'traceroute':
-			return tracerouteHelp(boldSeparator, rootCommand);
-
-		case 'auth':
-			switch (target) {
-				case AuthSubcommand.Login:
-					return authLoginHelp(boldSeparator, rootCommand);
-				case AuthSubcommand.Logout:
-					return authLogoutHelp(boldSeparator, rootCommand);
-				case AuthSubcommand.Status:
-					return authStatusHelp(boldSeparator, rootCommand);
-				default:
-					return authHelp(boldSeparator, rootCommand);
-			}
-
-		case 'limits':
-			return limitsHelp(boldSeparator, rootCommand);
-
-		case undefined:
-		case '':
-		case 'help':
-			if (!target) {
-				return generalHelp(boldSeparator, rootCommand);
-			}
-
-			// handle case: /globalping help <subcommand>
-			return helpCmd(target, target, platform);
-
-		default:
-			return `Unknown command! Please call \`${rootCommand} help\` for a list of commands.`;
-	}
+export const helpHelpTexts = {
+	name: 'help',
+	short: 'Help about any command',
 };
 
-export function generalHelp (boldSeparator: string, rootCommand: string) {
-	return `${generalHelpTexts.preamble}
+export const generalHelpTexts = {
+	preamble: `Globalping is a platform that allows anyone to run networking commands such as ping, traceroute, dig and mtr on probes distributed all around the world.
+The Globalping bot allows you to interact with the API in a simple and human-friendly way to debug networking issues like anycast routing and script automated tests and benchmarks.`,
+	usage: (rootCommand: string) => `${rootCommand} [command]`,
+	commands: [
+		dnsHelpTexts,
+		httpHelpTexts,
+		mtrHelpTexts,
+		pingHelpTexts,
+		tracerouteHelpTexts,
+	],
+	additionalCommands: [ authHelpTexts, limitsHelpTexts, helpHelpTexts ],
+	flags: `  -F, --from string   Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world"). (default "world")
+  -h, --help          help for globalping
+      --latency       Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
+  -L, --limit int     Limit the number of probes to use (default 1)
+      --share         Prints a link at the end the results, allowing to vizualize the results online (default false)
+
+  Use "globalping [command] --help" for more information about a command.`,
+};
+
+export function generateHelp (
+	boldSeparator: string,
+	rootCommand: string,
+	ignoreCmds?: Set<string>,
+) {
+	let maxCmdLength = generalHelpTexts.commands.reduce(
+		(max, cmd) => Math.max(max, cmd.name.length),
+		0,
+	);
+	generalHelpTexts.additionalCommands.reduce(
+		(max, cmd) => Math.max(max, cmd.name.length),
+		maxCmdLength,
+	);
+
+	maxCmdLength += 4;
+
+	let maxAuthCmdLength = authHelpTexts.commands.reduce(
+		(max, cmd) => Math.max(max, cmd.name.length),
+		0,
+	);
+	maxAuthCmdLength += 4;
+
+	return {
+		general: `${generalHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 \`\`\`
@@ -336,22 +316,31 @@ ${generalHelpTexts.usage(rootCommand)}
 
 ${boldSeparator}Measurement Commands${boldSeparator}:
 \`\`\`
-${generalHelpTexts.measurementCommands}
-\`\`\`
+${generalHelpTexts.commands.reduce((s, cmd) => {
+		if (ignoreCmds?.has(cmd.name)) {
+			return s;
+		}
+
+		const spaces = ' '.repeat(maxCmdLength - cmd.name.length);
+		return s + `  ${cmd.name}${spaces}${cmd.short}\n`;
+	}, '')}\`\`\`
 
 ${boldSeparator}Additional Commands${boldSeparator}:
 \`\`\`
-${generalHelpTexts.additionalCommands}
-\`\`\`
+${generalHelpTexts.additionalCommands.reduce((s, cmd) => {
+		if (ignoreCmds?.has(cmd.name)) {
+			return s;
+		}
+
+		const spaces = ' '.repeat(maxCmdLength - cmd.name.length);
+		return s + `  ${cmd.name}${spaces}${cmd.short}\n`;
+	}, '')}\`\`\`
 
 ${boldSeparator}Flags${boldSeparator}:
 \`\`\`
 ${generalHelpTexts.flags}
-\`\`\``;
-}
-
-export function dnsHelp (boldSeparator: string, rootCommand: string) {
-	return `${dnsHelpTexts.preamble}
+\`\`\``,
+		dns: `${dnsHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${dnsHelpTexts.examples}
@@ -369,11 +358,8 @@ ${dnsHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${dnsHelpTexts.globalFlags}
-\`\`\``;
-}
-
-export function httpHelp (boldSeparator: string, rootCommand: string) {
-	return `${httpHelpTexts.preamble}
+\`\`\``,
+		http: `${httpHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${httpHelpTexts.examples}
@@ -391,11 +377,8 @@ ${httpHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${httpHelpTexts.globalFlags}
-\`\`\``;
-}
-
-export function mtrHelp (boldSeparator: string, rootCommand: string) {
-	return `${mtrHelpTexts.preamble}
+\`\`\``,
+		mtr: `${mtrHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${mtrHelpTexts.examples}
@@ -413,11 +396,8 @@ ${mtrHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${mtrHelpTexts.globalFlags}
-\`\`\``;
-}
-
-export function pingHelp (boldSeparator: string, rootCommand: string) {
-	return `${pingHelpTexts.preamble}
+\`\`\``,
+		ping: `${pingHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${pingHelpTexts.examples}
@@ -435,11 +415,8 @@ ${pingHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${pingHelpTexts.globalFlags}
-\`\`\``;
-}
-
-export function tracerouteHelp (boldSeparator: string, rootCommand: string) {
-	return `${tracerouteHelpTexts.preamble}
+\`\`\``,
+		traceroute: `${tracerouteHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
 ${tracerouteHelpTexts.examples}
@@ -457,11 +434,15 @@ ${tracerouteHelpTexts.flags}
 ${boldSeparator}Global Flags${boldSeparator}:
 \`\`\`
 ${tracerouteHelpTexts.globalFlags}
-\`\`\``;
-}
+\`\`\``,
+		auth: `${authHelpTexts.preamble}
 
-export function authHelp (boldSeparator: string, rootCommand: string) {
-	return `${authHelpTexts.preamble}
+${boldSeparator}Available Commands${boldSeparator}:
+\`\`\`
+${authHelpTexts.commands.reduce((s, cmd) => {
+		const spaces = ' '.repeat(maxAuthCmdLength - cmd.name.length);
+		return s + `  ${cmd.name}${spaces}${cmd.short}\n`;
+	}, '')}\`\`\`
 
 ${boldSeparator}Usage:${boldSeparator}
 \`\`\`
@@ -471,11 +452,8 @@ ${authHelpTexts.usage(rootCommand)}
 ${boldSeparator}Flags${boldSeparator}:
 \`\`\`
 ${authHelpTexts.flags}
-\`\`\``;
-}
-
-export function authLoginHelp (boldSeparator: string, rootCommand: string) {
-	return `${authLoginHelpTexts.preamble}
+\`\`\``,
+		auth_login: `${authLoginHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 \`\`\`
@@ -485,11 +463,8 @@ ${authLoginHelpTexts.usage(rootCommand)}
 ${boldSeparator}Flags${boldSeparator}:
 \`\`\`
 ${authLoginHelpTexts.flags}
-\`\`\``;
-}
-
-export function authStatusHelp (boldSeparator: string, rootCommand: string) {
-	return `${authStatusHelpTexts.preamble}
+\`\`\``,
+		auth_status: `${authStatusHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 \`\`\`
@@ -499,11 +474,8 @@ ${authStatusHelpTexts.usage(rootCommand)}
 ${boldSeparator}Flags${boldSeparator}:
 \`\`\`
 ${authStatusHelpTexts.flags}
-\`\`\``;
-}
-
-export function authLogoutHelp (boldSeparator: string, rootCommand: string) {
-	return `${authLogoutHelpTexts.preamble}
+\`\`\``,
+		auth_logout: `${authLogoutHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 \`\`\`
@@ -513,11 +485,8 @@ ${authLogoutHelpTexts.usage(rootCommand)}
 ${boldSeparator}Flags${boldSeparator}:
 \`\`\`
 ${authLogoutHelpTexts.flags}
-\`\`\``;
-}
-
-export function limitsHelp (boldSeparator: string, rootCommand: string) {
-	return `${limitsHelpTexts.preamble}
+\`\`\``,
+		limits: `${limitsHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 \`\`\`
@@ -527,5 +496,9 @@ ${limitsHelpTexts.usage(rootCommand)}
 ${boldSeparator}Flags${boldSeparator}:
 \`\`\`
 ${limitsHelpTexts.flags}
-\`\`\``;
+\`\`\``,
+		unknownCommand: `Unknown command! Please call \`${rootCommand} help\` for a list of commands.`,
+	};
 }
+
+export type HelpTexts = ReturnType<typeof generateHelp>;

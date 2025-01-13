@@ -4,7 +4,12 @@ import {
 	SlackCommandMiddlewareArgs,
 	SlackEventMiddlewareArgs,
 } from '@slack/bolt';
-import { channelWelcome, getInstallationId, welcome } from './utils.js';
+import {
+	channelWelcome,
+	getInstallationId,
+	getHelpForCommand,
+	welcome,
+} from './utils.js';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
 import {
 	formatAPIError,
@@ -17,10 +22,11 @@ import {
 	MeasurementCreate,
 	Measurement,
 	MeasurementCreateResponse,
-	helpCmd,
 	Logger,
 	pluralize,
 	formatSeconds,
+	generateHelp,
+	HelpTexts,
 } from '@globalping/bot-utils';
 import type {
 	Block,
@@ -67,6 +73,8 @@ interface ChannelPayload {
 }
 
 export class Bot {
+	private help: HelpTexts;
+
 	constructor (
 		private logger: Logger,
 		private dbClient: DBClient,
@@ -76,7 +84,9 @@ export class Bot {
 			token?: string,
 		) => Promise<MeasurementCreateResponse>,
 		private getMeasurement: (id: string) => Promise<Measurement>,
-	) {}
+	) {
+		this.help = generateHelp('*', '/globalping');
+	}
 
 	async HandleHomeOpened ({
 		context,
@@ -380,7 +390,13 @@ export class Bot {
 		const flags = argsToFlags(cmdText);
 
 		if (!flags.cmd || flags.help) {
-			await this.help(client, payload, flags);
+			await client.chat.postEphemeral({
+				text: getHelpForCommand(flags.cmd, flags.target, this.help),
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: payload.thread_ts,
+			});
+
 			return;
 		}
 
@@ -396,7 +412,13 @@ export class Bot {
 					await this.authStatus(client, payload);
 					return;
 				default:
-					await this.help(client, payload, flags);
+					await client.chat.postEphemeral({
+						text: getHelpForCommand(flags.cmd, flags.target, this.help),
+						user: payload.user_id,
+						channel: payload.channel_id,
+						thread_ts: payload.thread_ts,
+					});
+
 					return;
 			}
 		}
@@ -407,15 +429,6 @@ export class Bot {
 		}
 
 		await this.createMeasurement(client, payload, cmdText, flags);
-	}
-
-	private async help (client: WebClient, payload: ChannelPayload, flags: Flags) {
-		await client.chat.postEphemeral({
-			text: helpCmd(flags.cmd, flags.target, 'slack'),
-			user: payload.user_id,
-			channel: payload.channel_id,
-			thread_ts: payload.thread_ts,
-		});
 	}
 
 	private async createMeasurement (
