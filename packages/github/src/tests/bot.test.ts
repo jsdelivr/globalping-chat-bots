@@ -1,3 +1,4 @@
+import { generateHelp } from '@globalping/bot-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
 	Bot,
@@ -41,6 +42,12 @@ describe('Bot', () => {
 		githubBotApiKey: 'api_key',
 		githubBotHandle: 'globalping',
 	};
+
+	const expectedHelpTexts = generateHelp(
+		'**',
+		`@${configMock.githubBotHandle}`,
+		new Set([ 'auth', 'limits' ]),
+	);
 
 	const bot = new Bot(
 		configMock,
@@ -384,6 +391,342 @@ Message ID: <myuser/myrepo/issues/1@github.com>`,
 ${expectedResponse.results[0].result.rawOutput.trim()}
 \`\`\`
 `,
+			});
+		});
+
+		it('should return help text - empty command', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: expectedHelpTexts.general,
+			});
+		});
+
+		it('should return help text - help command', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping help
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: expectedHelpTexts.general,
+			});
+		});
+
+		it('should return help text - ping command', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping help ping
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: expectedHelpTexts.ping,
+			});
+		});
+
+		it('should return help text - dns command', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping help dns
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: expectedHelpTexts.dns,
+			});
+		});
+
+		it('should return help text - mtr command', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping help mtr
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: expectedHelpTexts.mtr,
+			});
+		});
+
+		it('should return help text - http command', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping help http
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: expectedHelpTexts.http,
+			});
+		});
+
+		it('should return help text - traceroute command', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping help traceroute
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: expectedHelpTexts.traceroute,
+			});
+		});
+
+		it('should return help texts - invalid command', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping help auth
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: expectedHelpTexts.unknownCommand,
 			});
 		});
 	});

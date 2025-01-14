@@ -23,17 +23,7 @@ import {
 } from './utils.js';
 import { Context, SlashCommand } from '@slack/bolt';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
-import {
-	authHelp,
-	AuthToken,
-	dnsHelp,
-	generalHelp,
-	httpHelp,
-	limitsHelp,
-	mtrHelp,
-	pingHelp,
-	tracerouteHelp,
-} from '@globalping/bot-utils';
+import { AuthToken, generateHelp } from '@globalping/bot-utils';
 
 describe('Bot', () => {
 	afterEach(() => {
@@ -49,6 +39,7 @@ describe('Bot', () => {
 	const ackMock = vi.fn();
 	const respondMock = vi.fn();
 	const slackClientMock = mockSlackClient();
+	const expectedHelpTexts = generateHelp('*', '/globalping');
 
 	const bot = new Bot(
 		loggerMock,
@@ -1286,7 +1277,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: generalHelp('*', '/globalping'),
+				text: expectedHelpTexts.general,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1326,7 +1317,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: generalHelp('*', '/globalping'),
+				text: expectedHelpTexts.general,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1366,7 +1357,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: pingHelp('*', '/globalping'),
+				text: expectedHelpTexts.ping,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1406,7 +1397,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: dnsHelp('*', '/globalping'),
+				text: expectedHelpTexts.dns,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1446,7 +1437,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: mtrHelp('*', '/globalping'),
+				text: expectedHelpTexts.mtr,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1486,7 +1477,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: httpHelp('*', '/globalping'),
+				text: expectedHelpTexts.http,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1526,7 +1517,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: tracerouteHelp('*', '/globalping'),
+				text: expectedHelpTexts.traceroute,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1566,7 +1557,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: authHelp('*', '/globalping'),
+				text: expectedHelpTexts.auth,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1606,7 +1597,7 @@ TCP: 31 ms
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				text: limitsHelp('*', '/globalping'),
+				text: expectedHelpTexts.limits,
 				user: payload.user_id,
 				channel: payload.channel_id,
 				thread_ts: undefined,

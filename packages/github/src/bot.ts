@@ -7,10 +7,11 @@ import {
 	Flags,
 	formatAPIError,
 	fullResultsFooter,
+	generateHelp,
 	getAPIErrorMessage,
 	getMeasurement,
 	getTag,
-	helpCmd,
+	HelpTexts,
 	Logger,
 	Measurement,
 	MeasurementCreate,
@@ -30,6 +31,7 @@ import {
 import { Octokit } from 'octokit';
 import { remark } from 'remark';
 import strip from 'strip-markdown';
+import { getHelpForCommand } from './utils.js';
 
 export const initBot = (config: Config, logger: Logger) => {
 	const octokit = new Octokit({ auth: config.githubPersonalAccessToken });
@@ -39,6 +41,7 @@ export const initBot = (config: Config, logger: Logger) => {
 
 export class Bot {
 	private maxDisplayedResults = 4;
+	private help: HelpTexts;
 
 	constructor (
 		private config: Config,
@@ -49,7 +52,13 @@ export class Bot {
 			token?: string,
 		) => Promise<MeasurementCreateResponse>,
 		private getMeasurement: (id: string) => Promise<Measurement>,
-	) {}
+	) {
+		this.help = generateHelp(
+			'**',
+			`@${config.githubBotHandle}`,
+			new Set([ 'auth', 'limits' ]),
+		);
+	}
 
 	async HandleRequest (req: IncomingMessage, res: ServerResponse) {
 		const reqId = uuidv4();
@@ -143,10 +152,17 @@ export class Bot {
 			return err;
 		}
 
-		this.logger.info(`HandleMention: command text.`, { commandText, ...logData });
+		this.logger.info(`HandleMention: command text.`, {
+			commandText,
+			...logData,
+		});
+
 		commandText = await cleanUpCommandText(commandText);
 
-		this.logger.info(`HandleMention: clean up command text.`, { commandText, ...logData });
+		this.logger.info(`HandleMention: clean up command text.`, {
+			commandText,
+			...logData,
+		});
 
 		const githubTarget = parseFooter(footer);
 
@@ -161,7 +177,11 @@ export class Bot {
 			await this.processCommand(reqId, githubTarget, commandText);
 		} catch (error) {
 			const err = error as Error;
-			this.logger.info(`HandleMention: ${err.message} - processing failed.`, logData);
+			this.logger.info(
+				`HandleMention: ${err.message} - processing failed.`,
+				logData,
+			);
+
 			return err;
 		}
 
@@ -181,7 +201,10 @@ export class Bot {
 			flags = argsToFlags(cmdText);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error(`ProcessCommand: argsToFlags failed.`, { errorMsg, ...logData });
+			this.logger.error(`ProcessCommand: argsToFlags failed.`, {
+				errorMsg,
+				...logData,
+			});
 
 			await this.postComment(
 				this.githubClient,
@@ -193,12 +216,7 @@ export class Bot {
 		}
 
 		if (!flags.cmd || flags.help) {
-			const text = helpCmd(
-				flags.cmd,
-				flags.target,
-				'github',
-				this.config.githubBotHandle,
-			);
+			const text = getHelpForCommand(flags.cmd, flags.target, this.help);
 
 			await this.postComment(this.githubClient, githubTarget, text);
 			return;
@@ -215,7 +233,10 @@ export class Bot {
 			);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error(`ProcessCommand: postMeasurement failed.`, { errorMsg, ...logData });
+			this.logger.error(`ProcessCommand: postMeasurement failed.`, {
+				errorMsg,
+				...logData,
+			});
 
 			await this.postComment(
 				this.githubClient,
@@ -232,7 +253,10 @@ export class Bot {
 			res = await this.getMeasurement(measurementResponse.id);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error(`ProcessCommand: getMeasurement failed.`, { errorMsg, ...logData });
+			this.logger.error(`ProcessCommand: getMeasurement failed.`, {
+				errorMsg,
+				...logData,
+			});
 
 			await this.postComment(
 				this.githubClient,
@@ -336,6 +360,11 @@ export function parseCommandfromMention (
 
 	const textWithoutMention = trimmedText.slice(expectedMention.length).trim();
 	const commandOnly = removeNewLineAndFollowingText(textWithoutMention).trim();
+
+	if (commandOnly === '--') {
+		return '';
+	}
+
 	return commandOnly;
 }
 
