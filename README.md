@@ -4,7 +4,7 @@ Discord, Slack and Github bot codebase.
 
 ## Initial Setup
 
-To run this setup, you need Node.js 18 installed. This monorepo uses PNPM workspaces and you can install `pnpm` by either running `corepack enable` or `npm i pnpm -g`.
+To run this setup, you need Node.js 20 installed. This monorepo uses PNPM workspaces and you can install `pnpm` by either running `corepack enable` or `npm i pnpm -g`.
 
 1. Clone repository
 2. `pnpm install`
