@@ -125,7 +125,7 @@ describe('Bot', () => {
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
+						text: `> *Amsterdam, NL, EU, Gigahost AS (AS56655)*
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput}
 \`\`\``,
@@ -217,7 +217,7 @@ ${expectedResponse.results[0].result.rawOutput}
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Helsinki, FI, EU, Hetzner Online GmbH (AS24940)*
+						text: `> *Helsinki, FI, EU, Hetzner Online GmbH (AS24940)*
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput.trim()}
 \`\`\``,
@@ -316,7 +316,7 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)*
+						text: `> *Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)*
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput}
 \`\`\``,
@@ -406,7 +406,7 @@ ${expectedResponse.results[0].result.rawOutput}
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Beauharnois, CA, NA, OVH SAS (AS16276)*
+						text: `> *Beauharnois, CA, NA, OVH SAS (AS16276)*
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput.trim()}
 \`\`\``,
@@ -496,7 +496,7 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
+						text: `> *Amsterdam, NL, EU, Gigahost AS (AS56655)*
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput}
 \`\`\``,
@@ -586,7 +586,7 @@ ${expectedResponse.results[0].result.rawOutput}
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Rotterdam, NL, EU, DELTA Fiber Nederland B.V. (AS15435)*
+						text: `> *Rotterdam, NL, EU, DELTA Fiber Nederland B.V. (AS15435)*
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput.trim()}
 \`\`\``,
@@ -1040,7 +1040,7 @@ Creating measurements:
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
+						text: `> *Amsterdam, NL, EU, Gigahost AS (AS56655)*
 \`\`\`
 Min: 0.419 ms
 Max: 0.489 ms
@@ -1132,7 +1132,7 @@ Avg: 0.419 ms
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Helsinki, FI, EU, Hetzner Online GmbH (AS24940)*
+						text: `> *Helsinki, FI, EU, Hetzner Online GmbH (AS24940)*
 \`\`\`
 Total: 7 ms
 \`\`\``,
@@ -1229,7 +1229,7 @@ Total: 7 ms
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)*
+						text: `> *Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)*
 \`\`\`
 Total: 161 ms
 Download: 2 ms
@@ -1964,7 +1964,7 @@ Documentation and Support: https://github.com/jsdelivr/globalping`,
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
+						text: `> *Amsterdam, NL, EU, Gigahost AS (AS56655)*
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput}
 \`\`\``,
@@ -2070,7 +2070,7 @@ ${expectedResponse.results[0].result.rawOutput}
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `>*Amsterdam, NL, EU, Gigahost AS (AS56655)*
+						text: `> *Amsterdam, NL, EU, Gigahost AS (AS56655)*
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput}
 \`\`\``,

@@ -2,6 +2,7 @@ import {
 	Flags,
 	fullResultsFooter,
 	getTag,
+	LinkBlockType,
 	Measurement,
 	responseHeader,
 	responseText,
@@ -31,7 +32,6 @@ export const formatMeasurementResponse = (
 	const slackBoldSeparator = '*';
 	const slackTruncationLimit = 4000;
 
-	/* eslint-disable no-await-in-loop */
 	for (const result of resultsForDisplay) {
 		const tag = getTag(result.probe.tags);
 		blocks.push({
@@ -53,7 +53,11 @@ export const formatMeasurementResponse = (
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text: fullResultsFooter(res.id, slackBoldSeparator, true),
+				text: fullResultsFooter(
+					res.id,
+					slackBoldSeparator,
+					LinkBlockType.Slack,
+				),
 				verbatim: true,
 			},
 		});
@@ -62,7 +66,11 @@ export const formatMeasurementResponse = (
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text: shareMessageFooter(res.id, slackBoldSeparator, true),
+				text: shareMessageFooter(
+					res.id,
+					slackBoldSeparator,
+					LinkBlockType.Slack,
+				),
 				verbatim: true,
 			},
 		});

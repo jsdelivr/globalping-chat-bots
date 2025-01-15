@@ -4,6 +4,7 @@
 	"scripts": {
 		"start": "pnpm --filter main start",
 		"dev": "pnpm --filter main start-pretty",
+		"discord:deploy-commands": "pnpm --filter main discord:deploy-commands",
 		"test": "vitest",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix"

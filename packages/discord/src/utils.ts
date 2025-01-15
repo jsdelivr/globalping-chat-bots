@@ -1,23 +1,5 @@
-/* eslint-disable no-await-in-loop */
-import {
-	Flags,
-	getTag,
-	dnsHelpTexts,
-	pingHelpTexts,
-	tracerouteHelpTexts,
-	httpHelpTexts,
-	mtrHelpTexts,
-	scopedLogger,
-	Measurement,
-	throwArgError,
-	generalHelpTexts,
-} from '@globalping/bot-utils';
-import { ChatInputCommandInteraction, codeBlock } from 'discord.js';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
-
-export const logger = scopedLogger('discord');
+import { Flags, throwArgError, HelpTexts } from '@globalping/bot-utils';
+import { ChatInputCommandInteraction } from 'discord.js';
 
 export const getFlags = (interaction: ChatInputCommandInteraction): Flags => {
 	const cmd = interaction.options.getSubcommand();
@@ -82,62 +64,34 @@ export const expandFlags = (flags: Flags): string => {
 	return msg.join(' ');
 };
 
-export const expandResults = async (
-	response: Measurement,
-	interaction: ChatInputCommandInteraction,
-) => {
-	const { results } = response;
+export const getHelpForCommand = (
+	cmd: string,
+	target: string,
+	help: HelpTexts,
+): string => {
+	switch (cmd) {
+		case 'dns':
+			return help.dns;
+		case 'http':
+			return help.http;
+		case 'mtr':
+			return help.mtr;
+		case 'ping':
+			return help.ping;
+		case 'traceroute':
+			return help.traceroute;
 
-	for (const result of results) {
-		const tag = getTag(result.probe.tags);
-		const msg = {
-			content: `> **${result.probe.city}${
-				result.probe.state ? ` (${result.probe.state})` : ''
-			}, ${result.probe.country}, ${result.probe.continent}, ${
-				result.probe.network
-			} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}**`,
-		};
-		// Discord has a limit of 2000 characters per block - truncate if necessary
-		const rawOutput
-			= result.result.rawOutput.length > 1900
-				? `${result.result.rawOutput.slice(0, 1900)}\n... (truncated)`
-				: `${result.result.rawOutput}`;
-		const output = { content: codeBlock('shell', rawOutput) };
+		case undefined:
+		case '':
+		case 'help':
+			if (!target) {
+				return help.general;
+			}
 
-		if (interaction.channel) {
-			await interaction.channel.send(msg);
-			await interaction.channel.send(output);
-		} else {
-			await interaction.user.send(msg);
-			await interaction.user.send(output);
-		}
+			// handle case: /globalping help <subcommand>
+			return getHelpForCommand(target, target, help);
+
+		default:
+			return help.unknownCommand;
 	}
-};
-
-export const helpCmd = (cmd: string): string => {
-	if (cmd === 'help') {
-		return `${generalHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${generalHelpTexts.usage}\`\`\``;
-	}
-
-	if (cmd === 'ping') {
-		return `${pingHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${pingHelpTexts.usage}\`\`\`\n\n**Examples:**\n\`\`\`${pingHelpTexts.examples}\`\`\``;
-	}
-
-	if (cmd === 'traceroute') {
-		return `${tracerouteHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${tracerouteHelpTexts.usage}\`\`\`\n**Examples:**\n\`\`\`${tracerouteHelpTexts.examples}\`\`\``;
-	}
-
-	if (cmd === 'dns') {
-		return `${dnsHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${dnsHelpTexts.usage}\`\`\`\n\n**Examples:**\n\`\`\`${dnsHelpTexts.examples}\`\`\``;
-	}
-
-	if (cmd === 'mtr') {
-		return `${mtrHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${mtrHelpTexts.usage}\`\`\`\n\n**Examples:**\n\`\`\`${mtrHelpTexts.examples}\`\`\``;
-	}
-
-	if (cmd === 'http') {
-		return `${httpHelpTexts.preamble}\n\n**Usage:**\n\`\`\`${httpHelpTexts.usage}\`\`\`\n**Examples:**\n\`\`\`${httpHelpTexts.examples}\`\`\``;
-	}
-
-	return 'Unknown command! Please call `/globalping help` for a list of commands.';
 };
