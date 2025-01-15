@@ -39,7 +39,7 @@ export const config = {
 export type Config = typeof config;
 
 function validateConfig (c: Config) {
-	if (process.env.NODE_ENV === 'test') {
+	if (process.env.NODE_ENV !== 'production') {
 		return;
 	}
 
