@@ -30,7 +30,7 @@ export const deployCommands = (config: Config) => {
 				.addStringOption(option => option
 					.setName('from')
 					.setDescription('Probe locations')
-					.setRequired(true))
+					.setRequired(false))
 				.addNumberOption(option => option
 					.setName('limit')
 					.setDescription('Number of probes')
@@ -58,7 +58,7 @@ export const deployCommands = (config: Config) => {
 				.addStringOption(option => option
 					.setName('from')
 					.setDescription('Probe locations')
-					.setRequired(true))
+					.setRequired(false))
 				.addNumberOption(option => option
 					.setName('limit')
 					.setDescription('Number of probes')
@@ -83,7 +83,7 @@ export const deployCommands = (config: Config) => {
 				.addStringOption(option => option
 					.setName('from')
 					.setDescription('Probe locations')
-					.setRequired(true))
+					.setRequired(false))
 				.addNumberOption(option => option
 					.setName('limit')
 					.setDescription('Number of probes')
@@ -129,7 +129,7 @@ export const deployCommands = (config: Config) => {
 				.addStringOption(option => option
 					.setName('from')
 					.setDescription('Probe locations')
-					.setRequired(true))
+					.setRequired(false))
 				.addNumberOption(option => option
 					.setName('limit')
 					.setDescription('Number of probes')
@@ -162,7 +162,7 @@ export const deployCommands = (config: Config) => {
 				.addStringOption(option => option
 					.setName('from')
 					.setDescription('Probe locations')
-					.setRequired(true))
+					.setRequired(false))
 				.addNumberOption(option => option
 					.setName('limit')
 					.setDescription('Number of probes')
