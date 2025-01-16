@@ -1,4 +1,5 @@
 import { Response } from 'got';
+import { codeBlock } from './response.js';
 
 interface APIError {
 	error: {
@@ -25,7 +26,9 @@ export class PostError extends Error {
 
 export function getAPIErrorMessage (error: unknown): string {
 	// @ts-expect-error Discord error format
-	if (error.code === 50_001) { return 'Missing access! Please add the Globalping bot to this channel!'; }
+	if (error.code === 50_001) {
+		return 'Missing access! Please add the Globalping bot to this channel!';
+	}
 
 	if (error instanceof PostError) {
 		const { location, response } = error;
@@ -57,8 +60,6 @@ export function getAPIErrorMessage (error: unknown): string {
 }
 
 export function formatAPIError (error: unknown): string {
-	return `\`\`\`
-${getAPIErrorMessage(error)}
-\`\`\`
+	return `${codeBlock(getAPIErrorMessage(error))}
 Documentation and Support: https://github.com/jsdelivr/globalping`;
 }

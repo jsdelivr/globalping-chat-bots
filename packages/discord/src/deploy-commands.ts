@@ -38,6 +38,14 @@ export const deployCommands = (config: Config) => {
 				.addNumberOption(option => option
 					.setName('packets')
 					.setDescription('Number of packets')
+					.setRequired(false))
+				.addBooleanOption(option => option
+					.setName('share')
+					.setDescription('Provide share link')
+					.setRequired(false))
+				.addBooleanOption(option => option
+					.setName('latency')
+					.setDescription('Output only latency stats')
 					.setRequired(false)))
 			// Traceroute
 			.addSubcommand(subcommand => subcommand
@@ -64,6 +72,7 @@ export const deployCommands = (config: Config) => {
 					.setName('port')
 					.setDescription('Port to use')
 					.setRequired(false)))
+			// dns
 			.addSubcommand(subcommand => subcommand
 				.setName('dns')
 				.setDescription('Use dns command')
@@ -100,7 +109,16 @@ export const deployCommands = (config: Config) => {
 				.addBooleanOption(option => option
 					.setName('trace')
 					.setDescription('Trace route')
+					.setRequired(false))
+				.addBooleanOption(option => option
+					.setName('share')
+					.setDescription('Provide share link')
+					.setRequired(false))
+				.addBooleanOption(option => option
+					.setName('latency')
+					.setDescription('Output only latency stats')
 					.setRequired(false)))
+			// mtr
 			.addSubcommand(subcommand => subcommand
 				.setName('mtr')
 				.setDescription('Use mtr command')
@@ -128,7 +146,12 @@ export const deployCommands = (config: Config) => {
 					.setName('protocol')
 					.setDescription('Protocol to use')
 					.setRequired(false)
-					.addChoices(...choiceMap([ ...ALLOWED_MTR_PROTOCOLS ]))))
+					.addChoices(...choiceMap([ ...ALLOWED_MTR_PROTOCOLS ])))
+				.addBooleanOption(option => option
+					.setName('share')
+					.setDescription('Provide share link')
+					.setRequired(false)))
+			// http
 			.addSubcommand(subcommand => subcommand
 				.setName('http')
 				.setDescription('Use http command')
@@ -154,6 +177,10 @@ export const deployCommands = (config: Config) => {
 					.setRequired(false)
 					.addChoices(...choiceMap([ ...ALLOWED_HTTP_PROTOCOLS ])))
 				.addStringOption(option => option
+					.setName('resolver')
+					.setDescription('Resolver to use')
+					.setRequired(false))
+				.addStringOption(option => option
 					.setName('method')
 					.setDescription('Method to use')
 					.setRequired(false)
@@ -173,7 +200,16 @@ export const deployCommands = (config: Config) => {
 				.addStringOption(option => option
 					.setName('header')
 					.setDescription('Headers')
+					.setRequired(false))
+				.addBooleanOption(option => option
+					.setName('share')
+					.setDescription('Provide share link')
+					.setRequired(false))
+				.addBooleanOption(option => option
+					.setName('latency')
+					.setDescription('Output only latency stats')
 					.setRequired(false)))
+			// help
 			.addSubcommand(subcommand => subcommand
 				.setName('help')
 				.setDescription('Help command')

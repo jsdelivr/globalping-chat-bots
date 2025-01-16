@@ -16,11 +16,13 @@ import {
 	responseHeader,
 	responseText,
 	shareMessageFooter,
+	throwArgError,
 } from '@globalping/bot-utils';
 import {
 	APIEmbed,
 	APIEmbedField,
 	CacheType,
+	ChatInputCommandInteraction,
 	Client,
 	GatewayIntentBits,
 	inlineCode,
@@ -28,7 +30,7 @@ import {
 	userMention,
 } from 'discord.js';
 
-import { expandFlags, getFlags, getHelpForCommand } from './utils.js';
+import { expandFlags, getHelpForCommand } from './utils.js';
 
 export const initBot = (logger: Logger) => {
 	const client = new Client({ intents: [ GatewayIntentBits.Guilds ] });
@@ -78,7 +80,7 @@ class Bot {
 		let txtCommand;
 
 		try {
-			const flags = getFlags(interaction);
+			const flags = this.getFlags(interaction);
 			this.logger.debug(`Flags received`, { flags });
 
 			if (flags.cmd === 'help') {
@@ -89,27 +91,71 @@ class Bot {
 				await interaction.editReply({
 					content: getHelpForCommand(flags.help, '', this.help),
 				});
-			} else {
-				const txtFlags
-					= expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
-				txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
 
-				const measurementResponse = await this.postMeasurement(buildPostMeasurements(flags));
-				const res = await this.getMeasurement(measurementResponse.id);
-				this.logger.debug(`Get response`, { res });
-
-				const embeds = this.formatMeasurementResponse(res, flags);
-
-				await interaction.editReply({
-					content: `${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`,
-					embeds,
-				});
+				return;
 			}
-		} catch (error) {
-			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand ?? 'help')}`);
 
-			await interaction.followUp({ content: formatAPIError(error) });
+			const txtFlags
+				= expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
+			txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
+
+			const measurementResponse = await this.postMeasurement(buildPostMeasurements(flags));
+			const res = await this.getMeasurement(measurementResponse.id);
+			this.logger.debug(`Get response`, { res });
+
+			const embeds = this.formatMeasurementResponse(res, flags);
+
+			await interaction.editReply({
+				content: `${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`,
+				embeds,
+			});
+		} catch (error) {
+			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand ?? 'help')}
+${formatAPIError(error)}`);
 		}
+	}
+
+	private getFlags (interaction: ChatInputCommandInteraction): Flags {
+		const cmd = interaction.options.getSubcommand();
+		const helpVal
+			= interaction.options.getString('command')
+			?? (cmd === 'help' ? 'help' : undefined);
+
+		const target
+			= interaction.options.getString('target')
+			?? (helpVal ? '' : throwArgError(undefined, 'target', 'jsdelivr.com'));
+		const from
+			= interaction.options.getString('from')
+			?? (helpVal ? '' : throwArgError(undefined, 'from', 'New York'));
+		const rawHeader
+			= interaction.options
+				.getString('header')
+				?.split(':')
+				.map(header => header.trim()) ?? undefined;
+
+		return {
+			cmd,
+			target,
+			from,
+			limit:
+				interaction.options.getNumber('limit')
+				?? (undefined as unknown as number), // Force overwrite main interface
+			packets: interaction.options.getNumber('packets') ?? undefined,
+			protocol: interaction.options.getString('protocol') ?? undefined,
+			port: interaction.options.getNumber('port') ?? undefined,
+			resolver: interaction.options.getString('resolver') ?? undefined,
+			trace: interaction.options.getBoolean('trace') ?? undefined,
+			query: interaction.options.getString('query') ?? undefined,
+			method: interaction.options.getString('method') ?? undefined,
+			path: interaction.options.getString('path') ?? undefined,
+			host: interaction.options.getString('host') ?? undefined,
+			headers: rawHeader
+				? { [String(rawHeader.shift())]: rawHeader.join(' ') }
+				: undefined,
+			share: interaction.options.getBoolean('share') ?? undefined,
+			latency: interaction.options.getBoolean('latency') ?? undefined,
+			help: helpVal,
+		};
 	}
 
 	private formatMeasurementResponse (

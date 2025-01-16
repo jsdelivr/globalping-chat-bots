@@ -63,7 +63,7 @@ function isBodyOnlyHttpGet (flags: Flags): boolean {
 	return flags.cmd === 'http' && flags.method === 'GET' && !flags.full;
 }
 
-const codeBlock = (text: string): string => `\`\`\`
+export const codeBlock = (text: string): string => `\`\`\`
 ${text}
 \`\`\``;
 
