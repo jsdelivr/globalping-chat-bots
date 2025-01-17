@@ -1,4 +1,4 @@
-import { generateHelp, truncate } from '@globalping/bot-utils';
+import { generateHelp } from '@globalping/bot-utils';
 import { codeBlock } from 'discord.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Bot } from '../src/bot.js';
@@ -19,6 +19,8 @@ describe('Bot', () => {
 		vi.resetAllMocks();
 	});
 
+	const discordMessageLimit = 2000;
+
 	const loggerMock = mockLogger();
 	const postMeasurementMock = mockPostMeasurement();
 	const getMeasurementMock = mockGetMeasurement();
@@ -29,6 +31,8 @@ describe('Bot', () => {
 		'**',
 		'/globalping',
 		new Set([ 'auth', 'limits' ]),
+		4,
+		1,
 	);
 
 	const bot = new Bot(loggerMock, postMeasurementMock, getMeasurementMock);
@@ -346,6 +350,10 @@ describe('Bot', () => {
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.general);
+
+			if (expectedHelpTexts.general.length > discordMessageLimit) {
+				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.general.length}`);
+			}
 		});
 
 		it('should handle the command - /globalping help ping', async () => {
@@ -370,6 +378,10 @@ describe('Bot', () => {
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.ping);
+
+			if (expectedHelpTexts.ping.length > discordMessageLimit) {
+				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.ping.length}`);
+			}
 		});
 
 		it('should handle the command - /globalping help dns', async () => {
@@ -393,7 +405,11 @@ describe('Bot', () => {
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith(truncate(expectedHelpTexts.dns, 2000));
+			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.dns);
+
+			if (expectedHelpTexts.dns.length > discordMessageLimit) {
+				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.dns.length}`);
+			}
 		});
 
 		it('should handle the command - /globalping help http', async () => {
@@ -417,7 +433,11 @@ describe('Bot', () => {
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith(truncate(expectedHelpTexts.http, 2000));
+			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.http);
+
+			if (expectedHelpTexts.http.length > discordMessageLimit) {
+				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.http.length}`);
+			}
 		});
 
 		it('should handle the command - /globalping help mtr', async () => {
@@ -442,6 +462,10 @@ describe('Bot', () => {
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.mtr);
+
+			if (expectedHelpTexts.mtr.length > discordMessageLimit) {
+				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.mtr.length}`);
+			}
 		});
 
 		it('should handle the command - /globalping help traceroute', async () => {
@@ -466,6 +490,10 @@ describe('Bot', () => {
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.traceroute);
+
+			if (expectedHelpTexts.traceroute.length > discordMessageLimit) {
+				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.traceroute.length}`);
+			}
 		});
 	});
 });

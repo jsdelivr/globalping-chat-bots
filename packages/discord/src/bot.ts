@@ -59,7 +59,13 @@ export class Bot {
 		) => Promise<MeasurementCreateResponse>,
 		private getMeasurement: (id: string) => Promise<Measurement>,
 	) {
-		this.help = generateHelp('**', '/globalping', new Set([ 'auth', 'limits' ]));
+		this.help = generateHelp(
+			'**',
+			'/globalping',
+			new Set([ 'auth', 'limits' ]),
+			4,
+			1,
+		);
 	}
 
 	async HandleInteraction (interaction: Interaction<CacheType>) {
