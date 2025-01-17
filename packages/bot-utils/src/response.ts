@@ -121,10 +121,8 @@ export const responseText = (
 
 	if (responseText.length > truncationLimit) {
 		const truncationText = '\n... (truncated)';
-		return (
-			responseText.slice(0, truncationLimit - truncationText.length)
-			+ truncationText
-		);
+		return codeBlock(responseText.slice(0, truncationLimit - truncationText.length)
+				+ truncationText);
 	}
 
 	return codeBlock(responseText);

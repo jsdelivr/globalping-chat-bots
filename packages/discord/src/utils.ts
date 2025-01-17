@@ -1,26 +1,4 @@
-import { Flags, HelpTexts } from '@globalping/bot-utils';
-
-export const expandFlags = (flags: Flags): string => {
-	const entries = Object.entries(flags);
-	const skipFlag = new Set([ 'cmd', 'target', 'from', 'help' ]);
-	const msg = [];
-
-	for (const [ key, value ] of entries) {
-		// Remove flags that don't need to be diplayed to user
-		if (!skipFlag.has(key) && value !== undefined) {
-			if (key === 'headers') {
-				// Headers have different flag format
-				msg.push(`${Object.entries(value)
-					.map(([ headerKey, headerValue ]) => `--header ${headerKey}: ${headerValue}`)
-					.join(' ')}`);
-			}
-
-			msg.push(`--${key} ${value}`);
-		}
-	}
-
-	return msg.join(' ');
-};
+import { HelpTexts } from '@globalping/bot-utils';
 
 export const getHelpForCommand = (
 	cmd: string,

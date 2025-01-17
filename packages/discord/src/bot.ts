@@ -30,7 +30,7 @@ import {
 	userMention,
 } from 'discord.js';
 
-import { expandFlags, getHelpForCommand } from './utils.js';
+import { getHelpForCommand } from './utils.js';
 
 export const initBot = (logger: Logger) => {
 	const client = new Client({ intents: [ GatewayIntentBits.Guilds ] });
@@ -42,12 +42,12 @@ export const initBot = (logger: Logger) => {
 	client.on('warn', m => logger.warn(m));
 	client.on('error', m => logger.error(m.message, m));
 
-	client.on('interactionCreate', args => bot.handleInteraction(args));
+	client.on('interactionCreate', args => bot.HandleInteraction(args));
 
 	return client;
 };
 
-class Bot {
+export class Bot {
 	private maxDisplayedResults = 4;
 	private help: HelpTexts;
 
@@ -62,9 +62,7 @@ class Bot {
 		this.help = generateHelp('**', '/globalping', new Set([ 'auth', 'limits' ]));
 	}
 
-	async handleInteraction (interaction: Interaction<CacheType>) {
-		this.logger.debug(`Received interaction`, { interaction });
-
+	async HandleInteraction (interaction: Interaction<CacheType>) {
 		if (!interaction.isChatInputCommand()) {
 			return;
 		}
@@ -81,7 +79,6 @@ class Bot {
 
 		try {
 			const flags = this.getFlags(interaction);
-			this.logger.debug(`Flags received`, { flags });
 
 			if (flags.cmd === 'help') {
 				if (typeof flags.help !== 'string') {
@@ -95,13 +92,18 @@ class Bot {
 				return;
 			}
 
-			const txtFlags
-				= expandFlags(flags).length > 0 ? ` ${expandFlags(flags)}` : '';
-			txtCommand = `${flags.cmd} ${flags.target} from ${flags.from}${txtFlags}`;
+			txtCommand = this.expandCommand(flags);
+
+			if (!flags.from) {
+				flags.from = 'world';
+			}
+
+			if (!flags.limit) {
+				flags.limit = 1;
+			}
 
 			const measurementResponse = await this.postMeasurement(buildPostMeasurements(flags));
 			const res = await this.getMeasurement(measurementResponse.id);
-			this.logger.debug(`Get response`, { res });
 
 			const embeds = this.formatMeasurementResponse(res, flags);
 
@@ -110,6 +112,11 @@ class Bot {
 				embeds,
 			});
 		} catch (error) {
+			this.logger.error(`Error processing request`, {
+				error,
+				command: txtCommand,
+			});
+
 			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand ?? 'help')}
 ${formatAPIError(error)}`);
 		}
@@ -124,9 +131,7 @@ ${formatAPIError(error)}`);
 		const target
 			= interaction.options.getString('target')
 			?? (helpVal ? '' : throwArgError(undefined, 'target', 'jsdelivr.com'));
-		const from
-			= interaction.options.getString('from')
-			?? (helpVal ? '' : throwArgError(undefined, 'from', 'New York'));
+		const from = interaction.options.getString('from') ?? undefined;
 		const rawHeader
 			= interaction.options
 				.getString('header')
@@ -156,6 +161,40 @@ ${formatAPIError(error)}`);
 			latency: interaction.options.getBoolean('latency') ?? undefined,
 			help: helpVal,
 		};
+	}
+
+	private expandCommand (flags: Flags): string {
+		let cmd = `${flags.cmd} ${flags.target}`;
+
+		if (flags.from) {
+			cmd += ` from ${flags.from}`;
+		}
+
+		const entries = Object.entries(flags);
+		const skipFlag = new Set([ 'cmd', 'target', 'from', 'help' ]);
+
+		for (const [ key, value ] of entries) {
+			if (skipFlag.has(key)) {
+				continue;
+			}
+
+			if (value === undefined) {
+				continue;
+			}
+
+			if (key === 'headers') {
+				// Headers have different flag format
+				cmd += ` ${Object.entries(value)
+					.map(([ headerKey, headerValue ]) => `--header ${headerKey}: ${headerValue}`)
+					.join(' ')}`;
+
+				continue;
+			}
+
+			cmd += ` --${key} ${value}`;
+		}
+
+		return cmd;
 	}
 
 	private formatMeasurementResponse (
