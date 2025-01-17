@@ -1,4 +1,6 @@
-import { HelpTexts } from '@globalping/bot-utils';
+import { HelpTexts, truncate } from '@globalping/bot-utils';
+
+const truncationLimit = 2000;
 
 export const getHelpForCommand = (
 	cmd: string,
@@ -7,21 +9,21 @@ export const getHelpForCommand = (
 ): string => {
 	switch (cmd) {
 		case 'dns':
-			return help.dns;
+			return truncate(help.dns, truncationLimit);
 		case 'http':
-			return help.http;
+			return truncate(help.http, truncationLimit);
 		case 'mtr':
-			return help.mtr;
+			return truncate(help.mtr, truncationLimit);
 		case 'ping':
-			return help.ping;
+			return truncate(help.ping, truncationLimit);
 		case 'traceroute':
-			return help.traceroute;
+			return truncate(help.traceroute, truncationLimit);
 
 		case undefined:
 		case '':
 		case 'help':
 			if (!target) {
-				return help.general;
+				return truncate(help.general, truncationLimit);
 			}
 
 			// handle case: /globalping help <subcommand>

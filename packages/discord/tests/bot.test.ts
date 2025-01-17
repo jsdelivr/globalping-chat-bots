@@ -1,4 +1,4 @@
-import { generateHelp } from '@globalping/bot-utils';
+import { generateHelp, truncate } from '@globalping/bot-utils';
 import { codeBlock } from 'discord.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Bot } from '../src/bot.js';
@@ -345,9 +345,7 @@ describe('Bot', () => {
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith({
-				content: expectedHelpTexts.general,
-			});
+			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.general);
 		});
 
 		it('should handle the command - /globalping help ping', async () => {
@@ -371,9 +369,7 @@ describe('Bot', () => {
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith({
-				content: expectedHelpTexts.ping,
-			});
+			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.ping);
 		});
 
 		it('should handle the command - /globalping help dns', async () => {
@@ -397,9 +393,7 @@ describe('Bot', () => {
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith({
-				content: expectedHelpTexts.dns,
-			});
+			expect(interactionMock.editReply).toHaveBeenCalledWith(truncate(expectedHelpTexts.dns, 2000));
 		});
 
 		it('should handle the command - /globalping help http', async () => {
@@ -423,9 +417,7 @@ describe('Bot', () => {
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith({
-				content: expectedHelpTexts.http,
-			});
+			expect(interactionMock.editReply).toHaveBeenCalledWith(truncate(expectedHelpTexts.http, 2000));
 		});
 
 		it('should handle the command - /globalping help mtr', async () => {
@@ -449,9 +441,7 @@ describe('Bot', () => {
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith({
-				content: expectedHelpTexts.mtr,
-			});
+			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.mtr);
 		});
 
 		it('should handle the command - /globalping help traceroute', async () => {
@@ -475,9 +465,7 @@ describe('Bot', () => {
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith({
-				content: expectedHelpTexts.traceroute,
-			});
+			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.traceroute);
 		});
 	});
 });

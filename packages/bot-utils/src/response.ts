@@ -11,10 +11,8 @@ export function responseHeader (
 	tag: string | undefined,
 	boldSeparator: string,
 ): string {
-	return `> ${boldSeparator}${result.probe.city}${
-		result.probe.state ? ` (${result.probe.state})` : ''
-	}, ${result.probe.country}, ${result.probe.continent}, ${
-		result.probe.network
+	return `> ${boldSeparator}${result.probe.city}${result.probe.state ? ` (${result.probe.state})` : ''
+	}, ${result.probe.country}, ${result.probe.continent}, ${result.probe.network
 	} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}${boldSeparator}\n`;
 }
 
@@ -119,11 +117,15 @@ export const responseText = (
 		responseText = result.result.rawOutput.trim();
 	}
 
-	if (responseText.length > truncationLimit) {
-		const truncationText = '\n... (truncated)';
-		return codeBlock(responseText.slice(0, truncationLimit - truncationText.length)
-				+ truncationText);
+	return codeBlock(truncate(responseText, truncationLimit));
+};
+
+const truncationText = '\n... (truncated)';
+
+export const truncate = (text: string, limit: number): string => {
+	if (text.length <= limit) {
+		return text;
 	}
 
-	return codeBlock(responseText);
+	return text.slice(0, limit - truncationText.length) + truncationText;
 };

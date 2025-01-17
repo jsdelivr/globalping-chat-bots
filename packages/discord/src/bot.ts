@@ -85,9 +85,7 @@ export class Bot {
 					flags.help = 'help';
 				}
 
-				await interaction.editReply({
-					content: getHelpForCommand(flags.help, '', this.help),
-				});
+				await interaction.editReply(getHelpForCommand(flags.help, '', this.help));
 
 				return;
 			}
