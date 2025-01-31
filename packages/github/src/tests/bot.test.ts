@@ -115,7 +115,7 @@ Message ID: <myuser/myrepo/issues/1@github.com>`,
 				repo: 'myrepo',
 				issue_number: 1,
 				body: `Here are the results for \`ping google.com\`
->**Amsterdam, NL, EU, Gigahost AS (AS56655)**
+> **Amsterdam, NL, EU, Gigahost AS (AS56655)**
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput}
 \`\`\`
@@ -182,7 +182,7 @@ Message ID: <myuser/myrepo/issues/1@github.com>`,
 				repo: 'myrepo',
 				issue_number: 1,
 				body: `Here are the results for \`dns google.com from Berlin --resolver 1.1.1.1\`
->**Helsinki, FI, EU, Hetzner Online GmbH (AS24940)**
+> **Helsinki, FI, EU, Hetzner Online GmbH (AS24940)**
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput.trim()}
 \`\`\`
@@ -256,7 +256,7 @@ Message ID: <myuser/myrepo/issues/1@github.com>`,
 				repo: 'myrepo',
 				issue_number: 1,
 				body: `Here are the results for \`http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"\`
->**Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**
+> **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput}
 \`\`\`
@@ -321,7 +321,7 @@ Message ID: <myuser/myrepo/issues/1@github.com>`,
 				repo: 'myrepo',
 				issue_number: 1,
 				body: `Here are the results for \`mtr google.com\`
->**Beauharnois, CA, NA, OVH SAS (AS16276)**
+> **Beauharnois, CA, NA, OVH SAS (AS16276)**
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput.trim()}
 \`\`\`
@@ -386,7 +386,7 @@ Message ID: <myuser/myrepo/issues/1@github.com>`,
 				repo: 'myrepo',
 				issue_number: 1,
 				body: `Here are the results for \`traceroute google.com\`
->**Rotterdam, NL, EU, DELTA Fiber Nederland B.V. (AS15435)**
+> **Rotterdam, NL, EU, DELTA Fiber Nederland B.V. (AS15435)**
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput.trim()}
 \`\`\`

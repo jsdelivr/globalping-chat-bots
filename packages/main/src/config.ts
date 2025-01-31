@@ -34,6 +34,8 @@ export const config = {
 	githubBotHandle: process.env.GITHUB_BOT_HANDLE || 'globalping',
 
 	globalpingToken: process.env.GLOBALPING_TOKEN as string,
+
+	discordToken: process.env.DISCORD_TOKEN as string,
 };
 
 export type Config = typeof config;
@@ -61,6 +63,10 @@ function validateConfig (c: Config) {
 
 	if (!c.githubPersonalAccessToken || !c.githubBotApiKey || !c.globalpingToken) {
 		throw new Error('GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_BOT_API_KEY and GLOBALPING_TOKEN environment variable must be set');
+	}
+
+	if (!c.discordToken) {
+		throw new Error('DISCORD_TOKEN environment variable must be set');
 	}
 }
 

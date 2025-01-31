@@ -15,7 +15,7 @@ DISCORD_APP_ID=
 DISCORD_TOKEN=
 ```
 
-Run `pnpm deploy-commands` only once after registering your Discord application. This registers the `/globalping` command to Discord globally. You do not need to rerun this command unless changes are made to `src/deploy-commands.ts`.
+Run `pnpm discord:deploy-commands` only once after registering your Discord application. This registers the `/globalping` command to Discord globally. You do not need to rerun this command unless changes are made to `src/deploy-commands.ts`.
 
 Once ready, head over to your [app configuration](https://discord.com/developers/applications) and generate an invite URL under the **OAuth2** tab.
 

@@ -1,5 +1,6 @@
 import { scopedLogger, initKnexClient } from '@globalping/bot-utils';
-import { initBot } from 'github-bot';
+import { initBot as initGithubBot } from 'github-bot';
+import { initBot as initDiscordBot } from 'discord-bot';
 import { initApp, CustomRoute } from 'slack-bot';
 import { config } from './config.js';
 
@@ -9,7 +10,8 @@ const knex = initKnexClient(config, './migrations');
 
 const logger = scopedLogger('main');
 
-const githubBot = initBot(config, scopedLogger('github'));
+const githubBot = initGithubBot(config, scopedLogger('github'));
+const discordBot = initDiscordBot(scopedLogger('discord'));
 
 const routes: CustomRoute[] = [
 	{
@@ -52,7 +54,7 @@ const routes: CustomRoute[] = [
 	},
 ];
 
-const app = initApp(config, knex, routes);
+const app = initApp(config, scopedLogger('slack'), knex, routes);
 
 // Start the app
 (async () => {
@@ -62,11 +64,12 @@ const app = initApp(config, knex, routes);
 
 	// Start your app
 	await app.start(config.port);
+	logger.info('Slack and Github bots are online', { env: config.env });
 
-	if (config.env === 'production') {
-		logger.info('Bots are online [PRODUCTION]');
-	} else {
-		logger.info('Bots are running! [DEVELOPMENT]');
+	try {
+		await discordBot.login(config.discordToken);
+	} catch (error) {
+		logger.error('Discord bot failed to start', error);
 	}
 })();
 
@@ -86,5 +89,9 @@ const app = initApp(config, knex, routes);
 		logger.info('Closing database connection');
 		await knex.destroy();
 		logger.info('App stopped');
+
+		logger.info('Closing Discord bot');
+		await discordBot.destroy();
+		logger.info('Discord bot closed');
 	});
 });

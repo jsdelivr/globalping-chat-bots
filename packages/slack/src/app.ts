@@ -1,9 +1,4 @@
-import {
-	getMeasurement,
-	KnexClient,
-	scopedLogger,
-	postMeasurement, Logger,
-} from '@globalping/bot-utils';
+import { getMeasurement, KnexClient, postMeasurement, Logger } from '@globalping/bot-utils';
 import { App, AppOptions, CustomRoute, LogLevel } from '@slack/bolt';
 
 import { CALLBACK_PATH, OAuthClient } from './auth.js';
@@ -11,13 +6,7 @@ import { Bot } from './bot.js';
 import { DBClient } from './db.js';
 import { Config } from './types.js';
 
-export function initApp (
-	config: Config,
-	knex: KnexClient,
-	routes: CustomRoute[],
-): App {
-	const logger = scopedLogger('slack');
-
+export function initApp (config: Config, logger: Logger, knex: KnexClient, routes: CustomRoute[]): App {
 	const db = new DBClient(knex, logger);
 
 	const oauth = new OAuthClient(config, logger, db);

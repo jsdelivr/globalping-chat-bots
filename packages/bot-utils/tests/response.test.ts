@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
 	fullResultsFooter,
+	LinkBlockType,
 	responseHeader,
 	shareMessageFooter,
 } from '../src/response.js';
@@ -13,16 +14,16 @@ describe('Response', () => {
 	describe('shareMessageFooter', () => {
 		it('ok', () => {
 			const id = 'abc123';
-			const text = shareMessageFooter(id, boldSeparator, true);
-			expect(text).to.equal('>*View the results online: <https://globalping.io?measurement=abc123>*\n');
+			const text = shareMessageFooter(id, boldSeparator, LinkBlockType.Slack);
+			expect(text).to.equal('> *View the results online: <https://globalping.io?measurement=abc123>*\n');
 		});
 	});
 
 	describe('fullResultsFooter', () => {
 		it('ok', () => {
 			const id = 'abc123';
-			const text = fullResultsFooter(id, boldSeparator, true);
-			expect(text).to.equal('>*Full results available here: <https://globalping.io?measurement=abc123>*\n');
+			const text = fullResultsFooter(id, boldSeparator, LinkBlockType.Slack);
+			expect(text).to.equal('> *Full results available here: <https://globalping.io?measurement=abc123>*\n');
 		});
 	});
 
@@ -49,7 +50,7 @@ describe('Response', () => {
 			};
 			const tag = undefined;
 			const text = responseHeader(pingResult, tag, boldSeparator);
-			expect(text).to.equal('>*Vienna, AT, EU, My Network (AS12345)*\n');
+			expect(text).to.equal('> *Vienna, AT, EU, My Network (AS12345)*\n');
 		});
 	});
 
@@ -75,7 +76,7 @@ describe('Response', () => {
 				},
 			};
 			const text = responseHeader(pingResult, 'tag-1', boldSeparator);
-			expect(text).to.equal('>*Atlanta (GA), US, NA, My Network (AS12345), (tag-1)*\n');
+			expect(text).to.equal('> *Atlanta (GA), US, NA, My Network (AS12345), (tag-1)*\n');
 		});
 	});
 });

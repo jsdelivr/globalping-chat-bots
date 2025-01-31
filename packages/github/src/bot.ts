@@ -12,6 +12,7 @@ import {
 	getMeasurement,
 	getTag,
 	HelpTexts,
+	LinkBlockType,
 	Logger,
 	Measurement,
 	MeasurementCreate,
@@ -290,8 +291,6 @@ export class Bot {
 		});
 	}
 
-	// const
-
 	private async measurementsResponse (
 		githubClient: Octokit,
 		githubTarget: GithubTarget,
@@ -324,12 +323,16 @@ export class Bot {
 		let footerText;
 
 		if (resultsTruncated) {
-			footerText = fullResultsFooter(measurementId, githubBoldSeparator, false);
+			footerText = fullResultsFooter(
+				measurementId,
+				githubBoldSeparator,
+				LinkBlockType.Markdown,
+			);
 		} else if (flags.share) {
 			footerText = shareMessageFooter(
 				measurementId,
 				githubBoldSeparator,
-				false,
+				LinkBlockType.Markdown,
 			);
 		}
 

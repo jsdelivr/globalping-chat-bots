@@ -9,11 +9,12 @@
 	"compilerOptions": {
 
 		/* Projects */
-		"incremental": true,
+		// "incremental": true,
 
 		/* Language and Environment */
 		"target": "esnext",
 		"useDefineForClassFields": true,
+		"composite": true,
 
 		/* Modules */
 		"module": "esnext",

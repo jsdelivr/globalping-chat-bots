@@ -6,6 +6,7 @@
 	"scripts": {
 		"start": "NODE_ENV=production tsx src/main.ts",
 		"start-pretty": "tsx src/main.ts | pino-pretty",
+		"discord:deploy-commands": "NODE_ENV=production tsx src/discord/deploy-commands.ts",
 		"dev": "tsx src/main.ts",
 		"watch": "tsx watch src/main.ts"
 	},
