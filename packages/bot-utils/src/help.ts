@@ -107,8 +107,8 @@ export const dnsHelpTexts = {
 
 export const httpHelpTexts = {
 	name: 'http',
-	short: 'Perform a HEAD or GET request to a host',
-	preamble: `The http command sends an HTTP request to a host and can perform HEAD or GET operations. GET is limited to 10KB responses, everything above will be cut by the API.`,
+	short: 'Perform a HEAD, GET or OPTIONS request to a host',
+	preamble: `The http command sends an HTTP request to a host and can perform HEAD, GET or OPTIONS operations. GET is limited to 10KB responses, everything above will be cut by the API.`,
 	examples: [
 		{
 			description:
@@ -183,7 +183,7 @@ export const httpHelpTexts = {
 			name: 'method',
 			type: 'string',
 			description:
-				'Specifies the HTTP method to use (HEAD or GET) (default "HEAD")',
+				'Specifies the HTTP method to use (HEAD, GET or OPTIONS) (default "HEAD")',
 		},
 		{
 			name: 'path',
