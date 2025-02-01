@@ -65,6 +65,8 @@ export const codeBlock = (text: string): string => `\`\`\`
 ${text}
 \`\`\``;
 
+export const codeBlockLength = codeBlock('').length;
+
 const latencyText = (result: ProbeMeasurement, flags: Flags): string => {
 	let text = '';
 
@@ -117,7 +119,7 @@ export const responseText = (
 		responseText = result.result.rawOutput.trim();
 	}
 
-	return codeBlock(truncate(responseText, truncationLimit));
+	return codeBlock(truncate(responseText, truncationLimit - codeBlockLength));
 };
 
 const truncationText = '\n... (truncated)';
