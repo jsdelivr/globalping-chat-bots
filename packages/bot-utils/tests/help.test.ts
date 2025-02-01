@@ -119,7 +119,7 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
 *Measurement Commands*:
 \`\`\`
   dns           Resolve a DNS record similarly to dig
-  http          Perform a HEAD or GET request to a host
+  http          Perform a HEAD, GET, or OPTIONS request to a host
   mtr           Run an MTR test, similar to traceroute
   ping          Run a ping test
   traceroute    Run a traceroute test
@@ -143,7 +143,7 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
 
 Use \`globalping [command] --help\` for more information about a command.
 `,
-				http: `The http command sends an HTTP request to a host and can perform HEAD or GET operations. GET is limited to 10KB responses, everything above will be cut by the API.
+				http: `The http command sends an HTTP request to a host and can perform HEAD, GET, or OPTIONS operations. GET is limited to 10KB responses, everything above will be cut by the API.
 
 *Examples:*
 HTTP HEAD request to jsdelivr.com from 2 probes in New York
@@ -190,7 +190,7 @@ http google.com from 123 --resolver 1.1.1.1
       --full               Full output. Uses an HTTP GET request, and outputs the status, headers and body to the output
   -H, --header string      Specifies a HTTP header to be added to the request, in the format "Key: Value". Multiple headers can be added by adding multiple flags
       --host string        Specifies the Host header, which is going to be added to the request (default host defined in target)
-      --method string      Specifies the HTTP method to use (HEAD or GET) (default "HEAD")
+      --method string      Specifies the HTTP method to use (HEAD, GET, or OPTIONS) (default "HEAD")
       --path string        A URL pathname (default "/")
       --port int           Specifies the port to use (default 80 for HTTP, 443 for HTTPS and HTTP2)
       --protocol string    Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTP")
