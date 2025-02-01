@@ -35,6 +35,25 @@ const routes: CustomRoute[] = [
 		handler: (req, res) => githubBot.HandleRequest(req, res),
 	},
 	{
+		path: '/discord/install',
+		method: [ 'GET' ],
+		handler: (_req, res) => {
+			try {
+				res
+					.writeHead(302, {
+						Location:
+							'https://discord.com/api/oauth2/authorize?client_id='
+							+ config.discordClientId,
+					})
+					.end();
+			} catch (error) {
+				res.writeHead(503);
+				res.write('Failed to redirect to Discord\'s OAuth page');
+				res.end();
+			}
+		},
+	},
+	{
 		path: '/health',
 		method: [ 'GET' ],
 		handler: async (_req, res) => {
