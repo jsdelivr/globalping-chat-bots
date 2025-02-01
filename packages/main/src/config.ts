@@ -36,6 +36,7 @@ export const config = {
 	globalpingToken: process.env.GLOBALPING_TOKEN as string,
 
 	discordToken: process.env.DISCORD_TOKEN as string,
+	discordClientId: process.env.DISCORD_CLIENT_ID as string,
 };
 
 export type Config = typeof config;
@@ -49,7 +50,12 @@ function validateConfig (c: Config) {
 		throw new Error('DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_DATABASE environment variable must be set');
 	}
 
-	if (!c.slackSigningSecret || !c.slackClientId || !c.slackClientSecret || !c.slackStateSecret) {
+	if (
+		!c.slackSigningSecret
+		|| !c.slackClientId
+		|| !c.slackClientSecret
+		|| !c.slackStateSecret
+	) {
 		throw new Error('SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_STATE_SECRET environment variable must be set');
 	}
 
@@ -61,12 +67,16 @@ function validateConfig (c: Config) {
 		throw new Error('DASHBOARD_URL AUTH_URL, AUTH_CLIENT_ID and AUTH_CLIENT_SECRET environment variable must be set');
 	}
 
-	if (!c.githubPersonalAccessToken || !c.githubBotApiKey || !c.globalpingToken) {
+	if (
+		!c.githubPersonalAccessToken
+		|| !c.githubBotApiKey
+		|| !c.globalpingToken
+	) {
 		throw new Error('GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_BOT_API_KEY and GLOBALPING_TOKEN environment variable must be set');
 	}
 
-	if (!c.discordToken) {
-		throw new Error('DISCORD_TOKEN environment variable must be set');
+	if (!c.discordToken || !c.discordClientId) {
+		throw new Error('DISCORD_TOKEN and DISCORD_CLIENT_ID environment variable must be set');
 	}
 }
 
