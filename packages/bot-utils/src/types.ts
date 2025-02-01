@@ -70,7 +70,7 @@ export const ALLOWED_HTTP_PROTOCOLS = [ 'HTTP', 'HTTPS', 'HTTP2' ] as const;
 export type HttpProtocol = (typeof ALLOWED_HTTP_PROTOCOLS)[number];
 export const isHttpProtocol = (type: string): type is HttpProtocol => ALLOWED_HTTP_PROTOCOLS.includes(type as HttpProtocol);
 
-export const ALLOWED_HTTP_METHODS = [ 'GET', 'HEAD' ] as const;
+export const ALLOWED_HTTP_METHODS = [ 'HEAD', 'GET', 'OPTIONS' ] as const;
 export type HttpMethod = (typeof ALLOWED_HTTP_METHODS)[number];
 export const isHttpMethod = (type: string): type is HttpMethod => ALLOWED_HTTP_METHODS.includes(type as HttpMethod);
 
