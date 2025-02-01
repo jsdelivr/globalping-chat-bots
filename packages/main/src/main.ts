@@ -46,7 +46,7 @@ const routes: CustomRoute[] = [
 							+ config.discordClientId,
 					})
 					.end();
-			} catch (error) {
+			} catch {
 				res.writeHead(503);
 				res.write('Failed to redirect to Discord\'s OAuth page');
 				res.end();
