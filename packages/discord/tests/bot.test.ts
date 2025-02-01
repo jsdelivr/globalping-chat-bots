@@ -199,7 +199,7 @@ describe('Bot', () => {
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
 			const expectedText
-				= expectedResponse.results[0].result.rawOutput.trim().slice(0, 1008)
+				= expectedResponse.results[0].result.rawOutput.trim().slice(0, 1000)
 				+ '\n... (truncated)';
 
 			const expectedReply = {
@@ -257,7 +257,7 @@ describe('Bot', () => {
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
 			const expectedText
-				= expectedResponse.results[0].result.rawOutput.trim().slice(0, 1008)
+				= expectedResponse.results[0].result.rawOutput.trim().slice(0, 1000)
 				+ '\n... (truncated)';
 
 			const expectedReply = {
