@@ -36,7 +36,7 @@ export const config = {
 	globalpingToken: process.env.GLOBALPING_TOKEN as string,
 
 	discordToken: process.env.DISCORD_TOKEN as string,
-	discordClientId: process.env.DISCORD_CLIENT_ID as string,
+	discordAppId: process.env.DISCORD_APP_ID as string,
 };
 
 export type Config = typeof config;
@@ -75,8 +75,8 @@ function validateConfig (c: Config) {
 		throw new Error('GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_BOT_API_KEY and GLOBALPING_TOKEN environment variable must be set');
 	}
 
-	if (!c.discordToken || !c.discordClientId) {
-		throw new Error('DISCORD_TOKEN and DISCORD_CLIENT_ID environment variable must be set');
+	if (!c.discordToken || !c.discordAppId) {
+		throw new Error('DISCORD_TOKEN and DISCORD_APP_ID environment variable must be set');
 	}
 }
 
