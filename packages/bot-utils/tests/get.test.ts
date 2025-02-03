@@ -56,7 +56,7 @@ describe('Get measurement', () => {
 		});
 	});
 
-	describe.skip('http', () => {
+	describe('http', () => {
 		it('should get http successfully (no flags)', async () => {
 			const res = await getMeasurement('http1');
 			expect(res).toEqual(probeData.http1);

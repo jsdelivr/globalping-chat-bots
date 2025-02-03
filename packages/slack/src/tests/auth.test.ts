@@ -549,10 +549,15 @@ describe('Auth', () => {
 				installation,
 			});
 
-			const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+			const exchangeFetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({
 				ok: true,
 				status: 200,
 				json: async () => newToken,
+			} as Response);
+
+			const revokeFetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+				ok: true,
+				status: 200,
 			} as Response);
 
 			const req = {
@@ -577,16 +582,19 @@ describe('Auth', () => {
 				newToken,
 			);
 
-			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'Content-Length': '173',
+			expect(exchangeFetchSpy).toHaveBeenCalledWith(
+				`${config.authUrl}/oauth/token`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						'Content-Length': '173',
+					},
+					body: 'client_id=client_id&client_secret=client_secret&code=code&code_verifier=verifier&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%2Fslack%2Foauth%2Fcallback',
 				},
-				body: 'client_id=client_id&client_secret=client_secret&code=code&code_verifier=verifier&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%2Fslack%2Foauth%2Fcallback',
-			});
+			);
 
-			expect(fetchSpy).toHaveBeenCalledWith(
+			expect(revokeFetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/revoke`,
 				{
 					method: 'POST',
