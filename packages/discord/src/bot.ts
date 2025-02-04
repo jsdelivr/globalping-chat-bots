@@ -145,7 +145,7 @@ ${formatAPIError(error)}`);
 		return {
 			cmd,
 			target,
-			from,
+			from: from as string,
 			limit:
 				interaction.options.getNumber('limit')
 				?? (undefined as unknown as number), // Force overwrite main interface

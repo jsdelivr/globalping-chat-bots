@@ -5,8 +5,8 @@ import {
 	LinkBlockType,
 	responseHeader,
 	shareMessageFooter,
-} from '../src/response.js';
-import { ProbeMeasurement } from '../src/types.js';
+} from '../response.js';
+import { ProbeMeasurement } from '../types.js';
 
 describe('Response', () => {
 	const boldSeparator = '*';

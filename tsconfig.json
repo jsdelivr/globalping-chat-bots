@@ -1,13 +1,57 @@
 {
-	"files": [],
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"lib": [
+			"ES2022"
+		],
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"composite": true,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"rootDir": ".",
+		"baseUrl": ".",
+		"outDir": "./dist",
+		"removeComments": true,
+		"allowJs": true,
+		"checkJs": true,
+		"noImplicitAny": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"types": [
+			"node"
+		]
+	},
+	"include": [
+		"packages/**/*"
+	],
 	"exclude": [
-		"node_modules"
+		"node_modules",
+		"dist"
 	],
 	"references": [
-		{ "path": "packages/bot-utils" },
-		{ "path": "packages/discord" },
-		{ "path": "packages/github" },
-		{ "path": "packages/slack" },
-		{ "path": "packages/main" }
+		{
+			"path": "packages/bot-utils"
+		},
+		{
+			"path": "packages/discord"
+		},
+		{
+			"path": "packages/github"
+		},
+		{
+			"path": "packages/slack"
+		},
+		{
+			"path": "packages/main"
+		}
 	]
 }

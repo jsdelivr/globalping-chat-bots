@@ -16,7 +16,7 @@ export function responseHeader (
 	} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}${boldSeparator}\n`;
 }
 
-export const enum LinkBlockType {
+export enum LinkBlockType {
 	Slack = 1,
 	Markdown = 2,
 	Raw = 3,

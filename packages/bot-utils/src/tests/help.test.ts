@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateHelp } from '../src/help.js';
+import { generateHelp } from '../help.js';
 
 describe('help', () => {
 	describe('generateHelp', () => {

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { postMeasurement } from '../src/post.js';
+import { postMeasurement } from '../post.js';
 import { postMeasurementHandlers, setupAPIServer } from './mocks/index.js';
-import { MeasurementCreate } from '../src/types.js';
+import { MeasurementCreate } from '../types.js';
 
 describe('Post', () => {
 	setupAPIServer(postMeasurementHandlers);

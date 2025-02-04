@@ -1,7 +1,7 @@
 import { generateHelp } from '@globalping/bot-utils';
 import { codeBlock } from 'discord.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Bot } from '../src/bot.js';
+import { Bot } from '../bot.js';
 import {
 	getDefaultDnsResponse,
 	getDefaultHttpResponse,
@@ -49,7 +49,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -104,7 +104,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -165,7 +165,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -231,7 +231,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -288,7 +288,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -339,7 +339,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			await bot.HandleInteraction(interactionMock);
 
@@ -367,7 +367,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			await bot.HandleInteraction(interactionMock);
 
@@ -395,7 +395,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			await bot.HandleInteraction(interactionMock);
 
@@ -423,7 +423,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			await bot.HandleInteraction(interactionMock);
 
@@ -451,7 +451,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			await bot.HandleInteraction(interactionMock);
 
@@ -479,7 +479,7 @@ describe('Bot', () => {
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
-			};
+			} as any;
 
 			await bot.HandleInteraction(interactionMock);
 

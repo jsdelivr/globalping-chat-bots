@@ -1,24 +1,9 @@
-import { knex as knexInstance, Knex } from 'knex';
+import knex, { type Knex } from 'knex';
 
 export type KnexClient = Knex;
 
-export const enum Tables {
+export enum Tables {
 	Installations = 'installations',
-}
-
-declare module 'knex/types/tables' {
-	interface UserInstallation {
-		id: string;
-		installation: string | null;
-		token: string | null;
-		authorize_session: string | null;
-		installation_token: string | null;
-	}
-
-	interface Tables {
-		// This is same as specifying `knex<User>('users')`
-		installations: UserInstallation;
-	}
 }
 
 export function initKnexClient (
@@ -31,7 +16,7 @@ export function initKnexClient (
 	},
 	migrationsDirPath: string,
 ): KnexClient {
-	return knexInstance({
+	return knex.knex({
 		client: 'mysql',
 		connection: {
 			host: config.dbHost,

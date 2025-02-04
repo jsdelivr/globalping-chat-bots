@@ -1,12 +1,22 @@
-import { getMeasurement, KnexClient, postMeasurement, Logger } from '@globalping/bot-utils';
-import { App, AppOptions, CustomRoute, LogLevel } from '@slack/bolt';
+import {
+	getMeasurement,
+	KnexClient,
+	postMeasurement,
+	Logger,
+} from '@globalping/bot-utils';
+import bolt, { type App, AppOptions, CustomRoute, LogLevel } from '@slack/bolt';
 
 import { CALLBACK_PATH, OAuthClient } from './auth.js';
 import { Bot } from './bot.js';
 import { DBClient } from './db.js';
 import { Config } from './types.js';
 
-export function initApp (config: Config, logger: Logger, knex: KnexClient, routes: CustomRoute[]): App {
+export function initApp (
+	config: Config,
+	logger: Logger,
+	knex: KnexClient,
+	routes: CustomRoute[],
+): App {
 	const db = new DBClient(knex, logger);
 
 	const oauth = new OAuthClient(config, logger, db);
@@ -73,7 +83,7 @@ export function initApp (config: Config, logger: Logger, knex: KnexClient, route
 		customRoutes: routes,
 	};
 
-	const app: App = new App(baseAppConfig);
+	const app: App = new bolt.App(baseAppConfig);
 	oauth.SetSlackClient(app.client);
 
 	if (config.env !== 'production') {
