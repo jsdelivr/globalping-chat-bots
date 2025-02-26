@@ -95,7 +95,7 @@ export interface Flags {
 	share?: boolean;
 }
 
-export const enum AuthSubcommand {
+export enum AuthSubcommand {
 	Login = 'login',
 	Logout = 'logout',
 	Status = 'status',

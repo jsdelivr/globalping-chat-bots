@@ -1,10 +1,10 @@
 import { vi } from 'vitest';
 
-import { SlackClient } from '../types.js';
-import { OAuthClient } from '../auth.js';
-import probeData from '@globalping/bot-utils/tests/mocks/probedata.json';
 import { Logger, Measurement } from '@globalping/bot-utils';
-import { DBClient } from '../db.js';
+import probeData from '@globalping/bot-utils/tests/mocks/probedata.json' assert { type: 'json' };
+import { Octokit } from 'octokit';
+import { Readable } from 'node:stream';
+import { IncomingMessage } from 'node:http';
 
 export const mockLogger = (): Logger => ({
 	info: vi.fn(),
@@ -12,37 +12,16 @@ export const mockLogger = (): Logger => ({
 	debug: vi.fn(),
 }) as any;
 
-export const mockSlackClient = (): SlackClient => ({
-	chat: {
-		postEphemeral: vi.fn(),
-		postMessage: vi.fn(),
+export const mockGithubClient = (): Octokit => ({
+	rest: {
+		issues: {
+			createComment: vi.fn(),
+		},
 	},
-	conversations: {
-		info: vi.fn(),
-	},
-	users: {
-		info: vi.fn(),
-	},
-}) as any;
-
-export const mockDBClient = (): DBClient => ({
-	getToken: vi.fn(),
-	updateToken: vi.fn(),
-	updateAuthorizeSession: vi.fn(),
-	getInstallationForAuthorization: vi.fn(),
 }) as any;
 
 export const mockPostMeasurement = () => vi.fn();
 export const mockGetMeasurement = () => vi.fn();
-
-export const mockAuthClient = (): OAuthClient => ({
-	Authorize: vi.fn(),
-	Logout: vi.fn(),
-	Introspect: vi.fn(),
-	Limits: vi.fn(),
-	GetToken: vi.fn(),
-	TryToRefreshToken: vi.fn(),
-}) as any;
 
 export const getDefaultDnsResponse = (): Measurement => {
 	return probeData.dns1 as any;
@@ -62,4 +41,19 @@ export const getDefaultPingResponse = (): Measurement => {
 
 export const getDefaultTracerouteResponse = (): Measurement => {
 	return probeData.traceroute1 as any;
+};
+
+export const mockIncomingMessage = (
+	options = {},
+	data: string | Buffer,
+): IncomingMessage => {
+	const readable = new Readable();
+	readable._read = () => {
+		readable.emit('data', data);
+		readable.emit('end');
+	};
+
+	const mockRequest = Object.assign(readable, options);
+
+	return mockRequest as IncomingMessage;
 };

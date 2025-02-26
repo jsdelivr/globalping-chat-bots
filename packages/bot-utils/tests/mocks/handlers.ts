@@ -1,6 +1,6 @@
 import { http } from 'msw';
 
-import dataImport from './probedata.json';
+import dataImport from './probedata.json' assert { type: 'json' };
 
 const data: Record<string, object> = dataImport;
 

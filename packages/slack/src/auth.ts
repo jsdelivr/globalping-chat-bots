@@ -7,7 +7,7 @@ import { AuthorizeSession, DBClient, Installation } from './db.js';
 import { Config, SlackClient } from './types.js';
 
 export const CALLBACK_PATH = '/slack/oauth/callback';
-export const enum AuthorizeErrorType {
+export enum AuthorizeErrorType {
 	NotAuthorized = 'not_authorized',
 	InternalError = 'internal_error',
 	RefreshFailed = 'refresh_failed',
@@ -48,7 +48,7 @@ export interface CreditLimits {
 	remaining: number;
 }
 
-export const enum CreateLimitType {
+export enum CreateLimitType {
 	IP = 'ip',
 	User = 'user',
 }
@@ -79,7 +79,7 @@ export class OAuthClient {
 		private logger: Logger,
 		private installationStore: DBClient,
 		private slackClient?: SlackClient,
-	) {}
+	) { }
 
 	async SetSlackClient (client: SlackClient) {
 		this.slackClient = client;

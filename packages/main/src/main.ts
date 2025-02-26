@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { scopedLogger, initKnexClient } from '@globalping/bot-utils';
 import { initBot as initGithubBot } from 'github-bot';
 import { initBot as initDiscordBot } from 'discord-bot';
@@ -6,7 +8,9 @@ import { config } from './config.js';
 
 import { faviconHandler, homeHandler, robotsHandler } from './handlers.js';
 
-const knex = initKnexClient(config, './migrations');
+
+const migrationsPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../migrations');
+const knex = initKnexClient(config, migrationsPath);
 
 const logger = scopedLogger('main');
 
@@ -71,18 +75,28 @@ const app = initApp(config, scopedLogger('slack'), knex, routes);
 
 // Start the app
 (async () => {
-	logger.info('Running migrations');
-	await knex.migrate.latest();
-	logger.info('Migrations complete');
+	try {
+		logger.info('Running migrations');
+		await knex.migrate.latest();
+		logger.info('Migrations complete');
+	} catch (error) {
+		logger.error('Migrations failed', error);
+		process.exit(1);
+	}
 
-	// Start your app
-	await app.start(config.port);
-	logger.info('Slack and Github bots are online', { env: config.env });
+	try {
+		await app.start(config.port);
+		logger.info('Slack and Github bots are online', { env: config.env });
+	} catch (error) {
+		logger.error('App failed to start', error);
+		process.exit(1);
+	}
 
 	try {
 		await discordBot.login(config.discordToken);
 	} catch (error) {
 		logger.error('Discord bot failed to start', error);
+		process.exit(1);
 	}
 })();
 

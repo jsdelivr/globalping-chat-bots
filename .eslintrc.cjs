@@ -4,14 +4,19 @@ module.exports = {
 		EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
 		project: 'packages/*/tsconfig.json',
 	},
+	ignorePatterns: [
+		'/data',
+		'/node_modules',
+		'**/dist/**',
+		'**/node_modules/**',
+		'packages/main/migrations/**',
+	],
 	rules: {
 		'no-console': 'off',
 	},
 	overrides: [
 		{
-			files: [
-				'**',
-			],
+			files: [ '**' ],
 			rules: {
 				'camelcase': 'off',
 				'n/no-extraneous-import': [
@@ -21,17 +26,13 @@ module.exports = {
 			},
 		},
 		{
-			files: [
-				'**/tsconfig.json',
-			],
+			files: [ '**/tsconfig.json' ],
 			rules: {
 				'jsonc/no-comments': 'off',
 			},
 		},
 		{
-			files: [
-				'**/tests/**',
-			],
+			files: [ '**/tests/**' ],
 			rules: {
 				'@typescript-eslint/no-explicit-any': 'off',
 				'@typescript-eslint/no-non-null-assertion': 'off',

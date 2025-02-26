@@ -1,13 +1,14 @@
 {
 	"name": "main",
 	"private": true,
-	"version": "1.0.0",
-	"main": "src/main.ts",
+	"type": "module",
+	"main": "./dist/src/main.js",
+	"types": "./dist/src/main.d.ts",
 	"scripts": {
-		"start": "NODE_ENV=production tsx src/main.ts",
-		"start-pretty": "tsx src/main.ts | pino-pretty",
+		"build": "tsc",
+		"start": "NODE_ENV=production node dist/src/main.js",
 		"discord:deploy-commands": "NODE_ENV=production tsx src/discord/deploy-commands.ts",
-		"dev": "tsx src/main.ts",
+		"start:dev": "tsx src/main.ts",
 		"watch": "tsx watch src/main.ts"
 	},
 	"dependencies": {
@@ -16,8 +17,5 @@
 		"dotenv": "^16.0.3",
 		"github-bot": "workspace:*",
 		"slack-bot": "workspace:*"
-	},
-	"devDependencies": {
-		"pino-pretty": "^10.0.0"
 	}
 }

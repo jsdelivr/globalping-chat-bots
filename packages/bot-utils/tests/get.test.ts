@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { getMeasurement } from '../src/get.js';
 import { getMeasurementHandlers, setupAPIServer } from './mocks/index.js';
-import probeData from './mocks/probedata.json';
+import probeData from './mocks/probedata.json' assert { type: 'json' };
 
 // This is mainly just to have easy probe data fixtures to reference for future debugging
 describe('Get measurement', () => {
@@ -56,7 +56,7 @@ describe('Get measurement', () => {
 		});
 	});
 
-	describe.skip('http', () => {
+	describe('http', () => {
 		it('should get http successfully (no flags)', async () => {
 			const res = await getMeasurement('http1');
 			expect(res).toEqual(probeData.http1);
