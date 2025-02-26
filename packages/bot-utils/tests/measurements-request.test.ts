@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { argsToFlags } from '../flags.js';
-import { buildPostMeasurements } from '../measurements-request.js';
+import { argsToFlags } from '../src/flags.js';
+import { buildPostMeasurements } from '../src/measurements-request.js';
 
 describe('Utils', () => {
 	describe('parse arguments', () => {

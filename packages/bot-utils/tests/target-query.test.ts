@@ -4,7 +4,7 @@ import {
 	findAndRemoveResolver,
 	parseTargetQuery,
 	TargetQuery,
-} from '../target-query.js';
+} from '../src/target-query.js';
 
 describe('Utils', () => {
 	describe('parseTargetQuery', () => {

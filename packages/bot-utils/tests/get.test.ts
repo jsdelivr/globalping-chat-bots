@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getMeasurement } from '../get.js';
+import { getMeasurement } from '../src/get.js';
 import { getMeasurementHandlers, setupAPIServer } from './mocks/index.js';
 import probeData from './mocks/probedata.json' assert { type: 'json' };
 

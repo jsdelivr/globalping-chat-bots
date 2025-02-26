@@ -2,8 +2,9 @@
 	"name": "globalping-chat-bots",
 	"private": true,
 	"scripts": {
-		"start": "pnpm -r build && pnpm --filter main start",
-		"dev": "pnpm --filter main dev",
+		"build": "pnpm -r build",
+		"start": "pnpm --filter main start",
+		"start:dev": "pnpm --filter main start:dev",
 		"discord:deploy-commands": "pnpm --filter main discord:deploy-commands",
 		"test": "pnpm -r build && vitest",
 		"lint": "pnpm -r build && eslint .",
@@ -15,15 +16,13 @@
 		"node": "^20.18.0"
 	},
 	"license": "MIT",
-	"dependencies": {
-		"@types/node": "~20.17.12",
-		"tsx": "~4.19.2",
-		"typescript": "~5.7.3"
-	},
 	"devDependencies": {
 		"@martin-kolarik/eslint-config": "^7.3.2",
+		"@types/node": "~20.17.12",
 		"@typescript-eslint/eslint-plugin": "^8.11.0",
 		"eslint": "^8.57.1",
+		"tsx": "~4.19.2",
+		"typescript": "^5.7.3",
 		"vitest": "^3.0.5"
 	},
 	"packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c",

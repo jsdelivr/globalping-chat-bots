@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { argsToFlags, Flags } from '../flags.js';
+import { argsToFlags, Flags } from '../src/flags.js';
 
 describe('Utils', () => {
 	describe('args to flags', () => {

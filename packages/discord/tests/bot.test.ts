@@ -1,7 +1,7 @@
 import { generateHelp } from '@globalping/bot-utils';
 import { codeBlock } from 'discord.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Bot } from '../bot.js';
+import { Bot } from '../src/bot.js';
 import {
 	getDefaultDnsResponse,
 	getDefaultHttpResponse,

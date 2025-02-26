@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
 import { Logger, Measurement } from '@globalping/bot-utils';
-import probeData from '@globalping/bot-utils/src/tests/mocks/probedata.json' assert { type: 'json' };
+import probeData from '@globalping/bot-utils/tests/mocks/probedata.json' assert { type: 'json' };
 import { Octokit } from 'octokit';
 import { Readable } from 'node:stream';
 import { IncomingMessage } from 'node:http';

@@ -7,9 +7,9 @@ import {
 	AuthorizeErrorType,
 	IntrospectionResponse,
 	OAuthClient,
-} from '../auth.js';
-import { AuthorizeSession, Installation } from '../db.js';
-import { Config } from '../types.js';
+} from '../src/auth.js';
+import { AuthorizeSession, Installation } from '../src/db.js';
+import { Config } from '../src/types.js';
 import { mockDBClient, mockLogger, mockSlackClient } from './utils.js';
 
 describe('Auth', () => {

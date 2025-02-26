@@ -7,13 +7,13 @@ import {
 	parseCommandfromMention,
 	parseFooter,
 	splitMessageFooter,
-} from '../bot.js';
+} from '../src/bot.js';
 
 import {
 	Config,
 	GithubNotificationRequest,
 	GithubTargetType,
-} from '../types.js';
+} from '../src/types.js';
 import {
 	getDefaultDnsResponse,
 	getDefaultHttpResponse,

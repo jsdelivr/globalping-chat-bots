@@ -1,10 +1,10 @@
 import { vi } from 'vitest';
 
-import { SlackClient } from '../types.js';
-import { OAuthClient } from '../auth.js';
-import probeData from '@globalping/bot-utils/src/tests/mocks/probedata.json' assert { type: 'json' };
+import { SlackClient } from '../src/types.js';
+import { OAuthClient } from '../src/auth.js';
+import probeData from '@globalping/bot-utils/tests/mocks/probedata.json' assert { type: 'json' };
 import { Logger, Measurement } from '@globalping/bot-utils';
-import { DBClient } from '../db.js';
+import { DBClient } from '../src/db.js';
 
 export const mockLogger = (): Logger => ({
 	info: vi.fn(),

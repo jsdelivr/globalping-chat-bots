@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CreateLimitType } from '../auth.js';
+import { CreateLimitType } from '../src/auth.js';
 import {
 	Bot,
 	getMoreCreditsRequiredAuthError,
@@ -7,7 +7,7 @@ import {
 	getNoCreditsAuthError,
 	getNoCreditsNoAuthError,
 	getRawTextFromBlocks,
-} from '../bot.js';
+} from '../src/bot.js';
 import {
 	getDefaultDnsResponse,
 	getDefaultHttpResponse,
