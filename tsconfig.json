@@ -31,8 +31,8 @@
 		]
 	},
 	"include": [
-		"packages/**/*",
-		"packages/**/*.json"
+		"packages/*/src/**",
+		"packages/*/tests/**"
 	],
 	"exclude": [
 		"dist",

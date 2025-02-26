@@ -1,6 +1,6 @@
-import { KnexClient, Tables } from '@globalping/bot-utils';
+import { Tables } from '@globalping/bot-utils';
 
-export const up = async (knex: KnexClient) => {
+export const up = async (knex) => {
 	if (!await knex.schema.hasTable(Tables.Installations)) {
 		console.log('Creating installations table');
 
@@ -11,7 +11,7 @@ export const up = async (knex: KnexClient) => {
 	}
 };
 
-export const down = async (knex: KnexClient) => {
+export const down = async (knex) => {
 	if (await knex.schema.hasTable(Tables.Installations)) {
 		console.log('Dropping installations table');
 		await knex.schema.dropTable(Tables.Installations);

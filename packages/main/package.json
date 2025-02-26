@@ -16,6 +16,7 @@
 		"discord-bot": "workspace:*",
 		"dotenv": "^16.0.3",
 		"github-bot": "workspace:*",
+		"knex": "^2.5.1",
 		"slack-bot": "workspace:*"
 	}
 }

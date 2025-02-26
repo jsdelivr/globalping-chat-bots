@@ -119,6 +119,9 @@ importers:
       github-bot:
         specifier: workspace:*
         version: link:../github
+      knex:
+        specifier: ^2.5.1
+        version: 2.5.1(mysql@2.18.1)
       slack-bot:
         specifier: workspace:*
         version: link:../slack

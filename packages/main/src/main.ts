@@ -9,7 +9,7 @@ import { config } from './config.js';
 import { faviconHandler, homeHandler, robotsHandler } from './handlers.js';
 
 
-const migrationsPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../migrations');
+const migrationsPath = path.join(path.dirname(fileURLToPath(import.meta.url).replace('/dist/', '/')), '../migrations');
 const knex = initKnexClient(config, migrationsPath);
 
 const logger = scopedLogger('main');
