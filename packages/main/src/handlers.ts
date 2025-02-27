@@ -25,7 +25,7 @@ export async function faviconHandler (
 		res.setHeader('Content-Type', 'image/x-icon');
 
 		fs.createReadStream(path.join(
-			path.dirname(fileURLToPath(import.meta.url)),
+			path.dirname(fileURLToPath(import.meta.url).replace('/dist/', '/')),
 			'../public/favicon.ico',
 		)).pipe(res);
 	} catch (error) {
@@ -43,7 +43,7 @@ export async function robotsHandler (
 		res.setHeader('Content-Type', 'text/plain');
 
 		fs.createReadStream(path.join(
-			path.dirname(fileURLToPath(import.meta.url)),
+			path.dirname(fileURLToPath(import.meta.url).replace('/dist/', '/')),
 			'../public/robots.txt',
 		)).pipe(res);
 	} catch (error) {
