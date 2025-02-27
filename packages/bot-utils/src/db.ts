@@ -28,5 +28,11 @@ export function initKnexClient (
 		migrations: {
 			directory: migrationsDirPath,
 		},
+		pool: {
+			min: 0,
+			max: 10,
+			propagateCreateError: false,
+		},
+		acquireConnectionTimeout: 5000,
 	});
 }
