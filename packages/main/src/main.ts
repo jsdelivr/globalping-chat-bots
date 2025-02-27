@@ -110,8 +110,8 @@ const app = initApp(config, scopedLogger('slack'), knex, routes);
 	'SIGILL',
 	'SIGTERM',
 ].forEach((eventType) => {
-	process.on(eventType, async () => {
-		logger.info('Stopping app');
+	process.on(eventType, async (arg0) => {
+		logger.info(`Stopping app (${eventType})`, arg0);
 		await app.stop();
 		logger.info('Closing database connection');
 		await knex.destroy();
