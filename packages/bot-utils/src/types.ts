@@ -321,6 +321,8 @@ export interface HttpTimings {
 }
 
 export interface HttpTLS {
+	protocol: string;
+	cipherName: string;
 	authorized: boolean;
 	error?: string;
 	createdAt: string;
