@@ -163,6 +163,7 @@ ${formatAPIError(error)}`);
 				: undefined,
 			share: interaction.options.getBoolean('share') ?? undefined,
 			latency: interaction.options.getBoolean('latency') ?? undefined,
+			full: interaction.options.getBoolean('full') ?? undefined,
 			help: helpVal,
 		};
 	}

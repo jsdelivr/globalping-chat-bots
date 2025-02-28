@@ -1,4 +1,4 @@
-import { generateHelp } from '@globalping/bot-utils';
+import { generateHelp, HttpProbeResult } from '@globalping/bot-utils';
 import { codeBlock } from 'discord.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Bot } from '../src/bot.js';
@@ -205,6 +205,77 @@ describe('Bot', () => {
 			const expectedReply = {
 				content:
 					'<@123>, here are the results for `http jsdelivr.com --protocol HTTPS --port 443 --query nav=stats --path /package/npm/test --host www.jsdelivr.com`',
+				embeds: [
+					{
+						fields: [
+							{
+								name: '> **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**\n',
+								value: codeBlock(expectedText),
+							},
+						],
+					},
+				],
+			};
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedReply);
+		});
+
+		it('should handle the command - /globalping http tls details', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			const options: Record<string, string | number | boolean> = {
+				target: 'jsdelivr.com',
+				protocol: 'HTTPS',
+				full: true,
+			};
+			interactionMock.options = {
+				getSubcommand: () => 'http',
+				getString: (key: string) => options[key] as string,
+				getNumber: (key: string) => options[key] as number,
+				getBoolean: (key: string) => options[key] as boolean,
+			} as any;
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultHttpResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(postMeasurementMock).toHaveBeenCalledWith({
+				type: 'http',
+				target: 'jsdelivr.com',
+				inProgressUpdates: false,
+				limit: 1,
+				locations: [{ magic: 'world' }],
+				measurementOptions: {
+					protocol: 'HTTPS',
+					request: {},
+				},
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedText = `TLSv1.3/TLS_AES_256_GCM_SHA384
+Subject: www.jsdelivr.com; DNS:www.jsdelivr.com
+Issuer: E6; Let's Encrypt; US
+Validity: 2024-11-09T23:42:06.000Z; 2025-02-07T23:42:05.000Z
+Serial number: 04:F7:8C:6D:25:44:42:1D:C3:0C:9D:77:0C:E1:89:60:95:2F
+Fingerprint: 46:CF:F6:55:D2:66:13:4E:65:83:25:3E:4D:5D:E5:AA:88:15:BE:FA:FC:4E:A8:6A:42:CE:B0:63:FF:0E:88:83
+Key type: EC256
+
+HTTP/1.1 200
+${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 622)}
+... (truncated)`;
+
+			const expectedReply = {
+				content:
+					'<@123>, here are the results for `http jsdelivr.com --protocol HTTPS --full true`',
 				embeds: [
 					{
 						fields: [

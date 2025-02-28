@@ -23,7 +23,11 @@ import {
 } from './utils.js';
 import { Context, SlashCommand } from '@slack/bolt';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
-import { AuthToken, generateHelp } from '@globalping/bot-utils';
+import {
+	AuthToken,
+	generateHelp,
+	HttpProbeResult,
+} from '@globalping/bot-utils';
 
 describe('Bot', () => {
 	afterEach(() => {
@@ -1237,6 +1241,115 @@ First byte: 45 ms
 DNS: 38 ms
 TLS: 45 ms
 TCP: 31 ms
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
+		it('should handle the command - http tls details', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'http jsdelivr.com --full --protocol HTTPS',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultHttpResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'http',
+					target: 'jsdelivr.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						protocol: 'HTTPS',
+						request: {
+							headers: {},
+							method: 'GET',
+							host: 'jsdelivr.com',
+							path: '/',
+						},
+					},
+				},
+				'tok3n',
+			);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `> *Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)*
+\`\`\`
+TLSv1.3/TLS_AES_256_GCM_SHA384
+Subject: www.jsdelivr.com; DNS:www.jsdelivr.com
+Issuer: E6; Let's Encrypt; US
+Validity: 2024-11-09T23:42:06.000Z; 2025-02-07T23:42:05.000Z
+Serial number: 04:F7:8C:6D:25:44:42:1D:C3:0C:9D:77:0C:E1:89:60:95:2F
+Fingerprint: 46:CF:F6:55:D2:66:13:4E:65:83:25:3E:4D:5D:E5:AA:88:15:BE:FA:FC:4E:A8:6A:42:CE:B0:63:FF:0E:88:83
+Key type: EC256
+
+HTTP/1.1 200
+${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders}
+
+${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim()}
 \`\`\``,
 						verbatim: true,
 					},
