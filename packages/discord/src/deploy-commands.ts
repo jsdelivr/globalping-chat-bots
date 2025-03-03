@@ -208,6 +208,10 @@ export const deployCommands = (config: Config) => {
 				.addBooleanOption(option => option
 					.setName('latency')
 					.setDescription('Output only latency stats')
+					.setRequired(false))
+				.addBooleanOption(option => option
+					.setName('full')
+					.setDescription('Output full response')
 					.setRequired(false)))
 			// help
 			.addSubcommand(subcommand => subcommand

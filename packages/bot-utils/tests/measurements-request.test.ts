@@ -172,7 +172,7 @@ describe('Utils', () => {
 					limit: 1,
 					locations: [{ magic: 'New York' }],
 					measurementOptions: {
-						protocol: 'HTTP',
+						protocol: 'HTTPS',
 						request: {
 							host: 'google.com',
 							path: '/',

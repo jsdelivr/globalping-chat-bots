@@ -1,4 +1,4 @@
-import { generateHelp } from '@globalping/bot-utils';
+import { generateHelp, HttpProbeResult } from '@globalping/bot-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
 	Bot,
@@ -259,6 +259,90 @@ Message ID: <myuser/myrepo/issues/1@github.com>`,
 > **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**
 \`\`\`
 ${expectedResponse.results[0].result.rawOutput}
+\`\`\`
+`,
+			});
+		});
+
+		it('should succesfully handle the command - http tls details', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping http jsdelivr.com --protocol https --full
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultHttpResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'http',
+					target: 'jsdelivr.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						protocol: 'HTTPS',
+						request: {
+							headers: {},
+							method: 'GET',
+							host: 'jsdelivr.com',
+							path: '/',
+						},
+					},
+				},
+				'globalping_token',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: `Here are the results for \`http jsdelivr.com --protocol https --full\`
+> **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**
+\`\`\`
+TLSv1.3/TLS_AES_256_GCM_SHA384
+Subject: www.jsdelivr.com; DNS:www.jsdelivr.com
+Issuer: E6; Let's Encrypt; US
+Validity: 2024-11-09T23:42:06.000Z; 2025-02-07T23:42:05.000Z
+Serial number: 04:F7:8C:6D:25:44:42:1D:C3:0C:9D:77:0C:E1:89:60:95:2F
+Fingerprint: 46:CF:F6:55:D2:66:13:4E:65:83:25:3E:4D:5D:E5:AA:88:15:BE:FA:FC:4E:A8:6A:42:CE:B0:63:FF:0E:88:83
+Key type: EC256
+
+HTTP/1.1 200
+${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders}
+
+${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim()}
 \`\`\`
 `,
 			});

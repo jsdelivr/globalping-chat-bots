@@ -164,7 +164,7 @@ export const httpHelpTexts = {
 		{
 			name: 'full',
 			description:
-				'Full output. Uses an HTTP GET request, and outputs the status, headers and body to the output',
+				'Enable full output to display TLS details, HTTP status, headers, and body (if available)',
 		},
 		{
 			name: 'header',
@@ -200,7 +200,7 @@ export const httpHelpTexts = {
 			name: 'protocol',
 			type: 'string',
 			description:
-				'Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTP")',
+				'Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTPS")',
 		},
 		{
 			name: 'query',

@@ -2,6 +2,7 @@ import { Flags } from './flags.js';
 import {
 	DnsProbeResult,
 	HttpProbeResult,
+	HttpTLS,
 	PingProbeResult,
 	ProbeMeasurement,
 } from './types.js';
@@ -57,8 +58,20 @@ export function fullResultsFooter (
 	)}${boldSeparator}\n`;
 }
 
-function isBodyOnlyHttpGet (flags: Flags): boolean {
-	return flags.cmd === 'http' && flags.method === 'GET' && !flags.full;
+function getHTTPTLSText (tls: HttpTLS | null): string {
+	if (!tls) {
+		return '';
+	}
+
+	return `${tls.protocol}/${tls.cipherName}${tls.authorized ? '' : '\nError: ' + tls.error}
+Subject: ${tls.subject.CN}; ${tls.subject.alt}
+Issuer: ${tls.issuer.CN}; ${tls.issuer.O}; ${tls.issuer.C}
+Validity: ${tls.createdAt}; ${tls.expiresAt}
+Serial number: ${tls.serialNumber}
+Fingerprint: ${tls.fingerprint256}
+Key type: ${tls.keyType}${tls.keyBits}
+
+`;
 }
 
 export const codeBlock = (text: string): string => `\`\`\`
@@ -113,8 +126,26 @@ export const responseText = (
 
 	let responseText: string;
 
-	if (isBodyOnlyHttpGet(flags)) {
-		responseText = (result.result as HttpProbeResult).rawBody?.trim() || '';
+	if (flags.cmd === 'http') {
+		if (flags.full === true) {
+			responseText = getHTTPTLSText((result.result as HttpProbeResult).tls);
+
+			const firstLineEnd = result.result.rawOutput.indexOf('\n');
+			responseText
+				+= result.result.rawOutput.slice(0, firstLineEnd)
+				+ '\n'
+				+ (result.result as HttpProbeResult).rawHeaders
+				+ '\n\n';
+
+			if (flags.method === 'GET') {
+				responseText
+					+= (result.result as HttpProbeResult).rawBody?.trim() || '';
+			}
+		} else if (flags.method === 'GET') {
+			responseText = (result.result as HttpProbeResult).rawBody?.trim() || '';
+		} else {
+			responseText = result.result.rawOutput.trim();
+		}
 	} else {
 		responseText = result.result.rawOutput.trim();
 	}
