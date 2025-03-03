@@ -4,7 +4,7 @@
 	"scripts": {
 		"build": "pnpm -r build",
 		"start": "pnpm --filter main start",
-		"start:dev": "pnpm --filter main start:dev",
+		"start:dev": "pnpm -r build && pnpm --filter main start:dev",
 		"discord:deploy-commands": "pnpm --filter main discord:deploy-commands",
 		"test": "pnpm -r build && vitest",
 		"lint": "pnpm -r build && eslint .",
