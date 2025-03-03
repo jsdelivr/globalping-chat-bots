@@ -1349,7 +1349,7 @@ Key type: EC256
 HTTP/1.1 200
 ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders}
 
-${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim()}
+${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(0, 1419) + '\n... (truncated)'}
 \`\`\``,
 						verbatim: true,
 					},

@@ -30,17 +30,17 @@ export const formatMeasurementResponse = (
 	];
 	const resultsForDisplay = res.results.slice(0, maxDisplayedResults);
 	const slackBoldSeparator = '*';
-	const slackTruncationLimit = 4000;
+	const mrkdownBlockLimit = 3000;
 
 	for (const result of resultsForDisplay) {
 		const tag = getTag(result.probe.tags);
+		const header = responseHeader(result, tag, slackBoldSeparator);
+		const text = responseText(result, flags, mrkdownBlockLimit - header.length);
 		blocks.push({
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text:
-					responseHeader(result, tag, slackBoldSeparator)
-					+ responseText(result, flags, slackTruncationLimit),
+				text: header + text,
 				verbatim: true,
 			},
 		});
