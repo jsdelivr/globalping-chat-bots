@@ -63,11 +63,7 @@ function getHTTPTLSText (tls: HttpTLS | null): string {
 		return '';
 	}
 
-	if (tls.authorized === false) {
-		return 'Error: ' + tls.error + '\n\n';
-	}
-
-	return `${tls.protocol}/${tls.cipherName}
+	return `${tls.protocol}/${tls.cipherName}${tls.authorized ? '' : '\nError: ' + tls.error}
 Subject: ${tls.subject.CN}; ${tls.subject.alt}
 Issuer: ${tls.issuer.CN}; ${tls.issuer.O}; ${tls.issuer.C}
 Validity: ${tls.createdAt}; ${tls.expiresAt}
@@ -139,8 +135,12 @@ export const responseText = (
 				+= result.result.rawOutput.slice(0, firstLineEnd)
 				+ '\n'
 				+ (result.result as HttpProbeResult).rawHeaders
-				+ '\n\n'
-				+ ((result.result as HttpProbeResult).rawBody?.trim() || '');
+				+ '\n\n';
+
+			if (flags.method === 'GET') {
+				responseText
+					+= (result.result as HttpProbeResult).rawBody?.trim() || '';
+			}
 		} else if (flags.method === 'GET') {
 			responseText = (result.result as HttpProbeResult).rawBody?.trim() || '';
 		} else {

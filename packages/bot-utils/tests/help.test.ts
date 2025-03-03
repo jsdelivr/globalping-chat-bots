@@ -187,13 +187,13 @@ http google.com from 123 --resolver 1.1.1.1
 *Flags*:
 \`\`\`
   -h, --help               Help for http
-      --full               Full output. Uses an HTTP GET request, and outputs the status, headers and body to the output
+      --full               Enable full output to display TLS details, HTTP status, headers, and body (if available)
   -H, --header string      Specifies a HTTP header to be added to the request, in the format "Key: Value". Multiple headers can be added by adding multiple flags
       --host string        Specifies the Host header, which is going to be added to the request (default host defined in target)
       --method string      Specifies the HTTP method to use (HEAD, GET, or OPTIONS) (default "HEAD")
       --path string        A URL pathname (default "/")
       --port int           Specifies the port to use (default 80 for HTTP, 443 for HTTPS and HTTP2)
-      --protocol string    Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTP")
+      --protocol string    Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTPS")
       --query string       A query-string
       --resolver string    Specifies the resolver server used for DNS lookup (default is defined by the probe's network)
 \`\`\`

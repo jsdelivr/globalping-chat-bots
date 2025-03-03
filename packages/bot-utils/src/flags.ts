@@ -285,7 +285,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		? String(parsed.method).toUpperCase()
 		: undefined;
 
-	if (parsed.full) {
+	if (parsed.full && !httpMethod) {
 		httpMethod = 'GET';
 	}
 
@@ -316,7 +316,7 @@ export const argsToFlags = (argv: string | string[]): Flags => {
 		}
 
 		if (!protocol) {
-			protocol = urlData?.protocol;
+			protocol = urlData?.protocol || 'HTTPS';
 		}
 
 		if (!query) {
@@ -379,7 +379,7 @@ function parseUrlData (input: string): UrlData {
 
 	// add url scheme if missing
 	if (!u.startsWith('http://') && !u.startsWith('https://')) {
-		u = `http://${u}`;
+		u = `https://${u}`;
 	}
 
 	try {

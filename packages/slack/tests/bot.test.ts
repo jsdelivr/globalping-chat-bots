@@ -1200,7 +1200,7 @@ Total: 7 ms
 					limit: 1,
 					locations: [{ magic: 'world' }],
 					measurementOptions: {
-						protocol: 'HTTP',
+						protocol: 'HTTPS',
 						request: {
 							headers: {},
 							host: 'jsdelivr.com',
