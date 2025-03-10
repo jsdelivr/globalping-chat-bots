@@ -13,4 +13,4 @@ RUN npm install -g pnpm
 
 RUN pnpm i
 
-CMD pnpm dev
+CMD pnpm start:dev

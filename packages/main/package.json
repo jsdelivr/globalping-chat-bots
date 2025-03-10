@@ -2,14 +2,17 @@
 	"name": "main",
 	"private": true,
 	"type": "module",
-	"main": "./dist/src/main.js",
-	"types": "./dist/src/main.d.ts",
+	"exports": {
+		"types": "./dist/src/index.d.ts",
+		"development": "./src/index.ts",
+		"default": "./dist/src/index.js"
+	},
 	"scripts": {
 		"build": "tsc",
 		"start": "NODE_ENV=production node dist/src/main.js",
-		"discord:deploy-commands": "NODE_ENV=production tsx src/discord/deploy-commands.ts",
-		"start:dev": "tsx src/main.ts",
-		"watch": "tsx watch src/main.ts"
+		"discord:deploy-commands": "NODE_ENV=production tsx --conditions=development src/discord/deploy-commands.ts",
+		"start:dev": "tsx --conditions=development src/main.ts",
+		"watch": "tsx --conditions=development watch src/main.ts"
 	},
 	"dependencies": {
 		"@globalping/bot-utils": "workspace:*",
