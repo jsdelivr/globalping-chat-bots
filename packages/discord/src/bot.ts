@@ -1,4 +1,5 @@
 import {
+	AuthSubcommand,
 	buildPostMeasurements,
 	Flags,
 	formatAPIError,
@@ -7,16 +8,25 @@ import {
 	getMeasurement,
 	getTag,
 	HelpTexts,
+	KnexClient,
 	LinkBlockType,
 	Logger,
 	Measurement,
 	MeasurementCreate,
 	MeasurementCreateResponse,
+	OAuthClient,
 	postMeasurement,
 	responseHeader,
 	responseText,
 	shareMessageFooter,
 	throwArgError,
+	getLimitsOutput,
+	AuthorizeErrorType,
+	AuthToken,
+	AuthorizeError,
+	PostError,
+	getTooManyRequestsError,
+	CustomRoute,
 } from '@globalping/bot-utils';
 import {
 	APIEmbed,
@@ -27,15 +37,44 @@ import {
 	GatewayIntentBits,
 	inlineCode,
 	Interaction,
+	MessageFlags,
+	PermissionFlagsBits,
+	PermissionsBitField,
+	TextChannel,
 	userMention,
 } from 'discord.js';
 
 import { getHelpForCommand } from './utils.js';
+import { Config } from './types.js';
+import { DBClient, AuthorizeSession } from './db.js';
+import { IncomingMessage, ServerResponse } from 'node:http';
 
-export const initBot = (logger: Logger) => {
+export const initBot = (
+	config: Config,
+	logger: Logger,
+	knex: KnexClient,
+	routes: CustomRoute[],
+) => {
 	const client = new Client({ intents: [ GatewayIntentBits.Guilds ] });
 
-	const bot = new Bot(logger, postMeasurement, getMeasurement);
+	const db = new DBClient(knex, logger);
+
+	const oauth = new OAuthClient(config, logger, db);
+
+	const bot = new Bot(
+		logger,
+		config,
+		db,
+		postMeasurement,
+		getMeasurement,
+		oauth,
+		client,
+	);
+	routes.push({
+		path: config.authCallbackPath,
+		method: [ 'GET' ],
+		handler: (req, res) => bot.OnAuthCallback(req, res),
+	});
 
 	client.on('ready', () => logger.info('Discord bot is online'));
 	client.on('debug', m => logger.debug(m));
@@ -53,19 +92,17 @@ export class Bot {
 
 	constructor (
 		private logger: Logger,
+		private config: Config,
+		private dbClient: DBClient,
 		private postMeasurement: (
 			opts: MeasurementCreate,
 			token?: string,
 		) => Promise<MeasurementCreateResponse>,
 		private getMeasurement: (id: string) => Promise<Measurement>,
+		private oauth: OAuthClient,
+		private discord: Client,
 	) {
-		this.help = generateHelp(
-			'**',
-			'/globalping',
-			new Set([ 'auth', 'limits' ]),
-			4,
-			1,
-		);
+		this.help = generateHelp('**', '/globalping', undefined, 4, 1);
 	}
 
 	async HandleInteraction (interaction: Interaction<CacheType>) {
@@ -79,9 +116,7 @@ export class Bot {
 			return;
 		}
 
-		await interaction.deferReply();
-
-		let txtCommand;
+		let cmdText;
 
 		try {
 			const flags = this.getFlags(interaction);
@@ -91,12 +126,38 @@ export class Bot {
 					flags.help = 'help';
 				}
 
-				await interaction.editReply(getHelpForCommand(flags.help, '', this.help));
+				await interaction.reply({
+					content: getHelpForCommand(flags.help, flags.target, this.help),
+					flags: MessageFlags.Ephemeral,
+				});
 
 				return;
 			}
 
-			txtCommand = this.expandCommand(flags);
+			cmdText = this.expandCommand(flags);
+
+			if (flags.cmd === 'auth') {
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+				switch (flags.target) {
+					case AuthSubcommand.Login:
+						await this.authLogin(interaction);
+						return;
+					case AuthSubcommand.Logout:
+						await this.authLogout(interaction);
+						return;
+					case AuthSubcommand.Status:
+						await this.authStatus(interaction);
+						return;
+				}
+			}
+
+			if (flags.cmd === 'limits') {
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+				await this.limits(interaction);
+				return;
+			}
 
 			if (!flags.from) {
 				flags.from = 'world';
@@ -106,35 +167,399 @@ export class Bot {
 				flags.limit = 1;
 			}
 
-			const measurementResponse = await this.postMeasurement(buildPostMeasurements(flags));
-			const res = await this.getMeasurement(measurementResponse.id);
+			await interaction.deferReply();
 
-			const embeds = this.formatMeasurementResponse(res, flags);
-
-			await interaction.editReply({
-				content: `${userMention(user.id)}, here are the results for ${inlineCode(txtCommand)}`,
-				embeds,
-			});
+			await this.createMeasurement(interaction, flags, cmdText);
 		} catch (error) {
 			this.logger.error(`Error processing request`, {
 				error,
-				command: txtCommand,
+				command: cmdText,
 			});
 
-			await interaction.editReply(`${userMention(user.id)}, there was an error processing your request for ${inlineCode(txtCommand ?? 'help')}
-${formatAPIError(error)}`);
+			const errorMsg = `${userMention(user.id)}, there was an error processing your request for ${inlineCode(cmdText ?? 'help')}
+${formatAPIError(error)}`;
+
+			if (interaction.deferred) {
+				await interaction.editReply(errorMsg);
+			} else {
+				await interaction.reply(errorMsg);
+			}
 		}
+	}
+
+	async OnAuthCallback (req: IncomingMessage, res: ServerResponse) {
+		const url = new URL(req.url || '', this.config.serverHost);
+		const callbackError = url.searchParams.get('error');
+		const errorDescription = url.searchParams.get('error_description');
+		const code = url.searchParams.get('code');
+		const state = url.searchParams.get('state');
+
+		if (!state) {
+			this.logger.error('/oauth/callback missing state', { callbackError });
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		const separatorIndex = state.indexOf('-');
+		const callbackVerifier = state.substring(0, separatorIndex);
+		const id = state.substring(separatorIndex + 1);
+
+		let oldToken: AuthToken | null;
+		let session: AuthorizeSession | null;
+
+		try {
+			const data = await this.dbClient.getDataForAuthorization(id);
+			oldToken = data.token;
+			session = data.session;
+		} catch {
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		if (!session) {
+			this.logger.error('/oauth/callback missing session', { id });
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		if (callbackVerifier !== session.callbackVerifier) {
+			this.logger.error('/oauth/callback invalid verifier', {
+				id,
+			});
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		try {
+			// Delete session
+			await this.dbClient.updateAuthorizeSession(id, null);
+		} catch (error) {
+			this.logger.error('/oauth/callback failed to delete session', error);
+		}
+
+		if (callbackError || !code) {
+			try {
+				const user = this.discord.users.cache.get(session.userId);
+
+				if (user) {
+					await user.send(`Authentication failed: ${callbackError}: ${errorDescription}`);
+				}
+			} catch (error) {
+				this.logger.error('/oauth/callback failed to post ephemeral', error);
+			}
+
+			this.logger.error('/oauth/callback failed', {
+				error: callbackError,
+				errorDescription,
+				code,
+				id,
+			});
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		let exchangeError: AuthorizeError | null;
+
+		try {
+			exchangeError = await this.oauth.Exchange(
+				code,
+				session.exchangeVerifier,
+				id,
+			);
+
+			// Revoke old token if exists
+			if (!exchangeError && oldToken && oldToken.refresh_token) {
+				try {
+					await this.oauth.RevokeToken(oldToken.refresh_token);
+				} catch (error) {
+					this.logger.error('/oauth/callback failed to revoke token', {
+						id,
+						error,
+					});
+				}
+			}
+		} catch {
+			exchangeError = {
+				error: AuthorizeErrorType.InternalError,
+				error_description: 'Failed to exchange code',
+			};
+		}
+
+		if (exchangeError) {
+			this.logger.error('/oauth/callback failed', exchangeError);
+		}
+
+		try {
+			if (exchangeError) {
+				// We can't send ephemeral messages to users directly,
+				// so we send a DM if an error occurs.
+				const user = this.discord.users.cache.get(session.userId);
+
+				if (user) {
+					await user.send(`Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`);
+				}
+			} else {
+				const channel = this.discord.channels.cache.get(session.channelId) as TextChannel;
+
+				if (channel) {
+					await channel.send('Success! You are now authenticated.');
+				}
+			}
+		} catch (error) {
+			this.logger.error('/oauth/callback failed to reply to user', error);
+		}
+
+		res.writeHead(302, {
+			Location:
+				this.config.dashboardUrl
+				+ (exchangeError ? '/authorize/error' : '/authorize/success'),
+		});
+
+		res.end();
+	}
+
+	private async createMeasurement (
+		interaction: ChatInputCommandInteraction,
+		flags: Flags,
+		cmdText: string,
+	) {
+		const id = this.getIdFromInteraction(interaction);
+		const token = await this.oauth.GetToken(id);
+
+		let measurementResponse: MeasurementCreateResponse;
+
+		try {
+			measurementResponse = await this.postMeasurement(
+				buildPostMeasurements(flags),
+				token?.access_token,
+			);
+		} catch (error) {
+			if (error instanceof PostError) {
+				const { statusCode, headers } = error.response;
+
+				// Unauthorized or Forbidden
+				if ((statusCode === 401 || statusCode === 403) && token) {
+					const errMsg = await this.oauth.TryToRefreshToken(id, token);
+
+					if (errMsg) {
+						throw new Error(errMsg);
+					}
+				}
+
+				// Too many requests
+				if (statusCode === 429) {
+					throw getTooManyRequestsError(headers, token);
+				}
+			}
+
+			throw error;
+		}
+
+		const res = await this.getMeasurement(measurementResponse.id);
+
+		const embeds = this.formatMeasurementResponse(res, flags);
+
+		await interaction.editReply({
+			content: `${userMention(interaction.user.id)}, here are the results for ${inlineCode(cmdText)}`,
+			embeds,
+		});
+	}
+
+	private async authLogin (interaction: ChatInputCommandInteraction) {
+		if (!await this.canUseAuthCommand(interaction)) {
+			return;
+		}
+
+		const id = this.getIdFromInteraction(interaction);
+
+		const res = await this.oauth.Authorize(id, {
+			userId: interaction.user.id,
+			channelId: interaction.channelId,
+		});
+
+		let text = `Please [click here](${res.url}) to authenticate.`;
+
+		if (interaction.inGuild()) {
+			text
+				+= '\n\n**Note:** The login is set for the server. Once logged in, account credits are shared between all users in the server.';
+		}
+
+		await interaction.editReply({
+			embeds: [
+				{
+					description: text,
+				},
+			],
+		});
+	}
+
+	private async authStatus (interaction: ChatInputCommandInteraction) {
+		if (!await this.canUseAuthCommand(interaction)) {
+			return;
+		}
+
+		const id = this.getIdFromInteraction(interaction);
+
+		const [ introspection, error ] = await this.oauth.Introspect(id);
+		let text = '';
+
+		if (error) {
+			text
+				= error.error === AuthorizeErrorType.NotAuthorized
+					? 'Not logged in.'
+					: `${error.error}: ${error.error_description}`;
+		}
+
+		text
+			= introspection && introspection.active && introspection.username
+				? `Logged in as ${introspection?.username}.`
+				: 'Not logged in.';
+
+		await interaction.editReply({
+			content: text,
+		});
+	}
+
+	private async authLogout (interaction: ChatInputCommandInteraction) {
+		if (!await this.canUseAuthCommand(interaction)) {
+			return;
+		}
+
+		const id = this.getIdFromInteraction(interaction);
+
+		const error = await this.oauth.Logout(id);
+		let text = '';
+		text = error
+			? `${error.error}: ${error.error_description}`
+			: 'You are now logged out.';
+
+		await interaction.editReply({
+			content: text,
+		});
+	}
+
+	private async limits (interaction: ChatInputCommandInteraction) {
+		const id = this.getIdFromInteraction(interaction);
+
+		const [ introspection, error ] = await this.oauth.Introspect(id);
+
+		if (!introspection) {
+			await interaction.editReply({
+				content: `${error?.error}: ${error?.error_description}`,
+			});
+
+			return;
+		}
+
+		const [ limits, limitsError ] = await this.oauth.Limits(id);
+
+		if (!limits) {
+			await interaction.editReply({
+				content: `${limitsError?.type}: ${limitsError?.message}`,
+			});
+
+			return;
+		}
+
+		await interaction.editReply({
+			content: getLimitsOutput(limits, introspection),
+		});
+	}
+
+	private getIdFromInteraction (interaction: ChatInputCommandInteraction): string {
+		if (interaction.inGuild()) {
+			return 'G' + interaction.guildId;
+		}
+
+		return 'U' + interaction.user.id;
+	}
+
+	private async canUseAuthCommand (interaction: ChatInputCommandInteraction): Promise<boolean> {
+		if (!interaction.inGuild()) {
+			return true;
+		}
+
+		const canAuthenticate = (
+			interaction.member.permissions as PermissionsBitField
+		).has(PermissionFlagsBits.Administrator);
+
+		if (!canAuthenticate) {
+			await interaction.editReply({
+				content: 'Only administrators can use this command.',
+			});
+
+			return false;
+		}
+
+		return true;
 	}
 
 	private getFlags (interaction: ChatInputCommandInteraction): Flags {
 		const cmd = interaction.options.getSubcommand();
-		const helpVal
-			= interaction.options.getString('command')
-			?? (cmd === 'help' ? 'help' : undefined);
+
+		if (interaction.options.getSubcommandGroup() === 'auth') {
+			return {
+				cmd: 'auth',
+				target: cmd,
+				from: '',
+				limit: undefined as unknown as number,
+			};
+		}
+
+		if (cmd === 'help') {
+			let help = interaction.options.getString('command') ?? 'help';
+			let target = '';
+
+			if (help.startsWith('auth ')) {
+				target = help.split(' ')[1];
+				help = 'auth';
+			}
+
+			return {
+				cmd,
+				target,
+				from: '',
+				limit: undefined as unknown as number,
+				help,
+			};
+		}
+
+		if (cmd === 'limits') {
+			return {
+				cmd,
+				target: '',
+				from: '',
+				limit: undefined as unknown as number,
+			};
+		}
 
 		const target
 			= interaction.options.getString('target')
-			?? (helpVal ? '' : throwArgError(undefined, 'target', 'jsdelivr.com'));
+			?? throwArgError(undefined, 'target', 'jsdelivr.com');
 		const from = interaction.options.getString('from') ?? undefined;
 		const rawHeader
 			= interaction.options
@@ -164,7 +589,6 @@ ${formatAPIError(error)}`);
 			share: interaction.options.getBoolean('share') ?? undefined,
 			latency: interaction.options.getBoolean('latency') ?? undefined,
 			full: interaction.options.getBoolean('full') ?? undefined,
-			help: helpVal,
 		};
 	}
 

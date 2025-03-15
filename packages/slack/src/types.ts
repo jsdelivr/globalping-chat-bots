@@ -6,21 +6,15 @@ export type { CustomRoute } from '@slack/bolt';
 
 export interface Config {
 	env: string;
-	logLevel: string;
 
 	serverHost: string;
-
-	dbHost: string;
-	dbPort: number;
-	dbUser: string;
-	dbPassword: string;
-	dbDatabase: string;
 
 	apiUrl: string;
 	dashboardUrl: string;
 	authUrl: string;
 	authClientId: string;
 	authClientSecret: string;
+	authCallbackPath: string;
 
 	slackSigningSecret: string;
 	slackClientId: string;

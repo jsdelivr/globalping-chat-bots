@@ -3,7 +3,8 @@ import knex, { type Knex } from 'knex';
 export type KnexClient = Knex;
 
 export enum Tables {
-	Installations = 'installations',
+	Installations = 'installations', // slack
+	DiscordUsers = 'discord_users',
 }
 
 export function initKnexClient (

@@ -1,19 +1,29 @@
+import { IncomingHttpHeaders } from 'node:http';
 import { Flags } from './flags.js';
 import {
+	CreateLimitType,
+	IntrospectionResponse,
+	LimitsResponse,
+} from './oauth.js';
+import {
+	AuthToken,
 	DnsProbeResult,
 	HttpProbeResult,
 	HttpTLS,
 	PingProbeResult,
 	ProbeMeasurement,
 } from './types.js';
+import { formatSeconds, pluralize } from './utils.js';
 
 export function responseHeader (
 	result: ProbeMeasurement,
 	tag: string | undefined,
 	boldSeparator: string,
 ): string {
-	return `> ${boldSeparator}${result.probe.city}${result.probe.state ? ` (${result.probe.state})` : ''
-	}, ${result.probe.country}, ${result.probe.continent}, ${result.probe.network
+	return `> ${boldSeparator}${result.probe.city}${
+		result.probe.state ? ` (${result.probe.state})` : ''
+	}, ${result.probe.country}, ${result.probe.continent}, ${
+		result.probe.network
 	} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}${boldSeparator}\n`;
 }
 
@@ -162,3 +172,108 @@ export const truncate = (text: string, limit: number): string => {
 
 	return text.slice(0, limit - truncationText.length) + truncationText;
 };
+
+export function getLimitsOutput (
+	limits: LimitsResponse,
+	introspection: IntrospectionResponse,
+) {
+	let text = '';
+
+	if (limits.rateLimit.measurements.create.type === CreateLimitType.User) {
+		text = `Authentication: token (${introspection?.username || ''})\n\n`;
+	} else {
+		text = 'Authentication: workspace\n\n';
+	}
+
+	const createLimit = pluralize(
+		limits.rateLimit.measurements.create.limit,
+		'test',
+	);
+	const createConsumed
+		= limits.rateLimit.measurements.create.limit
+		- limits.rateLimit.measurements.create.remaining;
+	const createRemaining = limits.rateLimit.measurements.create.remaining;
+	text += `Creating measurements:
+ - ${createLimit} per hour
+ - ${createConsumed} consumed, ${createRemaining} remaining
+`;
+
+	if (limits.rateLimit.measurements.create.reset) {
+		text += ` - resets in ${formatSeconds(limits.rateLimit.measurements.create.reset)}\n`;
+	}
+
+	if (limits.rateLimit.measurements.create.type === CreateLimitType.User) {
+		text += `
+Credits:
+ - ${pluralize(
+		limits.credits?.remaining || 0,
+		'credit',
+	)} remaining (may be used to create measurements above the hourly limits)
+`;
+	}
+
+	return text;
+}
+
+export function getTooManyRequestsError (
+	headers: IncomingHttpHeaders,
+	token: AuthToken | null,
+): Error {
+	const rateLimitRemaining = parseInt(headers['X-RateLimit-Remaining'] as string);
+	const rateLimitReset = parseInt(headers['X-RateLimit-Reset'] as string);
+	const creditsRemaining = parseInt(headers['X-Credits-Remaining'] as string);
+	const requestCost = parseInt(headers['X-Request-Cost'] as string);
+	const remaining = rateLimitRemaining + creditsRemaining;
+
+	if (token && !token.isAnonymous) {
+		if (remaining > 0) {
+			return getMoreCreditsRequiredAuthError(
+				requestCost,
+				remaining,
+				rateLimitReset,
+			);
+		}
+
+		return getNoCreditsAuthError(rateLimitReset);
+	}
+
+	if (remaining > 0) {
+		return getMoreCreditsRequiredNoAuthError(
+			remaining,
+			requestCost,
+			rateLimitReset,
+		);
+	}
+
+	return getNoCreditsNoAuthError(rateLimitReset);
+}
+
+export function getMoreCreditsRequiredAuthError (
+	requestCost: number,
+	remaining: number,
+	rateLimitReset: number,
+): Error {
+	return new Error(`You only have ${pluralize(
+		remaining,
+		'credit',
+	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by sponsoring us or hosting probes.`);
+}
+
+export function getNoCreditsAuthError (rateLimitReset: number): Error {
+	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by sponsoring us or hosting probes.`);
+}
+
+export function getMoreCreditsRequiredNoAuthError (
+	requestCost: number,
+	remaining: number,
+	rateLimitReset: number,
+): Error {
+	return new Error(`You only have ${pluralize(
+		remaining,
+		'credit',
+	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by creating an account. Sign up at https://globalping.io`);
+}
+
+export function getNoCreditsNoAuthError (rateLimitReset: number): Error {
+	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by creating an account. Sign up at https://globalping.io`);
+}

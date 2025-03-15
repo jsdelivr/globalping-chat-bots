@@ -9,3 +9,4 @@ export * from './utils.js';
 export * from './help.js';
 export * from './response.js';
 export * from './db.js';
+export * from './oauth.js';
