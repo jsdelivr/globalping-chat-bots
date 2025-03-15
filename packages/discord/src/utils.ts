@@ -1,4 +1,4 @@
-import { HelpTexts } from '@globalping/bot-utils';
+import { AuthSubcommand, HelpTexts } from '@globalping/bot-utils';
 
 export const getHelpForCommand = (
 	cmd: string,
@@ -16,6 +16,21 @@ export const getHelpForCommand = (
 			return help.ping;
 		case 'traceroute':
 			return help.traceroute;
+
+		case 'auth':
+			switch (target) {
+				case AuthSubcommand.Login:
+					return help.auth_login;
+				case AuthSubcommand.Logout:
+					return help.auth_logout;
+				case AuthSubcommand.Status:
+					return help.auth_status;
+				default:
+					return help.auth;
+			}
+
+		case 'limits':
+			return help.limits;
 
 		case undefined:
 		case '':

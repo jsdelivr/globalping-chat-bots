@@ -1,13 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CreateLimitType } from '../src/auth.js';
-import {
-	Bot,
-	getMoreCreditsRequiredAuthError,
-	getMoreCreditsRequiredNoAuthError,
-	getNoCreditsAuthError,
-	getNoCreditsNoAuthError,
-	getRawTextFromBlocks,
-} from '../src/bot.js';
+import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage.js';
+import { Bot, getRawTextFromBlocks } from '../src/bot.js';
 import {
 	getDefaultDnsResponse,
 	getDefaultHttpResponse,
@@ -25,9 +18,12 @@ import { Context, SlashCommand } from '@slack/bolt';
 import { StringIndexed } from '@slack/bolt/dist/types/helpers.js';
 import {
 	AuthToken,
+	CreateLimitType,
 	generateHelp,
 	HttpProbeResult,
 } from '@globalping/bot-utils';
+import { Config } from '../src/types.js';
+import { AuthorizeSession, Installation } from '../src/db.js';
 
 describe('Bot', () => {
 	afterEach(() => {
@@ -44,14 +40,21 @@ describe('Bot', () => {
 	const respondMock = vi.fn();
 	const slackClientMock = mockSlackClient();
 	const expectedHelpTexts = generateHelp('*', '/globalping');
+	const configMock = {
+		serverHost: 'http://localhost',
+		dashboardUrl: 'http://dash.localhost',
+		authUrl: 'http://auth.localhost',
+	};
 
 	const bot = new Bot(
 		loggerMock,
+		configMock as Config,
 		dbClientMock,
 		oauthClientMock,
 		postMeasurementMock,
 		getMeasurementMock,
 	);
+	bot.SetSlackClient(slackClientMock);
 
 	describe('HandleCommand', () => {
 		it('should handle the command - /globalping', async () => {
@@ -646,11 +649,10 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 				user: payload.user_id,
 			});
 
-			expect(oauthClientMock.Authorize).toHaveBeenCalledWith({
-				installationId: context.teamId,
-				channel_id: payload.channel_id,
-				user_id: payload.user_id,
-				thread_ts: payload.thread_ts,
+			expect(oauthClientMock.Authorize).toHaveBeenCalledWith(context.teamId, {
+				channelId: payload.channel_id,
+				userId: payload.user_id,
+				threadTs: payload.thread_ts,
 			});
 
 			const expectedBlocks = [
@@ -2236,31 +2238,157 @@ ${expectedResponse.results[0].result.rawOutput}
 		});
 	});
 
-	describe('getMoreCreditsRequiredAuthError', () => {
-		it('should return correct error', () => {
-			const error = getMoreCreditsRequiredAuthError(5, 2, 300);
-			expect(error).toEqual(new Error('You only have 2 credits remaining, and 5 were required. Try requesting fewer probes or wait 5 minutes for the rate limit to reset. You can get higher limits by sponsoring us or hosting probes.'));
-		});
-	});
+	describe('OnAuthCallback', () => {
+		it('should exchange a new token, revoke the old token, and post a success message in slack', async () => {
+			const code = 'code';
+			const userId = 'U123';
+			const channelId = 'C123';
+			const threadTs = '123';
+			const installationId = 'I123';
 
-	describe('getNoCreditsAuthError', () => {
-		it('should return correct error', () => {
-			const error = getNoCreditsAuthError(60);
-			expect(error).toEqual(new Error('You have run out of credits for this session. You can wait 1 minute for the rate limit to reset or get higher limits by sponsoring us or hosting probes.'));
-		});
-	});
+			const now = new Date();
 
-	describe('getMoreCreditsRequiredNoAuthError', () => {
-		it('should return correct error', () => {
-			const error = getMoreCreditsRequiredNoAuthError(2, 1, 245);
-			expect(error).toEqual(new Error('You only have 1 credit remaining, and 2 were required. Try requesting fewer probes or wait 4 minutes for the rate limit to reset. You can get higher limits by creating an account. Sign up at https://globalping.io'));
-		});
-	});
+			const token: AuthToken = {
+				access_token: 'tok3n',
+				refresh_token: 'refresh_tok3n',
+				expires_in: 3600,
+				token_type: 'Bearer',
+				expiry: now.getTime() / 1000 - 3600,
+			};
 
-	describe('getNoCreditsNoAuthError', () => {
-		it('should return correct error', () => {
-			const error = getNoCreditsNoAuthError(10);
-			expect(error).toEqual(new Error('You have run out of credits for this session. You can wait 10 seconds for the rate limit to reset or get higher limits by creating an account. Sign up at https://globalping.io'));
+			const authorizeSession: AuthorizeSession = {
+				callbackVerifier: 'callback',
+				exchangeVerifier: 'verifier',
+				userId,
+				channelId,
+				threadTs,
+			};
+
+			const installation = {
+				bot: { token: 'installation_token' },
+			} as Installation;
+
+			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
+
+			vi.spyOn(
+				dbClientMock,
+				'getInstallationForAuthorization',
+			).mockResolvedValue({
+				token,
+				session: authorizeSession,
+				installation,
+			});
+
+			const req = {
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${installationId}`,
+			} as ParamsIncomingMessage;
+			const res = {
+				writeHead: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.OnAuthCallback(req, res);
+
+			expect(dbClientMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
+
+			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledWith(
+				installationId,
+				null,
+			);
+
+			expect(oauthClientMock.Exchange).toHaveBeenCalledWith(
+				code,
+				authorizeSession.exchangeVerifier,
+				installationId,
+			);
+
+			expect(oauthClientMock.RevokeToken).toHaveBeenCalledWith(token.refresh_token);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				token: installation?.bot?.token,
+				text: 'Success! You are now authenticated.',
+				user: userId,
+				channel: channelId,
+				thread_ts: threadTs,
+			});
+
+			expect(res.writeHead).toHaveBeenCalledWith(302, {
+				Location: `${configMock.dashboardUrl}/authorize/success`,
+			});
+
+			expect(res.end).toHaveBeenCalled();
+		});
+
+		it('should redirect to the error page - callback verifier does not match', async () => {
+			const code = 'code';
+			const userId = 'U123';
+			const channelId = 'C123';
+			const threadTs = '123';
+			const installationId = 'I123';
+
+			const now = new Date();
+
+			const token: AuthToken = {
+				access_token: 'tok3n',
+				refresh_token: 'refresh_tok3n',
+				expires_in: 3600,
+				token_type: 'Bearer',
+				expiry: now.getTime() / 1000 - 3600,
+			};
+
+			const authorizeSession: AuthorizeSession = {
+				callbackVerifier: 'callback',
+				exchangeVerifier: 'verifier',
+				userId,
+				channelId,
+				threadTs,
+			};
+
+			const installation = {
+				bot: { token: 'installation_token' },
+			} as Installation;
+
+			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
+
+			vi.spyOn(
+				dbClientMock,
+				'getInstallationForAuthorization',
+			).mockResolvedValue({
+				token,
+				session: {
+					...authorizeSession,
+					callbackVerifier: 'wrong',
+				},
+				installation,
+			});
+
+			const fetchSpy = vi.spyOn(global, 'fetch');
+
+			const req = {
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${installationId}`,
+			} as ParamsIncomingMessage;
+			const res = {
+				writeHead: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.OnAuthCallback(req, res);
+
+			expect(dbClientMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
+
+			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledTimes(0);
+
+			expect(dbClientMock.updateToken).toHaveBeenCalledTimes(0);
+
+			expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+
+			expect(res.writeHead).toHaveBeenCalledWith(302, {
+				Location: `${configMock.dashboardUrl}/authorize/error`,
+			});
+
+			expect(res.end).toHaveBeenCalled();
 		});
 	});
 

@@ -1,3 +1,5 @@
+import { IncomingMessage, ServerResponse } from 'node:http';
+
 // Docs: https://globalping.io/docs/api.globalping.io
 
 export const ALLOWED_QUERY_TYPES = [
@@ -389,4 +391,10 @@ export interface AuthToken {
 	refresh_token: string;
 	expiry: number; // Unix timestamp
 	isAnonymous?: boolean;
+}
+
+export interface CustomRoute {
+	path: string;
+	method: string | string[];
+	handler: (req: IncomingMessage, res: ServerResponse) => void;
 }
