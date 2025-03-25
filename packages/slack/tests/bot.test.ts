@@ -2280,7 +2280,7 @@ ${expectedResponse.results[0].result.rawOutput}
 			});
 
 			const req = {
-				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${installationId}`,
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${installationId}`,
 			} as ParamsIncomingMessage;
 			const res = {
 				writeHead: vi.fn(),
@@ -2365,7 +2365,7 @@ ${expectedResponse.results[0].result.rawOutput}
 			const fetchSpy = vi.spyOn(global, 'fetch');
 
 			const req = {
-				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${installationId}`,
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${installationId}`,
 			} as ParamsIncomingMessage;
 			const res = {
 				writeHead: vi.fn(),

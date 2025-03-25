@@ -64,7 +64,7 @@ describe('Auth', () => {
 
 			const state = url.searchParams.get('state');
 			expect(state?.length).toBe(43 + 1 + installationId.length);
-			expect(state?.substring(43)).toBe('-' + installationId);
+			expect(state?.substring(43)).toBe(':' + installationId);
 		});
 	});
 

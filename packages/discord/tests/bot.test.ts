@@ -951,7 +951,7 @@ Creating measurements:
 			});
 
 			const req = {
-				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${id}`,
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${id}`,
 			} as IncomingMessage;
 			const res = {
 				writeHead: vi.fn(),
@@ -1027,7 +1027,7 @@ Creating measurements:
 			const fetchSpy = vi.spyOn(global, 'fetch');
 
 			const req = {
-				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${id}`,
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${id}`,
 			} as IncomingMessage;
 			const res = {
 				writeHead: vi.fn(),
