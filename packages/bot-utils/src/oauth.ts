@@ -97,12 +97,14 @@ export interface LimitsResponse {
 	credits?: CreditLimits; // Only for authenticated requests
 }
 
+const stateSeparator = ':';
+
 export class OAuthClient {
 	constructor (
 		private config: Config,
 		private logger: Logger,
 		private db: DBClient,
-	) {}
+	) { }
 
 	async Authorize (
 		id: string,
@@ -134,7 +136,7 @@ export class OAuthClient {
 			this.config.serverHost + this.config.authCallbackPath,
 		);
 
-		url.searchParams.append('state', `${callbackVerifier}-${id}`);
+		url.searchParams.append('state', callbackVerifier + stateSeparator + id);
 
 		return {
 			url: url.toString(),
@@ -415,4 +417,26 @@ function generateS256Challenge (verifier: string): string {
 	const hash = createHash('sha256');
 	hash.update(verifier);
 	return hash.digest('base64url');
+}
+
+export function parseCallbackURL (
+	url: string,
+	base: string,
+): {
+	code: string | null;
+	error: string | null;
+	errorDescription: string | null;
+	verifier?: string;
+	id?: string;
+} {
+	const u = new URL(url, base);
+	const state = u.searchParams.get('state');
+	const separatorIndex = state ? state.indexOf(stateSeparator) : -1;
+	return {
+		code: u.searchParams.get('code'),
+		error: u.searchParams.get('error'),
+		errorDescription: u.searchParams.get('error_description'),
+		verifier: state ? state.substring(0, separatorIndex) : undefined,
+		id: state ? state.substring(separatorIndex + 1) : undefined,
+	};
 }

@@ -27,6 +27,7 @@ import {
 	PostError,
 	getTooManyRequestsError,
 	CustomRoute,
+	parseCallbackURL,
 } from '@globalping/bot-utils';
 import {
 	APIEmbed,
@@ -188,14 +189,13 @@ ${formatAPIError(error)}`;
 	}
 
 	async OnAuthCallback (req: IncomingMessage, res: ServerResponse) {
-		const url = new URL(req.url || '', this.config.serverHost);
-		const callbackError = url.searchParams.get('error');
-		const errorDescription = url.searchParams.get('error_description');
-		const code = url.searchParams.get('code');
-		const state = url.searchParams.get('state');
+		const url = parseCallbackURL(req.url || '', this.config.serverHost);
 
-		if (!state) {
-			this.logger.error('/oauth/callback missing state', { callbackError });
+		if (!url.verifier || !url.id) {
+			this.logger.error('/oauth/callback missing state', {
+				error: url.error,
+				errorDescription: url.errorDescription,
+			});
 
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
@@ -205,15 +205,11 @@ ${formatAPIError(error)}`;
 			return;
 		}
 
-		const separatorIndex = state.indexOf('-');
-		const callbackVerifier = state.substring(0, separatorIndex);
-		const id = state.substring(separatorIndex + 1);
-
 		let oldToken: AuthToken | null;
 		let session: AuthorizeSession | null;
 
 		try {
-			const data = await this.dbClient.getDataForAuthorization(id);
+			const data = await this.dbClient.getDataForAuthorization(url.id);
 			oldToken = data.token;
 			session = data.session;
 		} catch {
@@ -226,7 +222,7 @@ ${formatAPIError(error)}`;
 		}
 
 		if (!session) {
-			this.logger.error('/oauth/callback missing session', { id });
+			this.logger.error('/oauth/callback missing session', { id: url.id });
 
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
@@ -236,9 +232,9 @@ ${formatAPIError(error)}`;
 			return;
 		}
 
-		if (callbackVerifier !== session.callbackVerifier) {
+		if (url.verifier !== session.callbackVerifier) {
 			this.logger.error('/oauth/callback invalid verifier', {
-				id,
+				id: url.id,
 			});
 
 			res.writeHead(302, {
@@ -251,27 +247,27 @@ ${formatAPIError(error)}`;
 
 		try {
 			// Delete session
-			await this.dbClient.updateAuthorizeSession(id, null);
+			await this.dbClient.updateAuthorizeSession(url.id, null);
 		} catch (error) {
 			this.logger.error('/oauth/callback failed to delete session', error);
 		}
 
-		if (callbackError || !code) {
+		if (url.error || !url.code) {
 			try {
 				const user = this.discord.users.cache.get(session.userId);
 
 				if (user) {
-					await user.send(`Authentication failed: ${callbackError}: ${errorDescription}`);
+					await user.send(`Authentication failed: ${url.error}: ${url.errorDescription}`);
 				}
 			} catch (error) {
 				this.logger.error('/oauth/callback failed to post ephemeral', error);
 			}
 
 			this.logger.error('/oauth/callback failed', {
-				error: callbackError,
-				errorDescription,
-				code,
-				id,
+				error: url.error,
+				errorDescription: url.errorDescription,
+				code: url.code,
+				id: url.id,
 			});
 
 			res.writeHead(302, {
@@ -286,9 +282,9 @@ ${formatAPIError(error)}`;
 
 		try {
 			exchangeError = await this.oauth.Exchange(
-				code,
+				url.code,
 				session.exchangeVerifier,
-				id,
+				url.id,
 			);
 
 			// Revoke old token if exists
@@ -297,7 +293,7 @@ ${formatAPIError(error)}`;
 					await this.oauth.RevokeToken(oldToken.refresh_token);
 				} catch (error) {
 					this.logger.error('/oauth/callback failed to revoke token', {
-						id,
+						id: url.id,
 						error,
 					});
 				}

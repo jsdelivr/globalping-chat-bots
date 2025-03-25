@@ -32,6 +32,7 @@ import {
 	OAuthClient,
 	getTooManyRequestsError,
 	getLimitsOutput,
+	parseCallbackURL,
 } from '@globalping/bot-utils';
 import type {
 	Block,
@@ -363,14 +364,13 @@ export class Bot {
 			return;
 		}
 
-		const url = new URL(req.url || '', this.config.serverHost);
-		const callbackError = url.searchParams.get('error');
-		const errorDescription = url.searchParams.get('error_description');
-		const code = url.searchParams.get('code');
-		const state = url.searchParams.get('state');
+		const url = parseCallbackURL(req.url || '', this.config.serverHost);
 
-		if (!state) {
-			this.logger.error('/oauth/callback missing state', { callbackError });
+		if (!url.verifier || !url.id) {
+			this.logger.error('/oauth/callback missing state', {
+				error: url.error,
+				errorDescription: url.errorDescription,
+			});
 
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
@@ -380,17 +380,13 @@ export class Bot {
 			return;
 		}
 
-		const separatorIndex = state.indexOf('-');
-		const callbackVerifier = state.substring(0, separatorIndex);
-		const installationId = state.substring(separatorIndex + 1);
-
 		let oldToken: AuthToken | null;
 		let session: AuthorizeSession | null;
 		let installation: Installation | null;
 
 		try {
 			const installationRes
-				= await this.dbClient.getInstallationForAuthorization(installationId);
+				= await this.dbClient.getInstallationForAuthorization(url.id);
 			oldToken = installationRes.token;
 			session = installationRes.session;
 			installation = installationRes.installation;
@@ -404,7 +400,7 @@ export class Bot {
 		}
 
 		if (!session) {
-			this.logger.error('/oauth/callback missing session', { installationId });
+			this.logger.error('/oauth/callback missing session', { id: url.id });
 
 			res.writeHead(302, {
 				Location: `${this.config.dashboardUrl}/authorize/error`,
@@ -414,9 +410,9 @@ export class Bot {
 			return;
 		}
 
-		if (callbackVerifier !== session.callbackVerifier) {
+		if (url.verifier !== session.callbackVerifier) {
 			this.logger.error('/oauth/callback invalid verifier', {
-				installationId,
+				id: url.id,
 			});
 
 			res.writeHead(302, {
@@ -429,16 +425,16 @@ export class Bot {
 
 		try {
 			// Delete session
-			await this.dbClient.updateAuthorizeSession(installationId, null);
+			await this.dbClient.updateAuthorizeSession(url.id, null);
 		} catch (error) {
 			this.logger.error('/oauth/callback failed to delete session', error);
 		}
 
-		if (callbackError || !code) {
+		if (url.error || !url.code) {
 			try {
 				await this.slackClient.chat.postEphemeral({
 					token: installation?.bot?.token,
-					text: `Authentication failed: ${callbackError}: ${errorDescription}`,
+					text: `Authentication failed: ${url.error}: ${url.errorDescription}`,
 					user: session.userId,
 					channel: session.channelId,
 					thread_ts: session.threadTs,
@@ -448,10 +444,10 @@ export class Bot {
 			}
 
 			this.logger.error('/oauth/callback failed', {
-				error: callbackError,
-				errorDescription,
-				code,
-				installationId,
+				error: url.error,
+				errorDescription: url.errorDescription,
+				code: url.code,
+				id: url.id,
 			});
 
 			res.writeHead(302, {
@@ -466,9 +462,9 @@ export class Bot {
 
 		try {
 			exchangeError = await this.oauth.Exchange(
-				code,
+				url.code,
 				session.exchangeVerifier,
-				installationId,
+				url.id,
 			);
 
 			// Revoke old token if exists
@@ -477,7 +473,7 @@ export class Bot {
 					await this.oauth.RevokeToken(oldToken.refresh_token);
 				} catch (error) {
 					this.logger.error('/oauth/callback failed to revoke token', {
-						installationId,
+						id: url.id,
 						error,
 					});
 				}
