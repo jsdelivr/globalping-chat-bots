@@ -7,14 +7,15 @@ import {
 	ALLOWED_MTR_PROTOCOLS,
 	ALLOWED_QUERY_TYPES,
 	ALLOWED_TRACE_PROTOCOLS,
+	AuthSubcommand,
 } from '@globalping/bot-utils';
 import { Routes, SlashCommandBuilder } from 'discord.js';
-import { Config } from './types.js';
+import { DeployCommandsConfig } from './types.js';
 
 const choiceMap = (arr: string[]) => arr.map(item => ({ name: item, value: item }));
 
 // Only needs to be run once whenever bot is registered with server
-export const deployCommands = (config: Config) => {
+export const deployCommands = (config: DeployCommandsConfig) => {
 	const commands = [
 		new SlashCommandBuilder()
 			.setName('globalping')
@@ -213,6 +214,23 @@ export const deployCommands = (config: Config) => {
 					.setName('full')
 					.setDescription('Output full response')
 					.setRequired(false)))
+			// auth
+			.addSubcommandGroup(group => group
+				.setName('auth')
+				.setDescription('Authenticate with the Globalping API')
+				.addSubcommand(subcommand => subcommand
+					.setName(AuthSubcommand.Login)
+					.setDescription('Log in to your Globalping account'))
+				.addSubcommand(subcommand => subcommand
+					.setName(AuthSubcommand.Logout)
+					.setDescription('Log out from your Globalping account'))
+				.addSubcommand(subcommand => subcommand
+					.setName(AuthSubcommand.Status)
+					.setDescription('Check the current authentication status')))
+			// limits
+			.addSubcommand(subcommand => subcommand
+				.setName('limits')
+				.setDescription('Show the current rate limits'))
 			// help
 			.addSubcommand(subcommand => subcommand
 				.setName('help')
@@ -221,7 +239,13 @@ export const deployCommands = (config: Config) => {
 					.setName('command')
 					.setDescription('Command to get help for')
 					.setRequired(false)
-					.addChoices(...choiceMap([ ...ALLOWED_QUERY_TYPES ])))),
+					.addChoices(...choiceMap([
+						...ALLOWED_QUERY_TYPES,
+						'auth ' + AuthSubcommand.Login,
+						'auth ' + AuthSubcommand.Logout,
+						'auth ' + AuthSubcommand.Status,
+						'limits',
+					])))),
 	].map(command => command.toJSON());
 
 	const rest = new REST({ version: '10' }).setToken(config.discordToken);

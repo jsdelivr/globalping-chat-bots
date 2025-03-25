@@ -21,6 +21,9 @@ export const config = {
 	authUrl: process.env.AUTH_URL as string,
 	authClientId: process.env.AUTH_CLIENT_ID as string,
 	authClientSecret: process.env.AUTH_CLIENT_SECRET as string,
+	authDiscordClientId: process.env.AUTH_DISCORD_CLIENT_ID as string,
+	authDiscordClientSecret: process.env.AUTH_DISCORD_CLIENT_SECRET as string,
+	authCallbackPath: '',
 
 	slackSigningSecret: process.env.SLACK_SIGNING_SECRET as string,
 	slackClientId: process.env.SLACK_CLIENT_ID as string,

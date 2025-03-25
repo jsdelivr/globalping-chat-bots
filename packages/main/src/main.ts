@@ -8,14 +8,13 @@ import { config } from './config.js';
 
 import { faviconHandler, homeHandler, robotsHandler } from './handlers.js';
 
-
-const migrationsPath = path.join(path.dirname(fileURLToPath(import.meta.url).replace('/dist/', '/')), '../migrations');
+const migrationsPath = path.join(
+	path.dirname(fileURLToPath(import.meta.url).replace('/dist/', '/')),
+	'../migrations',
+);
 const knex = initKnexClient(config, migrationsPath);
 
 const logger = scopedLogger('main');
-
-const githubBot = initGithubBot(config, scopedLogger('github'));
-const discordBot = initDiscordBot(scopedLogger('discord'));
 
 const routes: CustomRoute[] = [
 	{
@@ -71,7 +70,52 @@ const routes: CustomRoute[] = [
 	},
 ];
 
-const app = initApp(config, scopedLogger('slack'), knex, routes);
+const githubBot = initGithubBot(
+	{
+		globalpingToken: config.globalpingToken,
+		githubPersonalAccessToken: config.githubPersonalAccessToken,
+		githubBotApiKey: config.githubBotApiKey,
+		githubBotHandle: config.githubBotHandle,
+	},
+	scopedLogger('github'),
+);
+const discordBot = initDiscordBot(
+	{
+		serverHost: config.serverHost,
+		apiUrl: config.apiUrl,
+		dashboardUrl: config.dashboardUrl,
+		authUrl: config.authUrl,
+		authClientId: config.authDiscordClientId,
+		authClientSecret: config.authDiscordClientSecret,
+		authCallbackPath: '/discord/oauth/callback',
+	},
+	scopedLogger('discord'),
+	knex,
+	routes,
+);
+const app = initApp(
+	{
+		env: config.env,
+
+		serverHost: config.serverHost,
+		apiUrl: config.apiUrl,
+		dashboardUrl: config.dashboardUrl,
+		authUrl: config.authUrl,
+		authClientId: config.authClientId,
+		authClientSecret: config.authClientSecret,
+		authCallbackPath: '/slack/oauth/callback',
+
+		slackSigningSecret: config.slackSigningSecret,
+		slackClientId: config.slackClientId,
+		slackClientSecret: config.slackClientSecret,
+		slackStateSecret: config.slackStateSecret,
+		slackSocketMode: config.slackSocketMode,
+		slackAppToken: config.slackAppToken,
+	},
+	scopedLogger('slack'),
+	knex,
+	routes,
+);
 
 // Start the app
 (async () => {
