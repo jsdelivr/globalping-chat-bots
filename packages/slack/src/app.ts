@@ -3,10 +3,10 @@ import {
 	KnexClient,
 	postMeasurement,
 	Logger,
+	OAuthClient,
 } from '@globalping/bot-utils';
 import bolt, { type App, AppOptions, CustomRoute, LogLevel } from '@slack/bolt';
 
-import { CALLBACK_PATH, OAuthClient } from './auth.js';
 import { Bot } from './bot.js';
 import { DBClient } from './db.js';
 import { Config } from './types.js';
@@ -20,13 +20,20 @@ export function initApp (
 	const db = new DBClient(knex, logger);
 
 	const oauth = new OAuthClient(config, logger, db);
-	routes.push({
-		path: CALLBACK_PATH,
-		method: [ 'GET' ],
-		handler: (req, res) => oauth.OnCallback(req, res),
-	});
 
-	const bot = new Bot(logger, db, oauth, postMeasurement, getMeasurement);
+	const bot = new Bot(
+		logger,
+		config,
+		db,
+		oauth,
+		postMeasurement,
+		getMeasurement,
+	);
+	routes.push({
+		path: config.authCallbackPath,
+		method: [ 'GET' ],
+		handler: (req, res) => bot.OnAuthCallback(req, res),
+	});
 
 	const logMessages = (log: Logger['info'], messages: unknown[]) => {
 		for (const message of messages) {
@@ -84,7 +91,7 @@ export function initApp (
 	};
 
 	const app: App = new bolt.App(baseAppConfig);
-	oauth.SetSlackClient(app.client);
+	bot.SetSlackClient(app.client);
 
 	if (config.env !== 'production') {
 		baseAppConfig.logLevel = LogLevel.DEBUG;

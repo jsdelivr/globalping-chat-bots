@@ -1,5 +1,6 @@
 import {
 	AllMiddlewareArgs,
+	Installation,
 	InstallationQuery,
 	SlackCommandMiddlewareArgs,
 	SlackEventMiddlewareArgs,
@@ -23,10 +24,15 @@ import {
 	Measurement,
 	MeasurementCreateResponse,
 	Logger,
-	pluralize,
-	formatSeconds,
 	generateHelp,
 	HelpTexts,
+	AuthToken,
+	AuthorizeError,
+	AuthorizeErrorType,
+	OAuthClient,
+	getTooManyRequestsError,
+	getLimitsOutput,
+	parseCallbackURL,
 } from '@globalping/bot-utils';
 import type {
 	Block,
@@ -35,15 +41,10 @@ import type {
 	RichTextBlockElement,
 	WebClient,
 } from '@slack/web-api';
-import {
-	AuthorizeErrorType,
-	CreateLimitType,
-	IntrospectionResponse,
-	LimitsResponse,
-	OAuthClient,
-} from './auth.js';
 import { formatMeasurementResponse } from './response.js';
-import { DBClient } from './db.js';
+import { AuthorizeSession, DBClient } from './db.js';
+import { IncomingMessage, ServerResponse } from 'node:http';
+import { Config, SlackClient } from './types.js';
 
 const welcomeMap: Record<string, boolean> = {};
 const welcomeMapTimeout = 10_000;
@@ -74,9 +75,11 @@ interface ChannelPayload {
 
 export class Bot {
 	private help: HelpTexts;
+	private slackClient?: SlackClient;
 
 	constructor (
 		private logger: Logger,
+		private config: Config,
 		private dbClient: DBClient,
 		private oauth: OAuthClient,
 		private postMeasurement: (
@@ -86,6 +89,10 @@ export class Bot {
 		private getMeasurement: (id: string) => Promise<Measurement>,
 	) {
 		this.help = generateHelp('*', '/globalping');
+	}
+
+	SetSlackClient (client: SlackClient) {
+		this.slackClient = client;
 	}
 
 	async HandleHomeOpened ({
@@ -121,7 +128,10 @@ export class Bot {
 		const historyLength = history?.messages?.length;
 
 		if (historyLength !== undefined && historyLength > 0) {
-			this.logger.info('Not sending welcome message, history present.', logData);
+			this.logger.info(
+				'Not sending welcome message, history present.',
+				logData,
+			);
 
 			return;
 		}
@@ -183,11 +193,7 @@ export class Bot {
 			await ack();
 		} catch (error) {
 			const err = error as Error;
-			this.logger.info(
-				'HandleCommand: ack failed',
-				err,
-				logData,
-			);
+			this.logger.info('HandleCommand: ack failed', err, logData);
 
 			await respond({
 				text: `Unable to acknowledge the request.\n${formatAPIError(err.message)}`,
@@ -229,10 +235,10 @@ export class Bot {
 						conversation.channel?.id
 						&& channel_id !== conversation.channel.id
 					) {
-						this.logger.error(
-							'HandleCommand: response - dm',
-							{ errorMsg: 'request in dm', ...logData },
-						);
+						this.logger.error('HandleCommand: response - dm', {
+							errorMsg: 'request in dm',
+							...logData,
+						});
 
 						await respond({
 							text:
@@ -248,10 +254,10 @@ export class Bot {
 				}
 
 				if (channel_name.startsWith('mpdm-')) {
-					this.logger.error(
-						'HandleCommand: response - mpdm',
-						{ errorMsg: 'request in mpdm', ...logData },
-					);
+					this.logger.error('HandleCommand: response - mpdm', {
+						errorMsg: 'request in mpdm',
+						...logData,
+					});
 
 					await respond({
 						text:
@@ -264,10 +270,10 @@ export class Bot {
 				}
 
 				// If not DM, try checking the properties of the channel
-				this.logger.error(
-					'HandleCommand: channel invite needed',
-					{ errorMsg: 'asked for invite to channel', ...logData },
-				);
+				this.logger.error('HandleCommand: channel invite needed', {
+					errorMsg: 'asked for invite to channel',
+					...logData,
+				});
 
 				await respond('Please invite me to this channel to use this command. Run `/invite @Globalping` to invite me.');
 
@@ -294,7 +300,10 @@ export class Bot {
 			await this.processCommand(client, channelPayload, commandText);
 		} catch (error) {
 			const errorMsg = getAPIErrorMessage(error);
-			this.logger.error('HandleCommand: failed', error, { errorMsg, ...logData });
+			this.logger.error('HandleCommand: failed', error, {
+				errorMsg,
+				...logData,
+			});
 
 			await respond({
 				text: `Failed to process command \`${text}\`.\n${formatAPIError(errorMsg)}`,
@@ -345,6 +354,165 @@ export class Bot {
 			getInstallationId(context),
 			client,
 		);
+	}
+
+	async OnAuthCallback (req: IncomingMessage, res: ServerResponse) {
+		if (!this.slackClient) {
+			this.logger.error('Slack client not set');
+			res.writeHead(500);
+			res.end();
+			return;
+		}
+
+		const url = parseCallbackURL(req.url || '', this.config.serverHost);
+
+		if (!url.verifier || !url.id) {
+			this.logger.error('/oauth/callback missing state', {
+				error: url.error,
+				errorDescription: url.errorDescription,
+			});
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		let oldToken: AuthToken | null;
+		let session: AuthorizeSession | null;
+		let installation: Installation | null;
+
+		try {
+			const installationRes
+				= await this.dbClient.getInstallationForAuthorization(url.id);
+			oldToken = installationRes.token;
+			session = installationRes.session;
+			installation = installationRes.installation;
+		} catch {
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		if (!session) {
+			this.logger.error('/oauth/callback missing session', { id: url.id });
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		if (url.verifier !== session.callbackVerifier) {
+			this.logger.error('/oauth/callback invalid verifier', {
+				id: url.id,
+			});
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		try {
+			// Delete session
+			await this.dbClient.updateAuthorizeSession(url.id, null);
+		} catch (error) {
+			this.logger.error('/oauth/callback failed to delete session', error);
+		}
+
+		if (url.error || !url.code) {
+			try {
+				await this.slackClient.chat.postEphemeral({
+					token: installation?.bot?.token,
+					text: `Authentication failed: ${url.error}: ${url.errorDescription}`,
+					user: session.userId,
+					channel: session.channelId,
+					thread_ts: session.threadTs,
+				});
+			} catch (error) {
+				this.logger.error('/oauth/callback failed to post ephemeral', error);
+			}
+
+			this.logger.error('/oauth/callback failed', {
+				error: url.error,
+				errorDescription: url.errorDescription,
+				code: url.code,
+				id: url.id,
+			});
+
+			res.writeHead(302, {
+				Location: `${this.config.dashboardUrl}/authorize/error`,
+			});
+
+			res.end();
+			return;
+		}
+
+		let exchangeError: AuthorizeError | null;
+
+		try {
+			exchangeError = await this.oauth.Exchange(
+				url.code,
+				session.exchangeVerifier,
+				url.id,
+			);
+
+			// Revoke old token if exists
+			if (!exchangeError && oldToken && oldToken.refresh_token) {
+				try {
+					await this.oauth.RevokeToken(oldToken.refresh_token);
+				} catch (error) {
+					this.logger.error('/oauth/callback failed to revoke token', {
+						id: url.id,
+						error,
+					});
+				}
+			}
+		} catch {
+			exchangeError = {
+				error: AuthorizeErrorType.InternalError,
+				error_description: 'Failed to exchange code',
+			};
+		}
+
+		let message = '';
+
+		if (exchangeError) {
+			this.logger.error('/oauth/callback failed', exchangeError);
+			message = `Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`;
+		} else {
+			message = 'Success! You are now authenticated.';
+		}
+
+		try {
+			await this.slackClient.chat.postEphemeral({
+				token: installation?.bot?.token,
+				text: message,
+				user: session.userId,
+				channel: session.channelId,
+				thread_ts: session.threadTs,
+			});
+		} catch (error) {
+			this.logger.error('/oauth/callback failed to post ephemeral', error);
+		}
+
+		res.writeHead(302, {
+			Location:
+				this.config.dashboardUrl
+				+ (exchangeError ? '/authorize/error' : '/authorize/success'),
+		});
+
+		res.end();
 	}
 
 	private async processMention (
@@ -467,33 +635,7 @@ export class Bot {
 
 				// Too many requests
 				if (statusCode === 429) {
-					const rateLimitRemaining = parseInt(headers['X-RateLimit-Remaining'] as string);
-					const rateLimitReset = parseInt(headers['X-RateLimit-Reset'] as string);
-					const creditsRemaining = parseInt(headers['X-Credits-Remaining'] as string);
-					const requestCost = parseInt(headers['X-Request-Cost'] as string);
-					const remaining = rateLimitRemaining + creditsRemaining;
-
-					if (token && !token.isAnonymous) {
-						if (remaining > 0) {
-							throw getMoreCreditsRequiredAuthError(
-								requestCost,
-								remaining,
-								rateLimitReset,
-							);
-						}
-
-						throw getNoCreditsAuthError(rateLimitReset);
-					} else {
-						if (remaining > 0) {
-							throw getMoreCreditsRequiredNoAuthError(
-								remaining,
-								requestCost,
-								rateLimitReset,
-							);
-						}
-
-						throw getNoCreditsNoAuthError(rateLimitReset);
-					}
+					throw getTooManyRequestsError(headers, token);
 				}
 			}
 
@@ -530,7 +672,11 @@ export class Bot {
 			return;
 		}
 
-		const res = await this.oauth.Authorize(payload);
+		const res = await this.oauth.Authorize(payload.installationId, {
+			channelId: payload.channel_id,
+			userId: payload.user_id,
+			threadTs: payload.thread_ts,
+		});
 		await client.chat.postEphemeral({
 			blocks: [
 				{
@@ -706,76 +852,4 @@ function traverseBlocks (
 			traverseBlocks(block.elements, callback);
 		}
 	}
-}
-
-export function getLimitsOutput (
-	limits: LimitsResponse,
-	introspection: IntrospectionResponse,
-) {
-	let text = '';
-
-	if (limits.rateLimit.measurements.create.type === CreateLimitType.User) {
-		text = `Authentication: token (${introspection?.username || ''})\n\n`;
-	} else {
-		text = 'Authentication: workspace\n\n';
-	}
-
-	const createLimit = pluralize(
-		limits.rateLimit.measurements.create.limit,
-		'test',
-	);
-	const createConsumed
-		= limits.rateLimit.measurements.create.limit
-		- limits.rateLimit.measurements.create.remaining;
-	const createRemaining = limits.rateLimit.measurements.create.remaining;
-	text += `Creating measurements:
- - ${createLimit} per hour
- - ${createConsumed} consumed, ${createRemaining} remaining
-`;
-
-	if (limits.rateLimit.measurements.create.reset) {
-		text += ` - resets in ${formatSeconds(limits.rateLimit.measurements.create.reset)}\n`;
-	}
-
-	if (limits.rateLimit.measurements.create.type === CreateLimitType.User) {
-		text += `
-Credits:
- - ${pluralize(
-		limits.credits?.remaining || 0,
-		'credit',
-	)} remaining (may be used to create measurements above the hourly limits)
-`;
-	}
-
-	return text;
-}
-
-export function getMoreCreditsRequiredAuthError (
-	requestCost: number,
-	remaining: number,
-	rateLimitReset: number,
-): Error {
-	return new Error(`You only have ${pluralize(
-		remaining,
-		'credit',
-	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by sponsoring us or hosting probes.`);
-}
-
-export function getNoCreditsAuthError (rateLimitReset: number): Error {
-	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by sponsoring us or hosting probes.`);
-}
-
-export function getMoreCreditsRequiredNoAuthError (
-	requestCost: number,
-	remaining: number,
-	rateLimitReset: number,
-): Error {
-	return new Error(`You only have ${pluralize(
-		remaining,
-		'credit',
-	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by creating an account. Sign up at https://globalping.io`);
-}
-
-export function getNoCreditsNoAuthError (rateLimitReset: number): Error {
-	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by creating an account. Sign up at https://globalping.io`);
 }

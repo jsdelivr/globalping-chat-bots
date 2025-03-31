@@ -1,9 +1,8 @@
 import { vi } from 'vitest';
 
 import { SlackClient } from '../src/types.js';
-import { OAuthClient } from '../src/auth.js';
 import probeData from '@globalping/bot-utils/tests/mocks/probedata.json' assert { type: 'json' };
-import { Logger, Measurement } from '@globalping/bot-utils';
+import { Logger, Measurement, OAuthClient } from '@globalping/bot-utils';
 import { DBClient } from '../src/db.js';
 
 export const mockLogger = (): Logger => ({
@@ -42,6 +41,8 @@ export const mockAuthClient = (): OAuthClient => ({
 	Limits: vi.fn(),
 	GetToken: vi.fn(),
 	TryToRefreshToken: vi.fn(),
+	Exchange: vi.fn(),
+	RevokeToken: vi.fn(),
 }) as any;
 
 export const getDefaultDnsResponse = (): Measurement => {

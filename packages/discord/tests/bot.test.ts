@@ -1,5 +1,10 @@
-import { generateHelp, HttpProbeResult } from '@globalping/bot-utils';
-import { codeBlock } from 'discord.js';
+import {
+	AuthToken,
+	CreateLimitType,
+	generateHelp,
+	HttpProbeResult,
+} from '@globalping/bot-utils';
+import { codeBlock, MessageFlags } from 'discord.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Bot } from '../src/bot.js';
 import {
@@ -8,11 +13,17 @@ import {
 	getDefaultMtrResponse,
 	getDefaultPingResponse,
 	getDefaultTracerouteResponse,
+	mockAuthClient,
+	mockDBClient,
+	mockDiscordClient,
 	mockDiscordInteraction,
 	mockGetMeasurement,
 	mockLogger,
 	mockPostMeasurement,
 } from './utils.js';
+import { Config } from '../src/types.js';
+import { AuthorizeSession } from '../src/db.js';
+import { IncomingMessage } from 'node:http';
 
 describe('Bot', () => {
 	afterEach(() => {
@@ -22,20 +33,30 @@ describe('Bot', () => {
 	const discordMessageLimit = 2000;
 
 	const loggerMock = mockLogger();
+	const dbClientMock = mockDBClient();
+	const oauthClientMock = mockAuthClient();
 	const postMeasurementMock = mockPostMeasurement();
 	const getMeasurementMock = mockGetMeasurement();
+	const discordClientMock = mockDiscordClient();
 
 	const interactionMock = mockDiscordInteraction();
 
-	const expectedHelpTexts = generateHelp(
-		'**',
-		'/globalping',
-		new Set([ 'auth', 'limits' ]),
-		4,
-		1,
-	);
+	const expectedHelpTexts = generateHelp('**', '/globalping', undefined, 4, 1);
+	const configMock = {
+		serverHost: 'http://localhost',
+		dashboardUrl: 'http://dash.localhost',
+		authUrl: 'http://auth.localhost',
+	};
 
-	const bot = new Bot(loggerMock, postMeasurementMock, getMeasurementMock);
+	const bot = new Bot(
+		loggerMock,
+		configMock as Config,
+		dbClientMock,
+		postMeasurementMock,
+		getMeasurementMock,
+		oauthClientMock,
+		discordClientMock,
+	);
 
 	describe('HandleInteraction', () => {
 		it('should handle the command - /globalping ping', async () => {
@@ -46,10 +67,15 @@ describe('Bot', () => {
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'ping',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
 			} as any;
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -63,14 +89,19 @@ describe('Bot', () => {
 
 			expect(interactionMock.deferReply).toHaveBeenCalled();
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'ping',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {},
-			});
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
 
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
@@ -101,10 +132,15 @@ describe('Bot', () => {
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'dns',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
 			} as any;
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -118,16 +154,21 @@ describe('Bot', () => {
 
 			expect(interactionMock.deferReply).toHaveBeenCalled();
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'dns',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'Berlin' }],
-				measurementOptions: {
-					resolver: '1.1.1.1',
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'dns',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'Berlin' }],
+					measurementOptions: {
+						resolver: '1.1.1.1',
+					},
 				},
-			});
+				'tok3n',
+			);
 
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
@@ -162,10 +203,15 @@ describe('Bot', () => {
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'http',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
 			} as any;
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -179,22 +225,27 @@ describe('Bot', () => {
 
 			expect(interactionMock.deferReply).toHaveBeenCalled();
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'http',
-				target: 'jsdelivr.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {
-					port: 443,
-					protocol: 'HTTPS',
-					request: {
-						host: 'www.jsdelivr.com',
-						path: '/package/npm/test',
-						query: 'nav=stats',
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'http',
+					target: 'jsdelivr.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						port: 443,
+						protocol: 'HTTPS',
+						request: {
+							host: 'www.jsdelivr.com',
+							path: '/package/npm/test',
+							query: 'nav=stats',
+						},
 					},
 				},
-			});
+				'tok3n',
+			);
 
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
@@ -230,10 +281,15 @@ describe('Bot', () => {
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'http',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
 			} as any;
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -247,17 +303,22 @@ describe('Bot', () => {
 
 			expect(interactionMock.deferReply).toHaveBeenCalled();
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'http',
-				target: 'jsdelivr.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {
-					protocol: 'HTTPS',
-					request: {},
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'http',
+					target: 'jsdelivr.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						protocol: 'HTTPS',
+						request: {},
+					},
 				},
-			});
+				'tok3n',
+			);
 
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
@@ -299,10 +360,15 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'mtr',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
 			} as any;
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -316,14 +382,19 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			expect(interactionMock.deferReply).toHaveBeenCalled();
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'mtr',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {},
-			});
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'mtr',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
 
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
@@ -356,10 +427,15 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'traceroute',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
 			} as any;
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
 
 			postMeasurementMock.mockResolvedValue({
 				id: 'm345ur3m3nt',
@@ -373,14 +449,19 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			expect(interactionMock.deferReply).toHaveBeenCalled();
 
-			expect(postMeasurementMock).toHaveBeenCalledWith({
-				type: 'traceroute',
-				target: 'google.com',
-				inProgressUpdates: false,
-				limit: 1,
-				locations: [{ magic: 'world' }],
-				measurementOptions: {},
-			});
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'traceroute',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
 
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
@@ -401,12 +482,273 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedReply);
 		});
 
+		it('should handle the command - auth login', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			interactionMock.options = {
+				getSubcommand: () => 'login',
+				getSubcommandGroup: () => 'auth',
+			} as any;
+
+			interactionMock.member = {
+				permissions: {
+					has: vi.fn().mockReturnValue(true),
+				},
+			} as any;
+
+			vi.spyOn(oauthClientMock, 'Authorize').mockResolvedValue({
+				url: 'https://globalping.io/auth',
+			});
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(oauthClientMock.Authorize).toHaveBeenCalledWith('G654', {
+				userId: '123',
+				channelId: 'C123',
+			});
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith({
+				embeds: [
+					{
+						description: `Please [click here](https://globalping.io/auth) to authenticate.
+
+**Note:** This action applies to the whole server. Once logged in, all users on the server share the same account credits.`,
+					},
+				],
+			});
+		});
+
+		it('should handle the command - auth login - cannot use the command', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			interactionMock.options = {
+				getSubcommand: () => 'login',
+				getSubcommandGroup: () => 'auth',
+			} as any;
+
+			interactionMock.member = {
+				permissions: {
+					has: vi.fn().mockReturnValue(false),
+				},
+			} as any;
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(oauthClientMock.Authorize).toHaveBeenCalledTimes(0);
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith({
+				content: 'Only administrators can use this command.',
+			});
+		});
+
+		it('should handle the command - auth logout', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			interactionMock.options = {
+				getSubcommand: () => 'logout',
+				getSubcommandGroup: () => 'auth',
+			} as any;
+
+			interactionMock.member = {
+				permissions: {
+					has: vi.fn().mockReturnValue(true),
+				},
+			} as any;
+
+			vi.spyOn(oauthClientMock, 'Logout').mockResolvedValue(null);
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith({
+				content: 'You are now logged out.',
+			});
+		});
+
+		it('should handle the command - auth status', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			interactionMock.options = {
+				getSubcommand: () => 'status',
+				getSubcommandGroup: () => 'auth',
+			} as any;
+
+			interactionMock.member = {
+				permissions: {
+					has: vi.fn().mockReturnValue(true),
+				},
+			} as any;
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+				},
+				null,
+			]);
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith({
+				content: 'Logged in as john.',
+			});
+		});
+
+		it('should handle the command - auth status anonymous', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			interactionMock.options = {
+				getSubcommand: () => 'status',
+				getSubcommandGroup: () => 'auth',
+			} as any;
+
+			interactionMock.member = {
+				permissions: {
+					has: vi.fn().mockReturnValue(true),
+				},
+			} as any;
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+				},
+				null,
+			]);
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith({
+				content: 'Not logged in.',
+			});
+		});
+
+		it('should handle the command - limits', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			interactionMock.options = {
+				getSubcommand: () => 'limits',
+				getSubcommandGroup: () => undefined,
+			} as any;
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+				},
+				null,
+			]);
+
+			vi.spyOn(oauthClientMock, 'Limits').mockResolvedValue([
+				{
+					rateLimit: {
+						measurements: {
+							create: {
+								type: CreateLimitType.User,
+								limit: 500,
+								remaining: 350,
+								reset: 600,
+							},
+						},
+					},
+					credits: {
+						remaining: 1000,
+					},
+				},
+				null,
+			]);
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
+
+			const expectedText = `Authentication: token (john)
+
+Creating measurements:
+ - 500 tests per hour
+ - 150 consumed, 350 remaining
+ - resets in 10 minutes
+
+Credits:
+ - 1000 credits remaining (may be used to create measurements above the hourly limits)
+`;
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith({
+				content: expectedText,
+			});
+		});
+
+		it('should handle the command - limits IP', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			interactionMock.options = {
+				getSubcommand: () => 'limits',
+				getSubcommandGroup: () => undefined,
+			} as any;
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+				},
+				null,
+			]);
+
+			vi.spyOn(oauthClientMock, 'Limits').mockResolvedValue([
+				{
+					rateLimit: {
+						measurements: {
+							create: {
+								type: CreateLimitType.IP,
+								limit: 500,
+								remaining: 500,
+								reset: 0,
+							},
+						},
+					},
+				},
+				null,
+			]);
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
+
+			const expectedText = `Authentication: workspace
+
+Creating measurements:
+ - 500 tests per hour
+ - 0 consumed, 500 remaining
+`;
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith({
+				content: expectedText,
+			});
+		});
+
 		it('should handle the command - /globalping help', async () => {
 			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
 
 			const options: Record<string, string | number | boolean> = {};
 			interactionMock.options = {
 				getSubcommand: () => 'help',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
@@ -414,13 +756,14 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			await bot.HandleInteraction(interactionMock);
 
-			expect(interactionMock.deferReply).toHaveBeenCalled();
-
 			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.general);
+			expect(interactionMock.reply).toHaveBeenCalledWith({
+				content: expectedHelpTexts.general,
+				flags: MessageFlags.Ephemeral,
+			});
 
 			if (expectedHelpTexts.general.length > discordMessageLimit) {
 				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.general.length}`);
@@ -435,6 +778,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'help',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
@@ -442,13 +786,14 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			await bot.HandleInteraction(interactionMock);
 
-			expect(interactionMock.deferReply).toHaveBeenCalled();
-
 			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.ping);
+			expect(interactionMock.reply).toHaveBeenCalledWith({
+				content: expectedHelpTexts.ping,
+				flags: MessageFlags.Ephemeral,
+			});
 
 			if (expectedHelpTexts.ping.length > discordMessageLimit) {
 				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.ping.length}`);
@@ -463,6 +808,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'help',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
@@ -470,13 +816,14 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			await bot.HandleInteraction(interactionMock);
 
-			expect(interactionMock.deferReply).toHaveBeenCalled();
-
 			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.dns);
+			expect(interactionMock.reply).toHaveBeenCalledWith({
+				content: expectedHelpTexts.dns,
+				flags: MessageFlags.Ephemeral,
+			});
 
 			if (expectedHelpTexts.dns.length > discordMessageLimit) {
 				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.dns.length}`);
@@ -491,6 +838,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'help',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
@@ -498,13 +846,14 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			await bot.HandleInteraction(interactionMock);
 
-			expect(interactionMock.deferReply).toHaveBeenCalled();
-
 			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.http);
+			expect(interactionMock.reply).toHaveBeenCalledWith({
+				content: expectedHelpTexts.http,
+				flags: MessageFlags.Ephemeral,
+			});
 
 			if (expectedHelpTexts.http.length > discordMessageLimit) {
 				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.http.length}`);
@@ -519,6 +868,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'help',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
@@ -526,13 +876,14 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			await bot.HandleInteraction(interactionMock);
 
-			expect(interactionMock.deferReply).toHaveBeenCalled();
-
 			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.mtr);
+			expect(interactionMock.reply).toHaveBeenCalledWith({
+				content: expectedHelpTexts.mtr,
+				flags: MessageFlags.Ephemeral,
+			});
 
 			if (expectedHelpTexts.mtr.length > discordMessageLimit) {
 				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.mtr.length}`);
@@ -547,6 +898,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			};
 			interactionMock.options = {
 				getSubcommand: () => 'help',
+				getSubcommandGroup: () => undefined,
 				getString: (key: string) => options[key] as string,
 				getNumber: (key: string) => options[key] as number,
 				getBoolean: (key: string) => options[key] as boolean,
@@ -554,17 +906,151 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			await bot.HandleInteraction(interactionMock);
 
-			expect(interactionMock.deferReply).toHaveBeenCalled();
-
 			expect(postMeasurementMock).toHaveBeenCalledTimes(0);
 
 			expect(getMeasurementMock).toHaveBeenCalledTimes(0);
 
-			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedHelpTexts.traceroute);
+			expect(interactionMock.reply).toHaveBeenCalledWith({
+				content: expectedHelpTexts.traceroute,
+				flags: MessageFlags.Ephemeral,
+			});
 
 			if (expectedHelpTexts.traceroute.length > discordMessageLimit) {
 				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.traceroute.length}`);
 			}
+		});
+	});
+
+	describe('OnAuthCallback', () => {
+		it('should exchange a new token, revoke the old token, and post a success message in slack', async () => {
+			const code = 'code';
+			const userId = 'U123';
+			const channelId = 'C123';
+			const id = 'U' + userId;
+
+			const now = new Date();
+
+			const token: AuthToken = {
+				access_token: 'tok3n',
+				refresh_token: 'refresh_tok3n',
+				expires_in: 3600,
+				token_type: 'Bearer',
+				expiry: now.getTime() / 1000 - 3600,
+			};
+
+			const authorizeSession: AuthorizeSession = {
+				callbackVerifier: 'callback',
+				exchangeVerifier: 'verifier',
+				userId,
+				channelId,
+			};
+
+			vi.spyOn(dbClientMock, 'getDataForAuthorization').mockResolvedValue({
+				token,
+				session: authorizeSession,
+			});
+
+			const req = {
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${id}`,
+			} as IncomingMessage;
+			const res = {
+				writeHead: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			const sendMock = vi.fn();
+			vi.spyOn(discordClientMock.channels.cache, 'get').mockReturnValue({
+				send: sendMock,
+			} as any);
+
+			await bot.OnAuthCallback(req, res);
+
+			expect(dbClientMock.getDataForAuthorization).toHaveBeenCalledWith(id);
+
+			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledWith(
+				id,
+				null,
+			);
+
+			expect(oauthClientMock.Exchange).toHaveBeenCalledWith(
+				code,
+				authorizeSession.exchangeVerifier,
+				id,
+			);
+
+			expect(oauthClientMock.RevokeToken).toHaveBeenCalledWith(token.refresh_token);
+
+			expect(discordClientMock.channels.cache.get).toHaveBeenCalledWith(channelId);
+
+			expect(sendMock).toHaveBeenCalledWith('Success! You are now authenticated.');
+
+			expect(res.writeHead).toHaveBeenCalledWith(302, {
+				Location: `${configMock.dashboardUrl}/authorize/success`,
+			});
+
+			expect(res.end).toHaveBeenCalled();
+		});
+
+		it('should redirect to the error page - callback verifier does not match', async () => {
+			const code = 'code';
+			const userId = 'U123';
+			const channelId = 'C123';
+			const id = 'U' + userId;
+
+			const now = new Date();
+
+			const token: AuthToken = {
+				access_token: 'tok3n',
+				refresh_token: 'refresh_tok3n',
+				expires_in: 3600,
+				token_type: 'Bearer',
+				expiry: now.getTime() / 1000 - 3600,
+			};
+
+			const authorizeSession: AuthorizeSession = {
+				callbackVerifier: 'callback',
+				exchangeVerifier: 'verifier',
+				userId,
+				channelId,
+			};
+
+			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
+
+			vi.spyOn(dbClientMock, 'getDataForAuthorization').mockResolvedValue({
+				token,
+				session: {
+					...authorizeSession,
+					callbackVerifier: 'wrong',
+				},
+			});
+
+			const fetchSpy = vi.spyOn(global, 'fetch');
+
+			const req = {
+				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${id}`,
+			} as IncomingMessage;
+			const res = {
+				writeHead: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.OnAuthCallback(req, res);
+
+			expect(dbClientMock.getDataForAuthorization).toHaveBeenCalledWith(id);
+
+			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledTimes(0);
+
+			expect(dbClientMock.updateToken).toHaveBeenCalledTimes(0);
+
+			expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+			// expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+
+			expect(res.writeHead).toHaveBeenCalledWith(302, {
+				Location: `${configMock.dashboardUrl}/authorize/error`,
+			});
+
+			expect(res.end).toHaveBeenCalled();
 		});
 	});
 });

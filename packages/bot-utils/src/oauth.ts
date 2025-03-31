@@ -1,12 +1,36 @@
-import { AuthToken, Logger } from '@globalping/bot-utils';
-import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage.js';
 import { createHash, randomBytes } from 'node:crypto';
-import { IncomingMessage, ServerResponse } from 'node:http';
+import { AuthToken } from './types.js';
+import { Logger } from './logger.js';
 
-import { AuthorizeSession, DBClient, Installation } from './db.js';
-import { Config, SlackClient } from './types.js';
+export interface Config {
+	serverHost: string;
+	apiUrl: string;
+	authUrl: string;
+	authCallbackPath: string;
+	authClientId: string;
+	authClientSecret: string;
+}
 
-export const CALLBACK_PATH = '/slack/oauth/callback';
+type AuthorizeSession = {
+	callbackVerifier: string;
+	exchangeVerifier: string;
+};
+
+type AuthorizeSessionData = {
+	channelId: string;
+	userId: string;
+	threadTs?: string;
+};
+
+export interface DBClient {
+	getToken: (id: string) => Promise<AuthToken | null>;
+	updateToken: (id: string, token: AuthToken | null) => Promise<void>;
+	updateAuthorizeSession: (
+		id: string,
+		authorizeSesssion: AuthorizeSession & AuthorizeSessionData,
+	) => Promise<void>;
+}
+
 export enum AuthorizeErrorType {
 	NotAuthorized = 'not_authorized',
 	InternalError = 'internal_error',
@@ -73,33 +97,26 @@ export interface LimitsResponse {
 	credits?: CreditLimits; // Only for authenticated requests
 }
 
+const stateSeparator = ':';
+
 export class OAuthClient {
 	constructor (
 		private config: Config,
 		private logger: Logger,
-		private installationStore: DBClient,
-		private slackClient?: SlackClient,
+		private db: DBClient,
 	) { }
 
-	async SetSlackClient (client: SlackClient) {
-		this.slackClient = client;
-	}
-
-	async Authorize (opts: {
-		installationId: string;
-		channel_id: string;
-		user_id: string;
-		thread_ts?: string;
-	}): Promise<AuthorizeResponse> {
+	async Authorize (
+		id: string,
+		data: AuthorizeSessionData,
+	): Promise<AuthorizeResponse> {
 		const callbackVerifier = generateVerifier();
 		const exchangeVerifier = generateVerifier();
 
-		await this.installationStore.updateAuthorizeSession(opts.installationId, {
+		await this.db.updateAuthorizeSession(id, {
 			callbackVerifier,
 			exchangeVerifier,
-			channelId: opts.channel_id,
-			userId: opts.user_id,
-			threadTs: opts.thread_ts,
+			...data,
 		});
 
 		const url = new URL(`${this.config.authUrl}/oauth/authorize`);
@@ -115,9 +132,11 @@ export class OAuthClient {
 		url.searchParams.append('scope', 'measurements');
 
 		url.searchParams.append(
-			'state',
-			`${callbackVerifier}-${opts.installationId}`,
+			'redirect_uri',
+			this.config.serverHost + this.config.authCallbackPath,
 		);
+
+		url.searchParams.append('state', callbackVerifier + stateSeparator + id);
 
 		return {
 			url: url.toString(),
@@ -125,7 +144,7 @@ export class OAuthClient {
 	}
 
 	async Logout (id: string): Promise<AuthorizeError | null> {
-		const token = await this.installationStore.getToken(id);
+		const token = await this.db.getToken(id);
 
 		if (!token) {
 			return null;
@@ -134,11 +153,11 @@ export class OAuthClient {
 		let error: AuthorizeError | null = null;
 
 		if (token && !token.isAnonymous && token.refresh_token) {
-			error = await this.revokeToken(token.refresh_token);
+			error = await this.RevokeToken(token.refresh_token);
 
 			if (!error) {
 				// Delete token
-				await this.installationStore.updateToken(id, null);
+				await this.db.updateToken(id, null);
 			}
 		}
 
@@ -213,7 +232,7 @@ export class OAuthClient {
 
 	// NOTE: Does not handle concurrent refreshes
 	async GetToken (id: string): Promise<AuthToken | null> {
-		const token = await this.installationStore.getToken(id);
+		const token = await this.db.getToken(id);
 
 		if (!token) {
 			const [ t ] = await this.requestAnonymousToken(id);
@@ -261,7 +280,7 @@ export class OAuthClient {
 		return 'You have been signed out by the API. Please try signing in again.';
 	}
 
-	async exchange (
+	async Exchange (
 		code: string,
 		verifier: string,
 		id: string,
@@ -273,7 +292,12 @@ export class OAuthClient {
 		body.append('code', code);
 		body.append('code_verifier', verifier);
 		body.append('grant_type', 'authorization_code');
-		body.append('redirect_uri', this.config.serverHost + CALLBACK_PATH);
+
+		body.append(
+			'redirect_uri',
+			this.config.serverHost + this.config.authCallbackPath,
+		);
+
 		const b = body.toString();
 
 		const res = await fetch(url.toString(), {
@@ -292,7 +316,29 @@ export class OAuthClient {
 		const token = (await res.json()) as AuthToken;
 		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
 
-		await this.installationStore.updateToken(id, token);
+		await this.db.updateToken(id, token);
+
+		return null;
+	}
+
+	async RevokeToken (token: string): Promise<AuthorizeError | null> {
+		const url = new URL(`${this.config.authUrl}/oauth/token/revoke`);
+		const body = new URLSearchParams();
+		body.append('token', token);
+		const b = body.toString();
+
+		const res = await fetch(url.toString(), {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Content-Length': b.length.toString(),
+			},
+			body: b,
+		});
+
+		if (res.status !== 200) {
+			return (await res.json()) as AuthorizeError;
+		}
 
 		return null;
 	}
@@ -325,206 +371,8 @@ export class OAuthClient {
 		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
 		token.isAnonymous = true;
 
-		await this.installationStore.updateToken(id, token);
+		await this.db.updateToken(id, token);
 		return [ token, null ];
-	}
-
-	async revokeToken (token: string): Promise<AuthorizeError | null> {
-		const url = new URL(`${this.config.authUrl}/oauth/token/revoke`);
-		const body = new URLSearchParams();
-		body.append('token', token);
-		const b = body.toString();
-
-		const res = await fetch(url.toString(), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Content-Length': b.length.toString(),
-			},
-			body: b,
-		});
-
-		if (res.status !== 200) {
-			return (await res.json()) as AuthorizeError;
-		}
-
-		return null;
-	}
-
-	async OnCallback (
-		req: ParamsIncomingMessage,
-		res: ServerResponse<IncomingMessage>,
-	) {
-		if (!this.slackClient) {
-			this.logger.error('Slack client not set');
-			res.writeHead(500);
-			res.end();
-			return;
-		}
-
-		const url = new URL(req.url || '', this.config.serverHost);
-		const callbackError = url.searchParams.get('error');
-		const errorDescription = url.searchParams.get('error_description');
-		const code = url.searchParams.get('code');
-		const state = url.searchParams.get('state');
-
-		if (!state) {
-			this.logger.error('/oauth/callback missing state', { callbackError });
-
-			res.writeHead(302, {
-				Location: `${this.config.dashboardUrl}/authorize/error`,
-			});
-
-			res.end();
-			return;
-		}
-
-		const separatorIndex = state.indexOf('-');
-		const callbackVerifier = state.substring(0, separatorIndex);
-		const installationId = state.substring(separatorIndex + 1);
-
-		let oldToken: AuthToken | null;
-		let session: AuthorizeSession | null;
-		let installation: Installation | null;
-
-		try {
-			const installationRes
-				= await this.installationStore.getInstallationForAuthorization(installationId);
-			oldToken = installationRes.token;
-			session = installationRes.session;
-			installation = installationRes.installation;
-		} catch {
-			res.writeHead(302, {
-				Location: `${this.config.dashboardUrl}/authorize/error`,
-			});
-
-			res.end();
-			return;
-		}
-
-		if (!session) {
-			this.logger.error('/oauth/callback missing session', { installationId });
-
-			res.writeHead(302, {
-				Location: `${this.config.dashboardUrl}/authorize/error`,
-			});
-
-			res.end();
-			return;
-		}
-
-		if (callbackVerifier !== session.callbackVerifier) {
-			this.logger.error(
-				'/oauth/callback invalid verifier',
-				{
-					installationId,
-				},
-			);
-
-			res.writeHead(302, {
-				Location: `${this.config.dashboardUrl}/authorize/error`,
-			});
-
-			res.end();
-			return;
-		}
-
-		try {
-			// Delete session
-			await this.installationStore.updateAuthorizeSession(installationId, null);
-		} catch (error) {
-			this.logger.error('/oauth/callback failed to delete session', error);
-		}
-
-		if (callbackError || !code) {
-			try {
-				await this.slackClient.chat.postEphemeral({
-					token: installation?.bot?.token,
-					text: `Authentication failed: ${callbackError}: ${errorDescription}`,
-					user: session.userId,
-					channel: session.channelId,
-					thread_ts: session.threadTs,
-				});
-			} catch (error) {
-				this.logger.error('/oauth/callback failed to post ephemeral', error);
-			}
-
-			this.logger.error(
-				'/oauth/callback failed',
-				{
-					error: callbackError,
-					errorDescription,
-					code,
-					installationId,
-				},
-			);
-
-			res.writeHead(302, {
-				Location: `${this.config.dashboardUrl}/authorize/error`,
-			});
-
-			res.end();
-			return;
-		}
-
-		let exchangeError: AuthorizeError | null;
-
-		try {
-			exchangeError = await this.exchange(
-				code,
-				session.exchangeVerifier,
-				installationId,
-			);
-
-			// Revoke old token if exists
-			if (!exchangeError && oldToken && oldToken.refresh_token) {
-				try {
-					await this.revokeToken(oldToken.refresh_token);
-				} catch (error) {
-					this.logger.error(
-						'/oauth/callback failed to revoke token',
-						{
-							installationId,
-							error,
-						},
-					);
-				}
-			}
-		} catch {
-			exchangeError = {
-				error: AuthorizeErrorType.InternalError,
-				error_description: 'Failed to exchange code',
-			};
-		}
-
-		let message = '';
-
-		if (exchangeError) {
-			this.logger.error('/oauth/callback failed', exchangeError);
-			message = `Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`;
-		} else {
-			message = 'Success! You are now authenticated.';
-		}
-
-		try {
-			await this.slackClient.chat.postEphemeral({
-				token: installation?.bot?.token,
-				text: message,
-				user: session.userId,
-				channel: session.channelId,
-				thread_ts: session.threadTs,
-			});
-		} catch (error) {
-			this.logger.error('/oauth/callback failed to post ephemeral', error);
-		}
-
-		res.writeHead(302, {
-			Location:
-				this.config.dashboardUrl
-				+ (exchangeError ? '/authorize/error' : '/authorize/success'),
-		});
-
-		res.end();
 	}
 
 	async refreshToken (
@@ -555,7 +403,7 @@ export class OAuthClient {
 
 		const token = (await res.json()) as AuthToken;
 		token.expiry = Math.floor(Date.now() / 1000) + token.expires_in;
-		await this.installationStore.updateToken(id, token);
+		await this.db.updateToken(id, token);
 
 		return [ token, null ];
 	}
@@ -571,13 +419,24 @@ function generateS256Challenge (verifier: string): string {
 	return hash.digest('base64url');
 }
 
-export let oauth: OAuthClient;
-
-export function initOAuthClient (
-	config: Config,
-	logger: Logger,
-	installationStore: DBClient,
-	slackClient: SlackClient,
-) {
-	oauth = new OAuthClient(config, logger, installationStore, slackClient);
+export function parseCallbackURL (
+	url: string,
+	base: string,
+): {
+	code: string | null;
+	error: string | null;
+	errorDescription: string | null;
+	verifier?: string;
+	id?: string;
+} {
+	const u = new URL(url, base);
+	const state = u.searchParams.get('state');
+	const separatorIndex = state ? state.indexOf(stateSeparator) : -1;
+	return {
+		code: u.searchParams.get('code'),
+		error: u.searchParams.get('error'),
+		errorDescription: u.searchParams.get('error_description'),
+		verifier: state ? state.substring(0, separatorIndex) : undefined,
+		id: state ? state.substring(separatorIndex + 1) : undefined,
+	};
 }

@@ -1,21 +1,19 @@
-import { AuthToken } from '@globalping/bot-utils';
-import { ParamsIncomingMessage } from '@slack/bolt/dist/receivers/ParamsIncomingMessage.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
 	AuthorizeError,
 	AuthorizeErrorType,
+	Config,
 	IntrospectionResponse,
 	OAuthClient,
-} from '../src/auth.js';
-import { AuthorizeSession, Installation } from '../src/db.js';
-import { Config } from '../src/types.js';
-import { mockDBClient, mockLogger, mockSlackClient } from './utils.js';
+} from '../src/oauth.js';
+import { mockDBClient, mockLogger } from './utils.js';
+import { AuthToken } from '../src/types.js';
 
 describe('Auth', () => {
 	const config: Config = {
 		serverHost: 'http://localhost',
-		dashboardUrl: 'http://dash.localhost',
+		authCallbackPath: '/oauth/callback',
 		authUrl: 'http://auth.localhost',
 		authClientId: 'client_id',
 		authClientSecret: 'client_secret',
@@ -23,14 +21,8 @@ describe('Auth', () => {
 
 	const loggerMock = mockLogger();
 	const dbClientMock = mockDBClient();
-	const slackClientMock = mockSlackClient();
 
-	const oauth: OAuthClient = new OAuthClient(
-		config,
-		loggerMock,
-		dbClientMock,
-		slackClientMock,
-	);
+	const oauth: OAuthClient = new OAuthClient(config, loggerMock, dbClientMock);
 
 	afterEach(() => {
 		vi.resetAllMocks();
@@ -43,11 +35,10 @@ describe('Auth', () => {
 			const threadTs = '123';
 			const installationId = 'I123';
 
-			const res = await oauth.Authorize({
-				installationId,
-				user_id: userId,
-				channel_id: channelId,
-				thread_ts: threadTs,
+			const res = await oauth.Authorize(installationId, {
+				userId,
+				channelId,
+				threadTs,
 			});
 
 			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledWith(
@@ -68,9 +59,12 @@ describe('Auth', () => {
 			expect(url.searchParams.get('code_challenge')?.length).toBe(43);
 			expect(url.searchParams.get('code_challenge_method')).toBe('S256');
 			expect(url.searchParams.get('scope')).toBe('measurements');
+
+			expect(url.searchParams.get('redirect_uri')).toBe(config.serverHost + config.authCallbackPath);
+
 			const state = url.searchParams.get('state');
 			expect(state?.length).toBe(43 + 1 + installationId.length);
-			expect(state?.substring(43)).toBe('-' + installationId);
+			expect(state?.substring(43)).toBe(':' + installationId);
 		});
 	});
 
@@ -500,37 +494,12 @@ describe('Auth', () => {
 		});
 	});
 
-	describe('OnCallback', () => {
-		it('should exchange a new token, revoke the old token, and post a success message in slack', async () => {
-			const code = 'code';
-			const userId = 'U123';
-			const channelId = 'C123';
-			const threadTs = '123';
-			const installationId = 'I123';
-
+	describe('Exchange', () => {
+		it('should exchange the token', async () => {
 			const now = new Date();
+			const id = '123';
 
-			const token: AuthToken = {
-				access_token: 'tok3n',
-				refresh_token: 'refresh_tok3n',
-				expires_in: 3600,
-				token_type: 'Bearer',
-				expiry: now.getTime() / 1000 - 3600,
-			};
-
-			const authorizeSession: AuthorizeSession = {
-				callbackVerifier: 'callback',
-				exchangeVerifier: 'verifier',
-				userId,
-				channelId,
-				threadTs,
-			};
-
-			const installation = {
-				bot: { token: 'installation_token' },
-			} as Installation;
-
-			const newToken: AuthToken = {
+			const expectedToken: AuthToken = {
 				access_token: 'new_tok3n',
 				refresh_token: 'new_refresh_tok3n',
 				expires_in: 3600,
@@ -540,61 +509,41 @@ describe('Auth', () => {
 
 			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
 
-			vi.spyOn(
-				dbClientMock,
-				'getInstallationForAuthorization',
-			).mockResolvedValue({
-				token,
-				session: authorizeSession,
-				installation,
-			});
-
-			const exchangeFetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+			const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
 				ok: true,
 				status: 200,
-				json: async () => newToken,
+				json: async () => expectedToken,
 			} as Response);
 
-			const revokeFetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({
-				ok: true,
-				status: 200,
-			} as Response);
+			const err = await oauth.Exchange('cod3', 'verifi3r', id);
 
-			const req = {
-				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${installationId}`,
-			} as ParamsIncomingMessage;
-			const res = {
-				writeHead: vi.fn(),
-				end: vi.fn(),
-			} as any;
+			expect(err).toBeNull();
 
-			await oauth.OnCallback(req, res);
+			expect(dbClientMock.updateToken).toHaveBeenCalledWith(id, expectedToken);
 
-			expect(dbClientMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
-
-			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledWith(
-				installationId,
-				null,
-			);
-
-			expect(dbClientMock.updateToken).toHaveBeenCalledWith(
-				installationId,
-				newToken,
-			);
-
-			expect(exchangeFetchSpy).toHaveBeenCalledWith(
-				`${config.authUrl}/oauth/token`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded',
-						'Content-Length': '173',
-					},
-					body: 'client_id=client_id&client_secret=client_secret&code=code&code_verifier=verifier&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%2Fslack%2Foauth%2Fcallback',
+			expect(fetchSpy).toHaveBeenCalledWith(`${config.authUrl}/oauth/token`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'Content-Length': '165',
 				},
-			);
+				body: 'client_id=client_id&client_secret=client_secret&code=cod3&code_verifier=verifi3r&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%2Foauth%2Fcallback',
+			});
+		});
+	});
 
-			expect(revokeFetchSpy).toHaveBeenCalledWith(
+	describe('RevokeToken', () => {
+		it('should revoke the token', async () => {
+			const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+				ok: true,
+				status: 200,
+			} as Response);
+
+			const err = await oauth.RevokeToken('refresh_tok3n');
+
+			expect(err).toBeNull();
+
+			expect(fetchSpy).toHaveBeenCalledWith(
 				`${config.authUrl}/oauth/token/revoke`,
 				{
 					method: 'POST',
@@ -605,92 +554,6 @@ describe('Auth', () => {
 					body: 'token=refresh_tok3n',
 				},
 			);
-
-			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
-				token: installation?.bot?.token,
-				text: 'Success! You are now authenticated.',
-				user: userId,
-				channel: channelId,
-				thread_ts: threadTs,
-			});
-
-			expect(res.writeHead).toHaveBeenCalledWith(302, {
-				Location: `${config.dashboardUrl}/authorize/success`,
-			});
-
-			expect(res.end).toHaveBeenCalled();
-		});
-
-		it('should redirect to the error page - callback verifier does not match', async () => {
-			const code = 'code';
-			const userId = 'U123';
-			const channelId = 'C123';
-			const threadTs = '123';
-			const installationId = 'I123';
-
-			const now = new Date();
-
-			const token: AuthToken = {
-				access_token: 'tok3n',
-				refresh_token: 'refresh_tok3n',
-				expires_in: 3600,
-				token_type: 'Bearer',
-				expiry: now.getTime() / 1000 - 3600,
-			};
-
-			const authorizeSession: AuthorizeSession = {
-				callbackVerifier: 'callback',
-				exchangeVerifier: 'verifier',
-				userId,
-				channelId,
-				threadTs,
-			};
-
-			const installation = {
-				bot: { token: 'installation_token' },
-			} as Installation;
-
-			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
-
-			vi.spyOn(
-				dbClientMock,
-				'getInstallationForAuthorization',
-			).mockResolvedValue({
-				token,
-				session: {
-					...authorizeSession,
-					callbackVerifier: 'wrong',
-				},
-				installation,
-			});
-
-			const fetchSpy = vi.spyOn(global, 'fetch');
-
-			const req = {
-				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}-${installationId}`,
-			} as ParamsIncomingMessage;
-			const res = {
-				writeHead: vi.fn(),
-				end: vi.fn(),
-			} as any;
-
-			await oauth.OnCallback(req, res);
-
-			expect(dbClientMock.getInstallationForAuthorization).toHaveBeenCalledWith(installationId);
-
-			expect(dbClientMock.updateAuthorizeSession).toHaveBeenCalledTimes(0);
-
-			expect(dbClientMock.updateToken).toHaveBeenCalledTimes(0);
-
-			expect(fetchSpy).toHaveBeenCalledTimes(0);
-
-			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
-
-			expect(res.writeHead).toHaveBeenCalledWith(302, {
-				Location: `${config.dashboardUrl}/authorize/error`,
-			});
-
-			expect(res.end).toHaveBeenCalled();
 		});
 	});
 });
