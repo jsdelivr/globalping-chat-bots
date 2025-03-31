@@ -401,7 +401,7 @@ ${formatAPIError(error)}`;
 
 		if (interaction.inGuild()) {
 			text
-				+= '\n\n**Note:** The login is set for the server. Once logged in, account credits are shared between all users in the server.';
+				+= '\n\n**Note:** This action applies to the whole server. Once logged in, all users on the server share the same account credits.';
 		}
 
 		await interaction.editReply({
