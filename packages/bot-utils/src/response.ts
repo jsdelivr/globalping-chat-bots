@@ -20,10 +20,8 @@ export function responseHeader (
 	tag: string | undefined,
 	boldSeparator: string,
 ): string {
-	return `> ${boldSeparator}${result.probe.city}${
-		result.probe.state ? ` (${result.probe.state})` : ''
-	}, ${result.probe.country}, ${result.probe.continent}, ${
-		result.probe.network
+	return `> ${boldSeparator}${result.probe.city}${result.probe.state ? ` (${result.probe.state})` : ''
+	}, ${result.probe.country}, ${result.probe.continent}, ${result.probe.network
 	} (AS${result.probe.asn})${tag ? `, (${tag})` : ''}${boldSeparator}\n`;
 }
 
@@ -256,11 +254,11 @@ export function getMoreCreditsRequiredAuthError (
 	return new Error(`You only have ${pluralize(
 		remaining,
 		'credit',
-	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by sponsoring us or hosting probes.`);
+	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by sponsoring us or hosting probes. Learn more at https://dash.globalping.io?view=add-credits.`);
 }
 
 export function getNoCreditsAuthError (rateLimitReset: number): Error {
-	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by sponsoring us or hosting probes.`);
+	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by sponsoring us or hosting probes. Learn more at https://dash.globalping.io?view=add-credits.`);
 }
 
 export function getMoreCreditsRequiredNoAuthError (
@@ -271,9 +269,9 @@ export function getMoreCreditsRequiredNoAuthError (
 	return new Error(`You only have ${pluralize(
 		remaining,
 		'credit',
-	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by creating an account. Sign up at https://globalping.io`);
+	)} remaining, and ${requestCost} were required. Try requesting fewer probes or wait ${formatSeconds(rateLimitReset)} for the rate limit to reset. You can get higher limits by creating an account. Sign up at https://dash.globalping.io?view=add-credits.`);
 }
 
 export function getNoCreditsNoAuthError (rateLimitReset: number): Error {
-	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by creating an account. Sign up at https://globalping.io`);
+	return new Error(`You have run out of credits for this session. You can wait ${formatSeconds(rateLimitReset)} for the rate limit to reset or get higher limits by creating an account. Sign up at https://dash.globalping.io?view=add-credits.`);
 }
