@@ -54,6 +54,7 @@ export const ALLOWED_DNS_TYPES = [
 	'SOA',
 	'TXT',
 	'SRV',
+	'SVCB',
 ] as const;
 export type DnsType = (typeof ALLOWED_DNS_TYPES)[number];
 export const isDnsType = (type: string): type is DnsType => ALLOWED_DNS_TYPES.includes(type as DnsType);
