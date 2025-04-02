@@ -11,24 +11,14 @@ export interface Config {
 	authClientSecret: string;
 }
 
-type AuthorizeSession = {
-	callbackVerifier: string;
-	exchangeVerifier: string;
-};
-
-type AuthorizeSessionData = {
-	channelId: string;
-	userId: string;
-	threadTs?: string;
-};
-
 export interface DBClient {
 	getToken: (id: string) => Promise<AuthToken | null>;
 	updateToken: (id: string, token: AuthToken | null) => Promise<void>;
-	updateAuthorizeSession: (
+	updateAuthorizeSession(
 		id: string,
-		authorizeSesssion: AuthorizeSession & AuthorizeSessionData,
-	) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		authorizeSesssion: any,
+	): Promise<void>;
 }
 
 export enum AuthorizeErrorType {
@@ -106,9 +96,9 @@ export class OAuthClient {
 		private db: DBClient,
 	) { }
 
-	async Authorize (
+	async Authorize<T> (
 		id: string,
-		data: AuthorizeSessionData,
+		data: T,
 	): Promise<AuthorizeResponse> {
 		const callbackVerifier = generateVerifier();
 		const exchangeVerifier = generateVerifier();

@@ -41,7 +41,7 @@ import {
 	MessageFlags,
 	PermissionFlagsBits,
 	PermissionsBitField,
-	TextChannel,
+	Routes,
 	userMention,
 } from 'discord.js';
 
@@ -254,11 +254,15 @@ ${formatAPIError(error)}`;
 
 		if (url.error || !url.code) {
 			try {
-				const user = this.discord.users.cache.get(session.userId);
-
-				if (user) {
-					await user.send(`Authentication failed: ${url.error}: ${url.errorDescription}`);
-				}
+				await this.discord.rest.post(
+					Routes.webhook(session.applicationId, session.token),
+					{
+						body: {
+							content: `Authentication failed: ${url.error}: ${url.errorDescription}`,
+							flags: MessageFlags.Ephemeral,
+						},
+					},
+				);
 			} catch (error) {
 				this.logger.error('/oauth/callback failed to post ephemeral', error);
 			}
@@ -305,26 +309,25 @@ ${formatAPIError(error)}`;
 			};
 		}
 
+		let message = '';
+
 		if (exchangeError) {
 			this.logger.error('/oauth/callback failed', exchangeError);
+			message = `Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`;
+		} else {
+			message = 'Success! You are now authenticated.';
 		}
 
 		try {
-			if (exchangeError) {
-				// We can't send ephemeral messages to users directly,
-				// so we send a DM if an error occurs.
-				const user = this.discord.users.cache.get(session.userId);
-
-				if (user) {
-					await user.send(`Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`);
-				}
-			} else {
-				const channel = this.discord.channels.cache.get(session.channelId) as TextChannel;
-
-				if (channel) {
-					await channel.send('Success! You are now authenticated.');
-				}
-			}
+			await this.discord.rest.post(
+				Routes.webhook(session.applicationId, session.token),
+				{
+					body: {
+						content: message,
+						flags: MessageFlags.Ephemeral,
+					},
+				},
+			);
 		} catch (error) {
 			this.logger.error('/oauth/callback failed to reply to user', error);
 		}
@@ -393,8 +396,8 @@ ${formatAPIError(error)}`;
 		const id = this.getIdFromInteraction(interaction);
 
 		const res = await this.oauth.Authorize(id, {
-			userId: interaction.user.id,
-			channelId: interaction.channelId,
+			applicationId: interaction.applicationId,
+			token: interaction.token,
 		});
 
 		let text = `Please [click here](${res.url}) to authenticate.`;
