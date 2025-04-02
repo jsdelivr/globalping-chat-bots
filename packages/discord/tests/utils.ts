@@ -26,21 +26,16 @@ export const mockDiscordInteraction = (): ChatInputCommandInteraction => ({
 	inGuild: () => true,
 	guildId: '654',
 	channelId: 'C123',
+	applicationId: 'A123',
+	token: 'message_tok3n',
 	user: {
 		id: '123',
 	},
 }) as any;
 
 export const mockDiscordClient = (): Client => ({
-	users: {
-		cache: {
-			get: vi.fn(),
-		},
-	},
-	channels: {
-		cache: {
-			get: vi.fn(),
-		},
+	rest: {
+		post: vi.fn(),
 	},
 }) as any;
 

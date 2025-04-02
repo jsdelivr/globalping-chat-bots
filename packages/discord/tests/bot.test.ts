@@ -4,7 +4,7 @@ import {
 	generateHelp,
 	HttpProbeResult,
 } from '@globalping/bot-utils';
-import { codeBlock, MessageFlags } from 'discord.js';
+import { codeBlock, MessageFlags, Routes } from 'discord.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Bot } from '../src/bot.js';
 import {
@@ -505,8 +505,8 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			expect(interactionMock.deferReply).toHaveBeenCalled();
 
 			expect(oauthClientMock.Authorize).toHaveBeenCalledWith('G654', {
-				userId: '123',
-				channelId: 'C123',
+				applicationId: 'A123',
+				token: 'message_tok3n',
 			});
 
 			expect(interactionMock.editReply).toHaveBeenCalledWith({
@@ -925,8 +925,9 @@ Creating measurements:
 		it('should exchange a new token, revoke the old token, and post a success message in slack', async () => {
 			const code = 'code';
 			const userId = 'U123';
-			const channelId = 'C123';
 			const id = 'U' + userId;
+			const applicationId = 'A123';
+			const messageToken = 'message_tok3n';
 
 			const now = new Date();
 
@@ -941,8 +942,8 @@ Creating measurements:
 			const authorizeSession: AuthorizeSession = {
 				callbackVerifier: 'callback',
 				exchangeVerifier: 'verifier',
-				userId,
-				channelId,
+				applicationId,
+				token: messageToken,
 			};
 
 			vi.spyOn(dbClientMock, 'getDataForAuthorization').mockResolvedValue({
@@ -957,11 +958,6 @@ Creating measurements:
 				writeHead: vi.fn(),
 				end: vi.fn(),
 			} as any;
-
-			const sendMock = vi.fn();
-			vi.spyOn(discordClientMock.channels.cache, 'get').mockReturnValue({
-				send: sendMock,
-			} as any);
 
 			await bot.OnAuthCallback(req, res);
 
@@ -980,9 +976,15 @@ Creating measurements:
 
 			expect(oauthClientMock.RevokeToken).toHaveBeenCalledWith(token.refresh_token);
 
-			expect(discordClientMock.channels.cache.get).toHaveBeenCalledWith(channelId);
-
-			expect(sendMock).toHaveBeenCalledWith('Success! You are now authenticated.');
+			expect(discordClientMock.rest.post).toHaveBeenCalledWith(
+				Routes.webhook(applicationId, messageToken),
+				{
+					body: {
+						content: `Success! You are now authenticated.`,
+						flags: MessageFlags.Ephemeral,
+					},
+				},
+			);
 
 			expect(res.writeHead).toHaveBeenCalledWith(302, {
 				Location: `${configMock.dashboardUrl}/authorize/success`,
@@ -994,8 +996,9 @@ Creating measurements:
 		it('should redirect to the error page - callback verifier does not match', async () => {
 			const code = 'code';
 			const userId = 'U123';
-			const channelId = 'C123';
 			const id = 'U' + userId;
+			const applicationId = 'A123';
+			const messageToken = 'message_tok3n';
 
 			const now = new Date();
 
@@ -1010,8 +1013,8 @@ Creating measurements:
 			const authorizeSession: AuthorizeSession = {
 				callbackVerifier: 'callback',
 				exchangeVerifier: 'verifier',
-				userId,
-				channelId,
+				applicationId,
+				token: messageToken,
 			};
 
 			vi.spyOn(Date, 'now').mockReturnValue(now.getTime());
@@ -1044,7 +1047,7 @@ Creating measurements:
 
 			expect(fetchSpy).toHaveBeenCalledTimes(0);
 
-			// expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledTimes(0);
+			expect(discordClientMock.rest.post).toHaveBeenCalledTimes(0);
 
 			expect(res.writeHead).toHaveBeenCalledWith(302, {
 				Location: `${configMock.dashboardUrl}/authorize/error`,

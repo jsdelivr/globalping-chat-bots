@@ -3,15 +3,15 @@ import { AuthToken, Logger, KnexClient, Tables } from '@globalping/bot-utils';
 export interface AuthorizeSession {
 	callbackVerifier: string;
 	exchangeVerifier: string;
-	userId: string;
-	channelId: string;
+	applicationId: string;
+	token: string;
 }
 
 export class DBClient {
 	constructor (
 		private knex: KnexClient,
 		private logger: Logger,
-	) {}
+	) { }
 
 	async getToken (id: string) {
 		try {
