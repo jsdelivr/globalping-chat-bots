@@ -28,6 +28,7 @@ import {
 	getTooManyRequestsError,
 	CustomRoute,
 	parseCallbackURL,
+	argsToFlags,
 } from '@globalping/bot-utils';
 import {
 	APIEmbed,
@@ -35,10 +36,14 @@ import {
 	CacheType,
 	ChatInputCommandInteraction,
 	Client,
+	ClientUser,
 	GatewayIntentBits,
 	inlineCode,
 	Interaction,
+	InteractionEditReplyOptions,
+	Message,
 	MessageFlags,
+	MessageReplyOptions,
 	PermissionFlagsBits,
 	PermissionsBitField,
 	Routes,
@@ -56,7 +61,14 @@ export const initBot = (
 	knex: KnexClient,
 	routes: CustomRoute[],
 ) => {
-	const client = new Client({ intents: [ GatewayIntentBits.Guilds ] });
+	const client = new Client({
+		intents: [
+			GatewayIntentBits.Guilds,
+			GatewayIntentBits.GuildMessages,
+			GatewayIntentBits.DirectMessages,
+			GatewayIntentBits.MessageContent,
+		],
+	});
 
 	const db = new DBClient(knex, logger);
 
@@ -83,6 +95,7 @@ export const initBot = (
 	client.on('error', m => logger.error(m.message, m));
 
 	client.on('interactionCreate', args => bot.HandleInteraction(args));
+	client.on('messageCreate', args => bot.HandleMessage(args));
 
 	return client;
 };
@@ -137,26 +150,42 @@ export class Bot {
 
 			cmdText = this.expandCommand(flags);
 
+			const id = this.getIdFromInteraction(interaction);
+
 			if (flags.cmd === 'auth') {
 				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
+				if (!await this.canUseAuthCommandFromInterraction(interaction)) {
+					return;
+				}
+
+				let response: InteractionEditReplyOptions;
+
 				switch (flags.target) {
 					case AuthSubcommand.Login:
-						await this.authLogin(interaction);
-						return;
+						response = await this.authLogin(id, interaction);
+
+						break;
 					case AuthSubcommand.Logout:
-						await this.authLogout(interaction);
-						return;
+						response = await this.authLogout(id);
+						break;
 					case AuthSubcommand.Status:
-						await this.authStatus(interaction);
+						response = await this.authStatus(id);
+						break;
+					default:
 						return;
 				}
+
+				await interaction.editReply(response);
+				return;
 			}
 
 			if (flags.cmd === 'limits') {
 				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-				await this.limits(interaction);
+				const response = await this.limits(id);
+
+				await interaction.editReply(response);
 				return;
 			}
 
@@ -170,7 +199,13 @@ export class Bot {
 
 			await interaction.deferReply();
 
-			await this.createMeasurement(interaction, flags, cmdText);
+			const response = await this.createMeasurement(
+				id,
+				interaction.user.id,
+				flags,
+				cmdText,
+			);
+			await interaction.editReply(response);
 		} catch (error) {
 			this.logger.error(`Error processing request`, {
 				error,
@@ -185,6 +220,86 @@ ${formatAPIError(error)}`;
 			} else {
 				await interaction.reply(errorMsg);
 			}
+		}
+	}
+
+	async HandleMessage (message: Message) {
+		if (!message.mentions.has(message.client.user)) {
+			return;
+		}
+
+		const cmdText = this.parseMentionContent(
+			message.content,
+			message.client.user,
+		);
+
+		try {
+			const flags = argsToFlags(cmdText);
+
+			if (!flags.cmd || flags.help) {
+				await message.reply({
+					content: getHelpForCommand(flags.cmd, flags.target, this.help),
+				});
+
+				return;
+			}
+
+			const id = this.getIdFromMessage(message);
+
+			if (flags.cmd === 'auth') {
+				if (!await this.canUseAuthCommandFromMessage(message)) {
+					return;
+				}
+
+				let response: MessageReplyOptions;
+
+				switch (flags.target) {
+					case AuthSubcommand.Login:
+						response = {
+							content: 'Please use `/globalping auth login` instead.',
+						};
+
+						break;
+					case AuthSubcommand.Logout:
+						response = await this.authLogout(id);
+						break;
+					case AuthSubcommand.Status:
+						response = await this.authStatus(id);
+						break;
+					default:
+						await message.reply({
+							content: getHelpForCommand(flags.cmd, flags.target, this.help),
+						});
+
+						return;
+				}
+
+				await message.reply(response);
+				return;
+			}
+
+			if (flags.cmd === 'limits') {
+				const response = await this.limits(id);
+				await message.reply(response);
+				return;
+			}
+
+			const response = await this.createMeasurement(
+				id,
+				message.author.id,
+				flags,
+				cmdText,
+			);
+			await message.reply(response);
+		} catch (error) {
+			this.logger.error(`Error processing request`, {
+				error,
+				command: cmdText,
+			});
+
+			const errorMsg = `${userMention(message.author.id)}, there was an error processing your request for ${inlineCode(cmdText ?? 'help')}
+${formatAPIError(error)}`;
+			await message.reply(errorMsg);
 		}
 	}
 
@@ -342,12 +457,12 @@ ${formatAPIError(error)}`;
 	}
 
 	private async createMeasurement (
-		interaction: ChatInputCommandInteraction,
+		localId: string,
+		userId: string,
 		flags: Flags,
 		cmdText: string,
 	) {
-		const id = this.getIdFromInteraction(interaction);
-		const token = await this.oauth.GetToken(id);
+		const token = await this.oauth.GetToken(localId);
 
 		let measurementResponse: MeasurementCreateResponse;
 
@@ -362,7 +477,7 @@ ${formatAPIError(error)}`;
 
 				// Unauthorized or Forbidden
 				if ((statusCode === 401 || statusCode === 403) && token) {
-					const errMsg = await this.oauth.TryToRefreshToken(id, token);
+					const errMsg = await this.oauth.TryToRefreshToken(localId, token);
 
 					if (errMsg) {
 						throw new Error(errMsg);
@@ -382,19 +497,16 @@ ${formatAPIError(error)}`;
 
 		const embeds = this.formatMeasurementResponse(res, flags);
 
-		await interaction.editReply({
-			content: `${userMention(interaction.user.id)}, here are the results for ${inlineCode(cmdText)}`,
+		return {
+			content: `${userMention(userId)}, here are the results for ${inlineCode(cmdText)}`,
 			embeds,
-		});
+		};
 	}
 
-	private async authLogin (interaction: ChatInputCommandInteraction) {
-		if (!await this.canUseAuthCommand(interaction)) {
-			return;
-		}
-
-		const id = this.getIdFromInteraction(interaction);
-
+	private async authLogin (
+		id: string,
+		interaction: ChatInputCommandInteraction,
+	) {
 		const res = await this.oauth.Authorize(id, {
 			applicationId: interaction.applicationId,
 			token: interaction.token,
@@ -407,23 +519,17 @@ ${formatAPIError(error)}`;
 				+= '\n\n**Note:** This action applies to the whole server. Once logged in, all users on the server share the same account credits.';
 		}
 
-		await interaction.editReply({
+		return {
 			embeds: [
 				{
 					description: text,
 				},
 			],
-		});
+		};
 	}
 
-	private async authStatus (interaction: ChatInputCommandInteraction) {
-		if (!await this.canUseAuthCommand(interaction)) {
-			return;
-		}
-
-		const id = this.getIdFromInteraction(interaction);
-
-		const [ introspection, error ] = await this.oauth.Introspect(id);
+	private async authStatus (localId: string) {
+		const [ introspection, error ] = await this.oauth.Introspect(localId);
 		let text = '';
 
 		if (error) {
@@ -438,55 +544,43 @@ ${formatAPIError(error)}`;
 				? `Logged in as ${introspection?.username}.`
 				: 'Not logged in.';
 
-		await interaction.editReply({
+		return {
 			content: text,
-		});
+		};
 	}
 
-	private async authLogout (interaction: ChatInputCommandInteraction) {
-		if (!await this.canUseAuthCommand(interaction)) {
-			return;
-		}
-
-		const id = this.getIdFromInteraction(interaction);
-
-		const error = await this.oauth.Logout(id);
+	private async authLogout (localId: string) {
+		const error = await this.oauth.Logout(localId);
 		let text = '';
 		text = error
 			? `${error.error}: ${error.error_description}`
 			: 'You are now logged out.';
 
-		await interaction.editReply({
+		return {
 			content: text,
-		});
+		};
 	}
 
-	private async limits (interaction: ChatInputCommandInteraction) {
-		const id = this.getIdFromInteraction(interaction);
-
-		const [ introspection, error ] = await this.oauth.Introspect(id);
+	private async limits (localId: string) {
+		const [ introspection, error ] = await this.oauth.Introspect(localId);
 
 		if (!introspection) {
-			await interaction.editReply({
+			return {
 				content: `${error?.error}: ${error?.error_description}`,
-			});
-
-			return;
+			};
 		}
 
-		const [ limits, limitsError ] = await this.oauth.Limits(id);
+		const [ limits, limitsError ] = await this.oauth.Limits(localId);
 
 		if (!limits) {
-			await interaction.editReply({
+			return {
 				content: `${limitsError?.type}: ${limitsError?.message}`,
-			});
-
-			return;
+			};
 		}
 
-		await interaction.editReply({
+		return {
 			content: getLimitsOutput(limits, introspection),
-		});
+		};
 	}
 
 	private getIdFromInteraction (interaction: ChatInputCommandInteraction): string {
@@ -497,7 +591,15 @@ ${formatAPIError(error)}`;
 		return 'U' + interaction.user.id;
 	}
 
-	private async canUseAuthCommand (interaction: ChatInputCommandInteraction): Promise<boolean> {
+	private getIdFromMessage (message: Message): string {
+		if (message.inGuild()) {
+			return 'G' + message.guildId;
+		}
+
+		return 'U' + message.author.id;
+	}
+
+	private async canUseAuthCommandFromInterraction (interaction: ChatInputCommandInteraction): Promise<boolean> {
 		if (!interaction.inGuild()) {
 			return true;
 		}
@@ -508,6 +610,26 @@ ${formatAPIError(error)}`;
 
 		if (!canAuthenticate) {
 			await interaction.editReply({
+				content: 'Only administrators can use this command.',
+			});
+
+			return false;
+		}
+
+		return true;
+	}
+
+	private async canUseAuthCommandFromMessage (message: Message): Promise<boolean> {
+		if (!message.inGuild()) {
+			return true;
+		}
+
+		const canAuthenticate
+			= message.member
+			&& message.member.permissions.has(PermissionFlagsBits.Administrator);
+
+		if (!canAuthenticate) {
+			await message.reply({
 				content: 'Only administrators can use this command.',
 			});
 
@@ -661,5 +783,12 @@ ${formatAPIError(error)}`;
 		}
 
 		return [{ fields }];
+	}
+
+	private parseMentionContent (content: string, botUser: ClientUser) {
+		const botMention = userMention(botUser.id);
+		return content
+			.slice(content.indexOf(botMention) + botMention.length)
+			.trim();
 	}
 }

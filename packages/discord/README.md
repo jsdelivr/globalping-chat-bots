@@ -31,3 +31,5 @@ Once ready, head over to your [app configuration](https://discord.com/developers
    8. Use Slash Commands
 
 Some of these permissions are unused, but may be introduced in a future update of the bot. You now have an invite link for the bot.
+
+3. Check `Bot -> Server Members Intent` and `Bot -> Message Content Intent` to allow the bot to work with mentions.
