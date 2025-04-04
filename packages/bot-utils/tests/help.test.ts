@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateHelp } from '../src/help.js';
+import { generalHelpTexts, generateHelp } from '../src/help.js';
 
 describe('help', () => {
 	describe('generateHelp', () => {
@@ -341,6 +341,28 @@ traceroute jsdelivr.com from Paris --port 453
 					'Unknown command! Please call `/globalping help` for a list of commands.',
 			};
 			expect(helpTexts).toEqual(expectedHelpTexts);
+		});
+
+		it('should check that short descriptions are less than or equal to 100 chars', async () => {
+			for (const cmd of generalHelpTexts.commands) {
+				expect((cmd.shortDescription || '').length <= 100, `${cmd.name}: ${cmd.shortDescription}`).toBe(true);
+
+				for (const flag of cmd.flags) {
+					expect((flag.shortDescription || '').length <= 100, `${cmd.name}: ${flag.name}: ${flag.shortDescription}`).toBe(true);
+				}
+			}
+
+			for (const cmd of generalHelpTexts.additionalCommands) {
+				expect((cmd.shortDescription || '').length <= 100, `${cmd.name}: ${cmd.shortDescription}`).toBe(true);
+
+				for (const flag of cmd.flags) {
+					expect((flag.shortDescription || '').length <= 100, `${cmd.name}: ${flag.name}: ${flag.shortDescription}`).toBe(true);
+				}
+			}
+
+			for (const flag of generalHelpTexts.flags) {
+				expect((flag.shortDescription || '').length <= 100, `general: ${flag.name}: ${flag.shortDescription}`).toBe(true);
+			}
 		});
 	});
 });

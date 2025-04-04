@@ -8,6 +8,25 @@ import {
 	ALLOWED_QUERY_TYPES,
 	ALLOWED_TRACE_PROTOCOLS,
 	AuthSubcommand,
+	dnsHelpTexts,
+	dnsFlagsMap,
+	globalFlagsMap,
+	helpHelpTexts,
+	httpFlagsMap,
+	mtrHelpTexts,
+	mtrFlagsMap,
+	pingHelpTexts,
+	pingFlagsMap,
+	tracerouteHelpTexts,
+	authHelpTexts,
+	authLoginHelpTexts,
+	authLogoutHelpTexts,
+	authStatusHelpTexts,
+	limitsHelpTexts,
+	httpHelpTexts,
+	tracerouteFlagsMap,
+	otherFlagsMap,
+	HelpFlag,
 } from '@globalping/bot-utils';
 import { Routes, SlashCommandBuilder } from 'discord.js';
 import { DeployCommandsConfig } from './types.js';
@@ -22,219 +41,219 @@ export const deployCommands = (config: DeployCommandsConfig) => {
 			.setDescription('Query Globalping network')
 			// Ping
 			.addSubcommand(subcommand => subcommand
-				.setName('ping')
-				.setDescription('Use ping command')
+				.setName(pingHelpTexts.name)
+				.setDescription(pingHelpTexts.shortDescription)
 				.addStringOption(option => option
-					.setName('target')
-					.setDescription('Target to ping')
+					.setName((otherFlagsMap.get('target') as HelpFlag).name)
+					.setDescription((otherFlagsMap.get('target') as HelpFlag).shortDescription)
 					.setRequired(true))
 				.addStringOption(option => option
-					.setName('from')
-					.setDescription('Probe locations')
+					.setName((globalFlagsMap.get('from') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('from') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('limit')
-					.setDescription('Number of probes')
+					.setName((globalFlagsMap.get('limit') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('limit') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('packets')
-					.setDescription('Number of packets')
+					.setName((pingFlagsMap.get('packets') as HelpFlag).name)
+					.setDescription((pingFlagsMap.get('packets') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addBooleanOption(option => option
-					.setName('share')
-					.setDescription('Provide share link')
+					.setName((globalFlagsMap.get('share') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('share') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addBooleanOption(option => option
-					.setName('latency')
-					.setDescription('Output only latency stats')
+					.setName((globalFlagsMap.get('latency') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('latency') as HelpFlag).shortDescription)
 					.setRequired(false)))
 			// Traceroute
 			.addSubcommand(subcommand => subcommand
-				.setName('traceroute')
-				.setDescription('Use traceroute command')
+				.setName(tracerouteHelpTexts.name)
+				.setDescription(tracerouteHelpTexts.shortDescription)
 				.addStringOption(option => option
-					.setName('target')
-					.setDescription('Target to traceroute')
+					.setName((otherFlagsMap.get('target') as HelpFlag).name)
+					.setDescription((otherFlagsMap.get('target') as HelpFlag).shortDescription)
 					.setRequired(true))
 				.addStringOption(option => option
-					.setName('from')
-					.setDescription('Probe locations')
+					.setName((globalFlagsMap.get('from') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('from') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('limit')
-					.setDescription('Number of probes')
+					.setName((globalFlagsMap.get('limit') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('limit') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('protocol')
-					.setDescription('Protocol to use')
+					.setName((tracerouteFlagsMap.get('protocol') as HelpFlag).name)
+					.setDescription((tracerouteFlagsMap.get('protocol') as HelpFlag).shortDescription)
 					.setRequired(false)
 					.addChoices(...choiceMap([ ...ALLOWED_TRACE_PROTOCOLS ])))
 				.addNumberOption(option => option
-					.setName('port')
-					.setDescription('Port to use')
+					.setName((tracerouteFlagsMap.get('port') as HelpFlag).name)
+					.setDescription((tracerouteFlagsMap.get('port') as HelpFlag).shortDescription)
 					.setRequired(false)))
 			// dns
 			.addSubcommand(subcommand => subcommand
-				.setName('dns')
-				.setDescription('Use dns command')
+				.setName(dnsHelpTexts.name)
+				.setDescription(dnsHelpTexts.shortDescription)
 				.addStringOption(option => option
-					.setName('target')
-					.setDescription('Target to query')
+					.setName((otherFlagsMap.get('target') as HelpFlag).name)
+					.setDescription((otherFlagsMap.get('target') as HelpFlag).shortDescription)
 					.setRequired(true))
 				.addStringOption(option => option
-					.setName('from')
-					.setDescription('Probe locations')
+					.setName((globalFlagsMap.get('from') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('from') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('limit')
-					.setDescription('Number of probes')
+					.setName((globalFlagsMap.get('limit') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('limit') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('query')
-					.setDescription('Query type')
+					.setName((dnsFlagsMap.get('type') as HelpFlag).name)
+					.setDescription((dnsFlagsMap.get('type') as HelpFlag).shortDescription)
 					.setRequired(false)
 					.addChoices(...choiceMap([ ...ALLOWED_DNS_TYPES ])))
 				.addNumberOption(option => option
-					.setName('port')
-					.setDescription('Port to use')
+					.setName((dnsFlagsMap.get('port') as HelpFlag).name)
+					.setDescription((dnsFlagsMap.get('port') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('protocol')
-					.setDescription('Protocol to use')
+					.setName((dnsFlagsMap.get('protocol') as HelpFlag).name)
+					.setDescription((dnsFlagsMap.get('protocol') as HelpFlag).shortDescription)
 					.setRequired(false)
 					.addChoices(...choiceMap([ ...ALLOWED_DNS_PROTOCOLS ])))
 				.addStringOption(option => option
-					.setName('resolver')
-					.setDescription('Resolver to use')
+					.setName((dnsFlagsMap.get('resolver') as HelpFlag).name)
+					.setDescription((dnsFlagsMap.get('resolver') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addBooleanOption(option => option
-					.setName('trace')
-					.setDescription('Trace route')
+					.setName((dnsFlagsMap.get('trace') as HelpFlag).name)
+					.setDescription((dnsFlagsMap.get('trace') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addBooleanOption(option => option
-					.setName('share')
-					.setDescription('Provide share link')
+					.setName((globalFlagsMap.get('share') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('share') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addBooleanOption(option => option
-					.setName('latency')
-					.setDescription('Output only latency stats')
+					.setName((globalFlagsMap.get('latency') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('latency') as HelpFlag).shortDescription)
 					.setRequired(false)))
 			// mtr
 			.addSubcommand(subcommand => subcommand
-				.setName('mtr')
-				.setDescription('Use mtr command')
+				.setName(mtrHelpTexts.name)
+				.setDescription(mtrHelpTexts.shortDescription)
 				.addStringOption(option => option
-					.setName('target')
-					.setDescription('Target to query')
+					.setName((otherFlagsMap.get('target') as HelpFlag).name)
+					.setDescription((otherFlagsMap.get('target') as HelpFlag).shortDescription)
 					.setRequired(true))
 				.addStringOption(option => option
-					.setName('from')
-					.setDescription('Probe locations')
+					.setName((globalFlagsMap.get('from') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('from') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('limit')
-					.setDescription('Number of probes')
+					.setName((globalFlagsMap.get('limit') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('limit') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('port')
-					.setDescription('Port to use')
+					.setName((mtrFlagsMap.get('port') as HelpFlag).name)
+					.setDescription((mtrFlagsMap.get('port') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('packets')
-					.setDescription('Number of packets')
+					.setName((mtrFlagsMap.get('packets') as HelpFlag).name)
+					.setDescription((mtrFlagsMap.get('packets') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('protocol')
-					.setDescription('Protocol to use')
+					.setName((mtrFlagsMap.get('protocol') as HelpFlag).name)
+					.setDescription((mtrFlagsMap.get('protocol') as HelpFlag).shortDescription)
 					.setRequired(false)
 					.addChoices(...choiceMap([ ...ALLOWED_MTR_PROTOCOLS ])))
 				.addBooleanOption(option => option
-					.setName('share')
-					.setDescription('Provide share link')
+					.setName((globalFlagsMap.get('share') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('share') as HelpFlag).shortDescription)
 					.setRequired(false)))
 			// http
 			.addSubcommand(subcommand => subcommand
-				.setName('http')
-				.setDescription('Use http command')
+				.setName(httpHelpTexts.name)
+				.setDescription(httpHelpTexts.shortDescription)
 				.addStringOption(option => option
-					.setName('target')
-					.setDescription('Target to query')
+					.setName((otherFlagsMap.get('target') as HelpFlag).name)
+					.setDescription((otherFlagsMap.get('target') as HelpFlag).shortDescription)
 					.setRequired(true))
 				.addStringOption(option => option
-					.setName('from')
-					.setDescription('Probe locations')
+					.setName((globalFlagsMap.get('from') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('from') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('limit')
-					.setDescription('Number of probes')
+					.setName((globalFlagsMap.get('limit') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('limit') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addNumberOption(option => option
-					.setName('port')
-					.setDescription('Port to use')
+					.setName((httpFlagsMap.get('port') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('port') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('protocol')
-					.setDescription('Protocol to use')
+					.setName((httpFlagsMap.get('protocol') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('protocol') as HelpFlag).shortDescription)
 					.setRequired(false)
 					.addChoices(...choiceMap([ ...ALLOWED_HTTP_PROTOCOLS ])))
 				.addStringOption(option => option
-					.setName('resolver')
-					.setDescription('Resolver to use')
+					.setName((httpFlagsMap.get('resolver') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('resolver') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('method')
-					.setDescription('Method to use')
+					.setName((httpFlagsMap.get('method') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('method') as HelpFlag).shortDescription)
 					.setRequired(false)
 					.addChoices(...choiceMap([ ...ALLOWED_HTTP_METHODS ])))
 				.addStringOption(option => option
-					.setName('path')
-					.setDescription('Pathname')
+					.setName((httpFlagsMap.get('path') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('path') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('query')
-					.setDescription('URL query')
+					.setName((httpFlagsMap.get('query') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('query') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('host')
-					.setDescription('Hostname')
+					.setName((httpFlagsMap.get('host') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('host') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addStringOption(option => option
-					.setName('header')
-					.setDescription('Headers')
+					.setName((httpFlagsMap.get('header') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('header') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addBooleanOption(option => option
-					.setName('share')
-					.setDescription('Provide share link')
+					.setName((globalFlagsMap.get('share') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('share') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addBooleanOption(option => option
-					.setName('latency')
-					.setDescription('Output only latency stats')
+					.setName((globalFlagsMap.get('latency') as HelpFlag).name)
+					.setDescription((globalFlagsMap.get('latency') as HelpFlag).shortDescription)
 					.setRequired(false))
 				.addBooleanOption(option => option
-					.setName('full')
-					.setDescription('Output full response')
+					.setName((httpFlagsMap.get('full') as HelpFlag).name)
+					.setDescription((httpFlagsMap.get('full') as HelpFlag).shortDescription)
 					.setRequired(false)))
 			// auth
 			.addSubcommandGroup(group => group
-				.setName('auth')
-				.setDescription('Authenticate with the Globalping API')
+				.setName(authHelpTexts.name)
+				.setDescription(authHelpTexts.shortDescription)
 				.addSubcommand(subcommand => subcommand
 					.setName(AuthSubcommand.Login)
-					.setDescription('Log in to your Globalping account'))
+					.setDescription(authLoginHelpTexts.shortDescription))
 				.addSubcommand(subcommand => subcommand
 					.setName(AuthSubcommand.Logout)
-					.setDescription('Log out from your Globalping account'))
+					.setDescription(authLogoutHelpTexts.shortDescription))
 				.addSubcommand(subcommand => subcommand
 					.setName(AuthSubcommand.Status)
-					.setDescription('Check the current authentication status')))
+					.setDescription(authStatusHelpTexts.shortDescription)))
 			// limits
 			.addSubcommand(subcommand => subcommand
-				.setName('limits')
-				.setDescription('Show the current rate limits'))
+				.setName(limitsHelpTexts.name)
+				.setDescription(limitsHelpTexts.shortDescription))
 			// help
 			.addSubcommand(subcommand => subcommand
-				.setName('help')
-				.setDescription('Help command')
+				.setName(helpHelpTexts.name)
+				.setDescription(helpHelpTexts.shortDescription)
 				.addStringOption(option => option
 					.setName('command')
 					.setDescription('Command to get help for')
