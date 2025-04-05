@@ -36,12 +36,11 @@ export function getAPIErrorMessage (error: unknown): string {
 		const errObj: APIError = JSON.parse(body as string) as APIError;
 
 		if (errObj.error.type === 'validation_error') {
-			return `${errObj.error.message}\n${
-				errObj.error.params
-					? Object.keys(errObj.error.params)
-						.map(key => `${errObj.error.params?.[key]}`)
-						.join('\n')
-					: 'Unknown validation error.'
+			return `Error: invalid parameters\n${errObj.error.params
+				? Object.keys(errObj.error.params)
+					.map(key => ` - ${errObj.error.params?.[key]}`)
+					.join('\n')
+				: ' - unknown validation error.'
 			}`;
 		}
 
