@@ -23,9 +23,9 @@ export const globalFlags: HelpFlag[] = [
 		short: 'F',
 		type: 'string',
 		shortDescription:
-			'Comma-separated list of location values to match against or measurement ID (default "world")',
+			'Comma-separated list of location values to match against or measurement ID (default "World")',
 		description:
-			'Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world")',
+			'Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "World")',
 	},
 	{
 		name: 'latency',
@@ -45,7 +45,7 @@ export const globalFlags: HelpFlag[] = [
 		shortDescription:
 			'Prints a link at the end the results, allowing to visualize the results online (default false)',
 		description:
-			'Prints a link at the end the results, allowing to vizualize the results online (default false)',
+			'Prints a link at the end the results, allowing to visualize the results online (default false)',
 	},
 ];
 export const globalFlagsMap = new Map<string, HelpFlag>(globalFlags.map(flag => [ flag.name, flag ]));
@@ -103,9 +103,9 @@ export const dnsHelpTexts = {
 			name: 'protocol',
 			type: 'string',
 			shortDescription:
-				'Specifies the protocol to use for the DNS query (TCP or UDP) (default "udp")',
+				'Specifies the protocol to use for the DNS query (TCP or UDP) (default "UDP")',
 			description:
-				'Specifies the protocol to use for the DNS query (TCP or UDP) (default "udp")',
+				'Specifies the protocol to use for the DNS query (TCP or UDP) (default "UDP")',
 		},
 		{
 			name: 'resolver',
@@ -146,17 +146,17 @@ export const httpHelpTexts = {
 		{
 			description:
 				'HTTP GET request to google.com from 2 probes from London or Belgium',
-			command: 'http google.com from London,Belgium --limit 2 --method get',
+			command: 'http google.com from London,Belgium --limit 2 --method GET',
 		},
 		{
 			description:
 				'HTTP GET request to google.com using probes from previous measurement',
-			command: 'http google.com from rvasVvKnj48cxNjC --method get',
+			command: 'http google.com from rvasVvKnj48cxNjC --method GET',
 		},
 		{
 			description:
 				'HTTP GET request to google.com from a probe in London. Returns the full output',
-			command: 'http google.com from London --method get --full',
+			command: 'http google.com from London --method GET --full',
 		},
 		{
 			description:
@@ -315,9 +315,9 @@ export const mtrHelpTexts = {
 			name: 'protocol',
 			type: 'string',
 			shortDescription:
-				'Specifies the protocol used (ICMP, TCP or UDP) (default "icmp")',
+				'Specifies the protocol used (ICMP, TCP or UDP) (default "ICMP")',
 			description:
-				'Specifies the protocol used (ICMP, TCP or UDP) (default "icmp")',
+				'Specifies the protocol used (ICMP, TCP or UDP) (default "ICMP")',
 		},
 	],
 };
@@ -418,9 +418,9 @@ export const tracerouteHelpTexts = {
 			name: 'protocol',
 			type: 'string',
 			shortDescription:
-				'Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "icmp")',
+				'Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "ICMP")',
 			description:
-				'Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "icmp")',
+				'Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "ICMP")',
 		},
 	],
 };
