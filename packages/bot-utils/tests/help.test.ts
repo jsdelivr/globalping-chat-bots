@@ -95,7 +95,7 @@ dns jsdelivr.com from aws+montreal --latency
 \`\`\`
   -h, --help               Help for dns
       --port int           Send the query to a non-standard port on the server (default 53)
-      --protocol string    Specifies the protocol to use for the DNS query (TCP or UDP) (default "udp")
+      --protocol string    Specifies the protocol to use for the DNS query (TCP or UDP) (default "UDP")
       --resolver string    Resolver is the hostname or IP address of the name server to use (default empty)
       --trace              Toggle tracing of the delegation path from the root name servers (default false)
       --type string        Specifies the type of DNS query to perform (default "A")
@@ -103,10 +103,10 @@ dns jsdelivr.com from aws+montreal --latency
 
 *Global Flags*:
 \`\`\`
-  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world")
+  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "World")
       --latency        Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int      Limit the number of probes to use (default 1)
-      --share          Prints a link at the end the results, allowing to vizualize the results online (default false)
+      --share          Prints a link at the end the results, allowing to visualize the results online (default false)
 \`\`\``,
 				general: `Globalping is a platform that allows anyone to run networking commands such as ping, traceroute, dig and mtr on probes distributed all around the world.
 The Globalping bot allows you to interact with the API in a simple and human-friendly way to debug networking issues like anycast routing and script automated tests and benchmarks.
@@ -135,10 +135,10 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
 *Flags*:
 \`\`\`
   -h, --help           Help for globalping
-  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world")
+  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "World")
       --latency        Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int      Limit the number of probes to use (default 1)
-      --share          Prints a link at the end the results, allowing to vizualize the results online (default false)
+      --share          Prints a link at the end the results, allowing to visualize the results online (default false)
 \`\`\`
 
 Use \`globalping [command] --help\` for more information about a command.
@@ -152,15 +152,15 @@ http https://www.jsdelivr.com:443/package/npm/test?nav=stats from New York --lim
 \`\`\`
 HTTP GET request to google.com from 2 probes from London or Belgium
 \`\`\`
-http google.com from London,Belgium --limit 2 --method get
+http google.com from London,Belgium --limit 2 --method GET
 \`\`\`
 HTTP GET request to google.com using probes from previous measurement
 \`\`\`
-http google.com from rvasVvKnj48cxNjC --method get
+http google.com from rvasVvKnj48cxNjC --method GET
 \`\`\`
 HTTP GET request to google.com from a probe in London. Returns the full output
 \`\`\`
-http google.com from London --method get --full
+http google.com from London --method GET --full
 \`\`\`
 HTTP HEAD request to jsdelivr.com from a probe that is from the AWS network and is located in Montreal using HTTP2, 2 http headers are added to the request
 \`\`\`
@@ -200,10 +200,10 @@ http google.com from 123 --resolver 1.1.1.1
 
 *Global Flags*:
 \`\`\`
-  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world")
+  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "World")
       --latency        Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int      Limit the number of probes to use (default 1)
-      --share          Prints a link at the end the results, allowing to vizualize the results online (default false)
+      --share          Prints a link at the end the results, allowing to visualize the results online (default false)
 \`\`\``,
 				limits: `Show the current rate limits.
 
@@ -246,15 +246,15 @@ mtr jsdelivr.com from aws+montreal --protocol tcp --port 453
   -h, --help               Help for mtr
       --packets int        Specifies the number of packets to send to each hop (default 3)
       --port int           Specifies the port to use. Only applicable for TCP protocol (default 53)
-      --protocol string    Specifies the protocol used (ICMP, TCP or UDP) (default "icmp")
+      --protocol string    Specifies the protocol used (ICMP, TCP or UDP) (default "ICMP")
 \`\`\`
 
 *Global Flags*:
 \`\`\`
-  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world")
+  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "World")
       --latency        Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int      Limit the number of probes to use (default 1)
-      --share          Prints a link at the end the results, allowing to vizualize the results online (default false)
+      --share          Prints a link at the end the results, allowing to visualize the results online (default false)
 \`\`\``,
 				ping: `The ping command allows sending ping requests to a target. Often used to test the network latency and stability.
 
@@ -289,10 +289,10 @@ ping jsdelivr.com from aws+montreal --latency
 
 *Global Flags*:
 \`\`\`
-  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world")
+  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "World")
       --latency        Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int      Limit the number of probes to use (default 1)
-      --share          Prints a link at the end the results, allowing to vizualize the results online (default false)
+      --share          Prints a link at the end the results, allowing to visualize the results online (default false)
 \`\`\``,
 				traceroute: `traceroute tracks the route packets take from an IP network on their way to a given host.
 
@@ -311,7 +311,7 @@ traceroute 1.1.1.1 from USA,Belgium --limit 2
 \`\`\`
 Traceroute jsdelivr.com from a probe that is from the AWS network and is located in Montreal using the UDP protocol
 \`\`\`
-traceroute jsdelivr.com from aws+montreal --protocol udp
+traceroute jsdelivr.com from aws+montreal --protocol UDP
 \`\`\`
 Traceroute jsdelivr.com from a probe that is located in Paris to port 453
 \`\`\`
@@ -327,15 +327,15 @@ traceroute jsdelivr.com from Paris --port 453
 \`\`\`
   -h, --help               Help for traceroute
       --port int           Specifies the port to use for the traceroute. Only applicable for TCP protocol (default 80)
-      --protocol string    Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "icmp")
+      --protocol string    Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "ICMP")
 \`\`\`
 
 *Global Flags*:
 \`\`\`
-  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world")
+  -F, --from string    Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "World")
       --latency        Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands
   -L, --limit int      Limit the number of probes to use (default 1)
-      --share          Prints a link at the end the results, allowing to vizualize the results online (default false)
+      --share          Prints a link at the end the results, allowing to visualize the results online (default false)
 \`\`\``,
 				unknownCommand:
 					'Unknown command! Please call `/globalping help` for a list of commands.',

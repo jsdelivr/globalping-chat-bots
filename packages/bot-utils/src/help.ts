@@ -390,7 +390,7 @@ export const tracerouteHelpTexts = {
 		{
 			description:
 				'Traceroute jsdelivr.com from a probe that is from the AWS network and is located in Montreal using the UDP protocol',
-			command: 'traceroute jsdelivr.com from aws+montreal --protocol udp',
+			command: 'traceroute jsdelivr.com from aws+montreal --protocol UDP',
 		},
 		{
 			description:
