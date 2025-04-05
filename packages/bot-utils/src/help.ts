@@ -247,7 +247,7 @@ export const httpHelpTexts = {
 			name: 'query',
 			type: 'string',
 			shortDescription:
-				'A URL query string (default empty)"',
+				'A URL query string (default empty)',
 			description: 'A query-string',
 		},
 		{
@@ -410,7 +410,7 @@ export const tracerouteHelpTexts = {
 			name: 'port',
 			type: 'int',
 			shortDescription:
-				'Specifies the port to use for the traceroute (default 53)',
+				'Specifies the port to use for the traceroute (default 80)',
 			description:
 				'Specifies the port to use for the traceroute. Only applicable for TCP protocol (default 80)',
 		},
