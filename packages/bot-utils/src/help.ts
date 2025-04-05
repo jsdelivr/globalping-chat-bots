@@ -1,22 +1,35 @@
 import { codeBlock } from './response.js';
 
-type HelpFlag = {
+export type HelpFlag = {
 	name: string;
 	short?: string;
 	type?: string;
+	shortDescription: string;
 	description: string;
 };
+
+export const otherFlags: HelpFlag[] = [
+	{
+		name: 'target',
+		shortDescription: 'Target host to be tested',
+		description: 'Target host to be tested',
+	},
+];
+export const otherFlagsMap = new Map<string, HelpFlag>(otherFlags.map(flag => [ flag.name, flag ]));
 
 export const globalFlags: HelpFlag[] = [
 	{
 		name: 'from',
 		short: 'F',
 		type: 'string',
+		shortDescription:
+			'Comma-separated list of location values to match against or measurement ID (default "World")',
 		description:
-			'Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "world")',
+			'Comma-separated list of location values to match against or measurement ID. For example the partial or full name of a continent, region (e.g eastern europe), country, US state, city or network (default "World")',
 	},
 	{
 		name: 'latency',
+		shortDescription: 'Output only the stats of a measurement (default false)',
 		description:
 			'Output only the stats of a measurement (default false). Only applies to the dns, http and ping commands',
 	},
@@ -24,18 +37,22 @@ export const globalFlags: HelpFlag[] = [
 		name: 'limit',
 		type: 'int',
 		short: 'L',
+		shortDescription: 'Limit the number of probes to use (default 1)',
 		description: 'Limit the number of probes to use (default 1)',
 	},
 	{
 		name: 'share',
+		shortDescription:
+			'Prints a link at the end the results, allowing to visualize the results online (default false)',
 		description:
-			'Prints a link at the end the results, allowing to vizualize the results online (default false)',
+			'Prints a link at the end the results, allowing to visualize the results online (default false)',
 	},
 ];
+export const globalFlagsMap = new Map<string, HelpFlag>(globalFlags.map(flag => [ flag.name, flag ]));
 
 export const dnsHelpTexts = {
 	name: 'dns',
-	short: 'Resolve a DNS record similarly to dig',
+	shortDescription: 'Resolve a DNS record similarly to dig',
 	preamble: `Performs DNS lookups and displays the answers that are returned from the name server(s) that were queried. The default nameserver depends on the probe and is defined by the user's local settings or DHCP.`,
 	examples: [
 		{
@@ -72,42 +89,52 @@ export const dnsHelpTexts = {
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for dns',
 			description: 'Help for dns',
 		},
 		{
 			name: 'port',
 			type: 'int',
+			shortDescription: 'Send the query to a non-standard port on the server (default 53)',
 			description:
 				'Send the query to a non-standard port on the server (default 53)',
 		},
 		{
 			name: 'protocol',
 			type: 'string',
+			shortDescription:
+				'Specifies the protocol to use for the DNS query (TCP or UDP) (default "UDP")',
 			description:
-				'Specifies the protocol to use for the DNS query (TCP or UDP) (default "udp")',
+				'Specifies the protocol to use for the DNS query (TCP or UDP) (default "UDP")',
 		},
 		{
 			name: 'resolver',
 			type: 'string',
+			shortDescription:
+				'Resolver is the hostname or IP address of the name server to use (default empty)',
 			description:
 				'Resolver is the hostname or IP address of the name server to use (default empty)',
 		},
 		{
 			name: 'trace',
+			shortDescription:
+				'Toggle tracing of the delegation path from the root name servers (default false)',
 			description:
 				'Toggle tracing of the delegation path from the root name servers (default false)',
 		},
 		{
 			name: 'type',
 			type: 'string',
+			shortDescription:
+				'Specifies the type of DNS query to perform (default "A")',
 			description: 'Specifies the type of DNS query to perform (default "A")',
 		},
 	] as HelpFlag[],
 };
-
+export const dnsFlagsMap = new Map<string, HelpFlag>(dnsHelpTexts.flags.map(flag => [ flag.name, flag ]));
 export const httpHelpTexts = {
 	name: 'http',
-	short: 'Perform a HEAD, GET, or OPTIONS request to a host',
+	shortDescription: 'Perform a HEAD, GET, or OPTIONS request to a host',
 	preamble: `The http command sends an HTTP request to a host and can perform HEAD, GET, or OPTIONS operations. GET is limited to 10KB responses, everything above will be cut by the API.`,
 	examples: [
 		{
@@ -119,17 +146,17 @@ export const httpHelpTexts = {
 		{
 			description:
 				'HTTP GET request to google.com from 2 probes from London or Belgium',
-			command: 'http google.com from London,Belgium --limit 2 --method get',
+			command: 'http google.com from London,Belgium --limit 2 --method GET',
 		},
 		{
 			description:
 				'HTTP GET request to google.com using probes from previous measurement',
-			command: 'http google.com from rvasVvKnj48cxNjC --method get',
+			command: 'http google.com from rvasVvKnj48cxNjC --method GET',
 		},
 		{
 			description:
 				'HTTP GET request to google.com from a probe in London. Returns the full output',
-			command: 'http google.com from London --method get --full',
+			command: 'http google.com from London --method GET --full',
 		},
 		{
 			description:
@@ -159,10 +186,13 @@ export const httpHelpTexts = {
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for http',
 			description: 'Help for http',
 		},
 		{
 			name: 'full',
+			shortDescription:
+				'Enable full output to display TLS details, HTTP status, headers, and body (if available)',
 			description:
 				'Enable full output to display TLS details, HTTP status, headers, and body (if available)',
 		},
@@ -170,55 +200,71 @@ export const httpHelpTexts = {
 			name: 'header',
 			short: 'H',
 			type: 'string',
+			shortDescription:
+				'Specifies a HTTP header to be added to the request, in the format "Key: Value"',
 			description:
 				'Specifies a HTTP header to be added to the request, in the format "Key: Value". Multiple headers can be added by adding multiple flags',
 		},
 		{
 			name: 'host',
 			type: 'string',
+			shortDescription:
+				'Specifies the Host header (default host defined in target)',
 			description:
 				'Specifies the Host header, which is going to be added to the request (default host defined in target)',
 		},
 		{
 			name: 'method',
 			type: 'string',
+			shortDescription:
+				'Specifies the HTTP method to use (HEAD, GET, or OPTIONS) (default "HEAD")',
 			description:
 				'Specifies the HTTP method to use (HEAD, GET, or OPTIONS) (default "HEAD")',
 		},
 		{
 			name: 'path',
 			type: 'string',
+			shortDescription: 'A URL pathname (default "/")',
 			description: 'A URL pathname (default "/")',
 		},
 		{
 			name: 'port',
 			type: 'int',
+			shortDescription:
+				'Specifies the port to use (default 80 for HTTP, 443 for HTTPS and HTTP2)',
 			description:
 				'Specifies the port to use (default 80 for HTTP, 443 for HTTPS and HTTP2)',
 		},
 		{
 			name: 'protocol',
 			type: 'string',
+			shortDescription:
+				'Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTPS")',
 			description:
 				'Specifies the query protocol (HTTP, HTTPS, HTTP2) (default "HTTPS")',
 		},
 		{
 			name: 'query',
 			type: 'string',
+			shortDescription:
+				'A URL query string (default empty)',
 			description: 'A query-string',
 		},
 		{
 			name: 'resolver',
 			type: 'string',
+			shortDescription:
+				'Specifies the resolver server used for DNS lookup (default is defined by the probe\'s network)',
 			description:
 				'Specifies the resolver server used for DNS lookup (default is defined by the probe\'s network)',
 		},
 	],
 };
+export const httpFlagsMap = new Map<string, HelpFlag>(httpHelpTexts.flags.map(flag => [ flag.name, flag ]));
 
 export const mtrHelpTexts = {
 	name: 'mtr',
-	short: 'Run an MTR test, similar to traceroute',
+	shortDescription: 'Run an MTR test, similar to traceroute',
 	preamble:
 		'mtr combines the functionality of the traceroute and ping programs in a single network diagnostic tool.',
 	examples: [
@@ -246,32 +292,40 @@ export const mtrHelpTexts = {
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for mtr',
 			description: 'Help for mtr',
 		},
 		{
 			name: 'packets',
 			type: 'int',
+			shortDescription:
+				'Specifies the number of packets to send to each hop (default 3)',
 			description:
 				'Specifies the number of packets to send to each hop (default 3)',
 		},
 		{
 			name: 'port',
 			type: 'int',
+			shortDescription:
+				'Specifies the port to use. Only applicable for TCP protocol (default 53)',
 			description:
 				'Specifies the port to use. Only applicable for TCP protocol (default 53)',
 		},
 		{
 			name: 'protocol',
 			type: 'string',
+			shortDescription:
+				'Specifies the protocol used (ICMP, TCP or UDP) (default "ICMP")',
 			description:
-				'Specifies the protocol used (ICMP, TCP or UDP) (default "icmp")',
+				'Specifies the protocol used (ICMP, TCP or UDP) (default "ICMP")',
 		},
 	],
 };
+export const mtrFlagsMap = new Map<string, HelpFlag>(mtrHelpTexts.flags.map(flag => [ flag.name, flag ]));
 
 export const pingHelpTexts = {
 	name: 'ping',
-	short: 'Run a ping test',
+	shortDescription: 'Run a ping test',
 	preamble:
 		'The ping command allows sending ping requests to a target. Often used to test the network latency and stability.',
 	examples: [
@@ -299,20 +353,24 @@ export const pingHelpTexts = {
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for ping',
 			description: 'Help for ping',
 		},
 		{
 			name: 'packets',
 			type: 'int',
+			shortDescription:
+				'Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)',
 			description:
 				'Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)',
 		},
 	],
 };
+export const pingFlagsMap = new Map<string, HelpFlag>(pingHelpTexts.flags.map(flag => [ flag.name, flag ]));
 
 export const tracerouteHelpTexts = {
 	name: 'traceroute',
-	short: 'Run a traceroute test',
+	shortDescription: 'Run a traceroute test',
 	preamble:
 		'traceroute tracks the route packets take from an IP network on their way to a given host.',
 	examples: [
@@ -332,7 +390,7 @@ export const tracerouteHelpTexts = {
 		{
 			description:
 				'Traceroute jsdelivr.com from a probe that is from the AWS network and is located in Montreal using the UDP protocol',
-			command: 'traceroute jsdelivr.com from aws+montreal --protocol udp',
+			command: 'traceroute jsdelivr.com from aws+montreal --protocol UDP',
 		},
 		{
 			description:
@@ -345,68 +403,79 @@ export const tracerouteHelpTexts = {
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for traceroute',
 			description: 'Help for traceroute',
 		},
 		{
 			name: 'port',
 			type: 'int',
+			shortDescription:
+				'Specifies the port to use for the traceroute (default 80)',
 			description:
 				'Specifies the port to use for the traceroute. Only applicable for TCP protocol (default 80)',
 		},
 		{
 			name: 'protocol',
 			type: 'string',
+			shortDescription:
+				'Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "ICMP")',
 			description:
-				'Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "icmp")',
+				'Specifies the protocol used for tracerouting (ICMP, TCP or UDP) (default "ICMP")',
 		},
 	],
 };
-
+export const tracerouteFlagsMap = new Map<string, HelpFlag>(tracerouteHelpTexts.flags.map(flag => [ flag.name, flag ]));
 export const authLoginHelpTexts = {
 	name: 'login',
-	short: 'Log in to your Globalping account',
+	shortDescription: 'Log in to your Globalping account',
 	preamble: 'Log in to your Globalping account for higher measurements limits.',
 	usage: (rootCommand: string) => `${rootCommand} auth login  [flags]`,
 	flags: [
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for login',
 			description: 'Help for login',
 		},
 	],
 };
+export const authLoginHelpTextsMap = new Map<string, HelpFlag>(authLoginHelpTexts.flags.map(flag => [ flag.name, flag ]));
 
 export const authLogoutHelpTexts = {
 	name: 'logout',
-	short: 'Log out from your Globalping account',
+	shortDescription: 'Log out from your Globalping account',
 	preamble: 'Log out from your Globalping account.',
 	usage: (rootCommand: string) => `${rootCommand} auth logout`,
 	flags: [
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for logout',
 			description: 'Help for logout',
 		},
 	],
 };
+export const authLogoutHelpTextsMap = new Map<string, HelpFlag>(authLogoutHelpTexts.flags.map(flag => [ flag.name, flag ]));
 
 export const authStatusHelpTexts = {
 	name: 'status',
-	short: 'Check the current authentication status',
+	shortDescription: 'Check the current authentication status',
 	preamble: 'Check the current authentication status.',
 	usage: (rootCommand: string) => `${rootCommand} auth status`,
 	flags: [
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for status',
 			description: 'Help for status',
 		},
 	],
 };
+export const authStatusHelpTextsMap = new Map<string, HelpFlag>(authStatusHelpTexts.flags.map(flag => [ flag.name, flag ]));
 
 export const authHelpTexts = {
 	name: 'auth',
-	short: 'Authenticate with the Globalping API',
+	shortDescription: 'Authenticate with the Globalping API',
 	preamble: `Authenticate with the Globalping API for higher measurements limits.`,
 	commands: [ authLoginHelpTexts, authLogoutHelpTexts, authStatusHelpTexts ],
 	usage: (rootCommand: string) => `${rootCommand} auth [command]`,
@@ -414,28 +483,33 @@ export const authHelpTexts = {
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for auth',
 			description: 'Help for auth',
 		},
 	],
 };
+export const authHelpTextsMap = new Map<string, HelpFlag>(authHelpTexts.flags.map(flag => [ flag.name, flag ]));
 
 export const limitsHelpTexts = {
 	name: 'limits',
-	short: 'Show the current rate limits',
+	shortDescription: 'Show the current rate limits',
 	preamble: `Show the current rate limits.`,
 	usage: (rootCommand: string) => `${rootCommand} limits`,
 	flags: [
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for limits',
 			description: 'Help for limits',
 		},
 	],
 };
+export const limitsHelpTextsMap = new Map<string, HelpFlag>(limitsHelpTexts.flags.map(flag => [ flag.name, flag ]));
 
 export const helpHelpTexts = {
 	name: 'help',
-	short: 'Help about any command',
+	shortDescription: 'Help about any command',
+	flags: [],
 };
 
 export const generalHelpTexts = {
@@ -454,6 +528,7 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
 		{
 			name: 'help',
 			short: 'h',
+			shortDescription: 'Help for globalping',
 			description: 'Help for globalping',
 		},
 		...globalFlags,
@@ -558,8 +633,8 @@ ${codeBlock(generalHelpTexts.commands.reduce((s, cmd, i) => {
 		const spaces = ' '.repeat(maxCmdLength - cmd.name.length);
 		return (
 			s
-			+ `  ${cmd.name}${spaces}${cmd.short}`
-			+ (i < generalHelpTexts.commands.length - 1 ? '\n' : '')
+				+ `  ${cmd.name}${spaces}${cmd.shortDescription}`
+				+ (i < generalHelpTexts.commands.length - 1 ? '\n' : '')
 		);
 	}, ''))}
 
@@ -572,8 +647,8 @@ ${codeBlock(generalHelpTexts.additionalCommands.reduce((s, cmd, i) => {
 		const spaces = ' '.repeat(maxCmdLength - cmd.name.length);
 		return (
 			s
-			+ `  ${cmd.name}${spaces}${cmd.short}`
-			+ (i < generalHelpTexts.additionalCommands.length - 1 ? '\n' : '')
+				+ `  ${cmd.name}${spaces}${cmd.shortDescription}`
+				+ (i < generalHelpTexts.additionalCommands.length - 1 ? '\n' : '')
 		);
 	}, ''))}
 
@@ -655,8 +730,8 @@ ${codeBlock(authHelpTexts.commands.reduce((s, cmd, i) => {
 		const spaces = ' '.repeat(maxAuthCmdLength - cmd.name.length);
 		return (
 			s
-			+ `  ${cmd.name}${spaces}${cmd.short}`
-			+ (i < authHelpTexts.commands.length - 1 ? '\n' : '')
+				+ `  ${cmd.name}${spaces}${cmd.shortDescription}`
+				+ (i < authHelpTexts.commands.length - 1 ? '\n' : '')
 		);
 	}, ''))}
 
