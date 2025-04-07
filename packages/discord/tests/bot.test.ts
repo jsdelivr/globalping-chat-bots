@@ -1308,6 +1308,31 @@ Credits:
 				content: expectedText,
 			});
 		});
+
+		it('should handle the mention - invalid command', async () => {
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			messageMock.content = '<@111> test test';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(messageMock.reply).toHaveBeenCalledWith(`<@123>, there was an error processing your request for \`test test\`
+\`\`\`
+Invalid argument "test" for "command"!
+Expected "ping, traceroute, dns, mtr, http, auth, limits".
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`);
+		});
+
+		it('should ignore mention - bot is not mentioned', async () => {
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(false);
+
+			messageMock.content = 'message';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(messageMock.reply).toHaveBeenCalledTimes(0);
+		});
 	});
 
 	describe('OnAuthCallback', () => {

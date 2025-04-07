@@ -155,7 +155,7 @@ export class Bot {
 			if (flags.cmd === 'auth') {
 				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-				if (!await this.canUseAuthCommandFromInterraction(interaction)) {
+				if (!await this.canUseAuthCommandFromInteraction(interaction)) {
 					return;
 				}
 
@@ -585,21 +585,21 @@ ${formatAPIError(error)}`;
 
 	private getIdFromInteraction (interaction: ChatInputCommandInteraction): string {
 		if (interaction.inGuild()) {
-			return 'G' + interaction.guildId;
+			return `G${interaction.guildId}`;
 		}
 
-		return 'U' + interaction.user.id;
+		return `U${interaction.user.id}`;
 	}
 
 	private getIdFromMessage (message: Message): string {
 		if (message.inGuild()) {
-			return 'G' + message.guildId;
+			return `G${message.guildId}`;
 		}
 
-		return 'U' + message.author.id;
+		return `U${message.author.id}`;
 	}
 
-	private async canUseAuthCommandFromInterraction (interaction: ChatInputCommandInteraction): Promise<boolean> {
+	private async canUseAuthCommandFromInteraction (interaction: ChatInputCommandInteraction): Promise<boolean> {
 		if (!interaction.inGuild()) {
 			return true;
 		}
@@ -625,8 +625,7 @@ ${formatAPIError(error)}`;
 		}
 
 		const canAuthenticate
-			= message.member
-			&& message.member.permissions.has(PermissionFlagsBits.Administrator);
+			= message.member?.permissions?.has(PermissionFlagsBits.Administrator);
 
 		if (!canAuthenticate) {
 			await message.reply({
