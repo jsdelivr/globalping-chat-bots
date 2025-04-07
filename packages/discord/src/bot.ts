@@ -295,6 +295,8 @@ ${formatAPIError(error)}`;
 			this.logger.error(`Error processing request`, {
 				error,
 				command: cmdText,
+				originalCommand: message.content,
+				user: message.client.user,
 			});
 
 			const errorMsg = `${userMention(message.author.id)}, there was an error processing your request for ${inlineCode(cmdText ?? 'help')}
