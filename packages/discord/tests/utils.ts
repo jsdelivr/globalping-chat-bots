@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 
 import probeData from '@globalping/bot-utils/dist/tests/mocks/probedata.json' assert { type: 'json' };
 import { Logger, Measurement, OAuthClient } from '@globalping/bot-utils';
-import { ChatInputCommandInteraction, Client } from 'discord.js';
+import { ChatInputCommandInteraction, Client, Message } from 'discord.js';
 import { DBClient } from '../src/db.js';
 
 export const mockLogger = (): Logger => ({
@@ -30,6 +30,29 @@ export const mockDiscordInteraction = (): ChatInputCommandInteraction => ({
 	token: 'message_tok3n',
 	user: {
 		id: '123',
+	},
+}) as any;
+
+export const mockDiscordMessage = (): Message => ({
+	reply: vi.fn(),
+	inGuild: () => true,
+	guildId: '654',
+	author: {
+		id: '123',
+	},
+	content: '',
+	mentions: {
+		has: vi.fn(),
+	},
+	member: {
+		permissions: {
+			has: vi.fn(),
+		},
+	},
+	client: {
+		user: {
+			id: '111',
+		},
 	},
 }) as any;
 

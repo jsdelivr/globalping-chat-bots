@@ -4,7 +4,7 @@ import {
 	generateHelp,
 	HttpProbeResult,
 } from '@globalping/bot-utils';
-import { codeBlock, MessageFlags, Routes } from 'discord.js';
+import { codeBlock, GuildMember, MessageFlags, Routes } from 'discord.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Bot } from '../src/bot.js';
 import {
@@ -17,6 +17,7 @@ import {
 	mockDBClient,
 	mockDiscordClient,
 	mockDiscordInteraction,
+	mockDiscordMessage,
 	mockGetMeasurement,
 	mockLogger,
 	mockPostMeasurement,
@@ -40,6 +41,7 @@ describe('Bot', () => {
 	const discordClientMock = mockDiscordClient();
 
 	const interactionMock = mockDiscordInteraction();
+	const messageMock = mockDiscordMessage();
 
 	const expectedHelpTexts = generateHelp('**', '/globalping', undefined, 4, 1);
 	const configMock = {
@@ -918,6 +920,418 @@ Creating measurements:
 			if (expectedHelpTexts.traceroute.length > discordMessageLimit) {
 				throw new Error(`The message must have at most ${discordMessageLimit} characters. Got ${expectedHelpTexts.traceroute.length}`);
 			}
+		});
+	});
+
+	describe('HandleMessage', () => {
+		it('should handle the mention - ping', async () => {
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			messageMock.content = '<@111> ping google.com';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedReply = {
+				content: '<@123>, here are the results for `ping google.com`',
+				embeds: [
+					{
+						fields: [
+							{
+								name: '> **Amsterdam, NL, EU, Gigahost AS (AS56655)**\n',
+								value: codeBlock(expectedResponse.results[0].result.rawOutput),
+							},
+						],
+					},
+				],
+			};
+
+			expect(messageMock.reply).toHaveBeenCalledWith(expectedReply);
+		});
+
+		it('should handle the mention - dns', async () => {
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultDnsResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			messageMock.content = 'text <@111> dns google.com from Berlin --resolver 1.1.1.1';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'dns',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'Berlin' }],
+					measurementOptions: {
+						resolver: '1.1.1.1',
+					},
+				},
+				'tok3n',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedReply = {
+				content: '<@123>, here are the results for `dns google.com from Berlin --resolver 1.1.1.1`',
+				embeds: [
+					{
+						fields: [
+							{
+								name: '> **Helsinki, FI, EU, Hetzner Online GmbH (AS24940)**\n',
+								value: codeBlock(expectedResponse.results[0].result.rawOutput.trim()),
+							},
+						],
+					},
+				],
+			};
+
+			expect(messageMock.reply).toHaveBeenCalledWith(expectedReply);
+		});
+
+		it('should handle the mention - http', async () => {
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultHttpResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			messageMock.content = '<@111> http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'http',
+					target: 'jsdelivr.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						port: 443,
+						protocol: 'HTTPS',
+						request: {
+							headers: {},
+							host: 'www.jsdelivr.com',
+							path: '/package/npm/test',
+							query: 'nav=stats',
+						},
+					},
+				},
+				'tok3n',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedText
+				= expectedResponse.results[0].result.rawOutput.trim().slice(0, 1000)
+				+ '\n... (truncated)';
+
+			const expectedReply = {
+				content: '<@123>, here are the results for `http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"`',
+				embeds: [
+					{
+						fields: [
+							{
+								name: '> **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**\n',
+								value: codeBlock(expectedText),
+							},
+						],
+					},
+				],
+			};
+
+			expect(messageMock.reply).toHaveBeenCalledWith(expectedReply);
+		});
+
+		it('should handle the mention - mtr', async () => {
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultMtrResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			messageMock.content = '<@111> mtr google.com';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'mtr',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedText
+				= expectedResponse.results[0].result.rawOutput.trim().slice(0, 1000)
+				+ '\n... (truncated)';
+
+			const expectedReply = {
+				content: '<@123>, here are the results for `mtr google.com`',
+				embeds: [
+					{
+						fields: [
+							{
+								name: '> **Beauharnois, CA, NA, OVH SAS (AS16276)**\n',
+								value: codeBlock(expectedText),
+							},
+						],
+					},
+				],
+			};
+
+			expect(messageMock.reply).toHaveBeenCalledWith(expectedReply);
+		});
+
+		it('should handle the mention - traceroute', async () => {
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultTracerouteResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			messageMock.content = '<@111> traceroute google.com';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'traceroute',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedReply = {
+				content: '<@123>, here are the results for `traceroute google.com`',
+				embeds: [
+					{
+						fields: [
+							{
+								name: '> **Rotterdam, NL, EU, DELTA Fiber Nederland B.V. (AS15435)**\n',
+								value: codeBlock(expectedResponse.results[0].result.rawOutput.trim()),
+							},
+						],
+					},
+				],
+			};
+
+			expect(messageMock.reply).toHaveBeenCalledWith(expectedReply);
+		});
+
+		it('should handle the mention - auth login', async () => {
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+			vi.spyOn((messageMock.member as GuildMember).permissions, 'has').mockReturnValue(true);
+
+			messageMock.content = '<@111> auth login';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(messageMock.reply).toHaveBeenCalledWith({
+				content: 'Please use `/globalping auth login` instead.',
+			});
+		});
+
+		it('should handle the mention - auth logout', async () => {
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+			vi.spyOn((messageMock.member as GuildMember).permissions, 'has').mockReturnValue(true);
+
+			vi.spyOn(oauthClientMock, 'Logout').mockResolvedValue(null);
+
+			messageMock.content = '<@111> auth logout';
+
+			await bot.HandleMessage(messageMock);
+
+
+			expect(messageMock.reply).toHaveBeenCalledWith({
+				content: 'You are now logged out.',
+			});
+		});
+
+		it('should handle the mention - auth status', async () => {
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+			vi.spyOn((messageMock.member as GuildMember).permissions, 'has').mockReturnValue(true);
+
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+				},
+				null,
+			]);
+
+			messageMock.content = '<@111> auth status';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
+
+
+			expect(messageMock.reply).toHaveBeenCalledWith({
+				content: 'Logged in as john.',
+			});
+		});
+
+		it('should handle the mention - limits', async () => {
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+			vi.spyOn((messageMock.member as GuildMember).permissions, 'has').mockReturnValue(true);
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+				},
+				null,
+			]);
+
+			vi.spyOn(oauthClientMock, 'Limits').mockResolvedValue([
+				{
+					rateLimit: {
+						measurements: {
+							create: {
+								type: CreateLimitType.User,
+								limit: 500,
+								remaining: 350,
+								reset: 600,
+							},
+						},
+					},
+					credits: {
+						remaining: 1000,
+					},
+				},
+				null,
+			]);
+
+			messageMock.content = '<@111> limits';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
+
+			const expectedText = `Authentication: token (john)
+
+Creating measurements:
+ - 500 tests per hour
+ - 150 consumed, 350 remaining
+ - resets in 10 minutes
+
+Credits:
+ - 1000 credits remaining (may be used to create measurements above the hourly limits)
+`;
+			expect(messageMock.reply).toHaveBeenCalledWith({
+				content: expectedText,
+			});
+		});
+
+		it('should handle the mention - invalid command', async () => {
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			messageMock.content = '<@111> test test';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(messageMock.reply).toHaveBeenCalledWith(`<@123>, there was an error processing your request for \`test test\`
+\`\`\`
+Invalid argument "test" for "command"!
+Expected "ping, traceroute, dns, mtr, http, auth, limits".
+\`\`\`
+Documentation and Support: https://github.com/jsdelivr/globalping`);
+		});
+
+		it('should ignore mention - bot is not mentioned', async () => {
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(false);
+
+			messageMock.content = 'message';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(messageMock.reply).toHaveBeenCalledTimes(0);
 		});
 	});
 
