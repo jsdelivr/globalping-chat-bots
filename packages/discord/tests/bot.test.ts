@@ -1309,6 +1309,58 @@ Credits:
 			});
 		});
 
+		it('should handle the mention - bot mention was replaced with a role mention', async () => {
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			messageMock.content = '<@&199> ping google.com';
+
+			await bot.HandleMessage(messageMock);
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {},
+				},
+				'tok3n',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedReply = {
+				content: '<@123>, here are the results for `ping google.com`',
+				embeds: [
+					{
+						fields: [
+							{
+								name: '> **Amsterdam, NL, EU, Gigahost AS (AS56655)**\n',
+								value: codeBlock(expectedResponse.results[0].result.rawOutput),
+							},
+						],
+					},
+				],
+			};
+
+			expect(messageMock.reply).toHaveBeenCalledWith(expectedReply);
+		});
+
 		it('should handle the mention - invalid command', async () => {
 			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
 

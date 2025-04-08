@@ -788,8 +788,29 @@ ${formatAPIError(error)}`;
 
 	private parseMentionContent (content: string, botUser: ClientUser) {
 		const botMention = userMention(botUser.id);
-		return content
-			.slice(content.indexOf(botMention) + botMention.length)
-			.trim();
+		const botMentionIndex = content.indexOf(botMention);
+
+		if (botMentionIndex !== -1) {
+			return content
+				.slice(botMentionIndex + botMention.length)
+				.trim();
+		}
+
+		// Handle copy-paste issue. When a previous message command is copied
+		// and pasted into a new message, discord might replace the mention
+		// with a role reference.
+		const roleReferenceIndex = content.lastIndexOf('<@&');
+
+		if (roleReferenceIndex === -1) {
+			return content;
+		}
+
+		const roleReferenceIndexEnd = content.indexOf('>', roleReferenceIndex);
+
+		if (roleReferenceIndexEnd !== -1) {
+			return content.slice(roleReferenceIndexEnd + 1).trim();
+		}
+
+		return content;
 	}
 }
