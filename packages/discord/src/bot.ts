@@ -805,10 +805,10 @@ ${formatAPIError(error)}`;
 			return content;
 		}
 
-		for (let i = roleReferenceIndex; i < content.length; i++) {
-			if (content[i] === '>') {
-				return content.slice(i + 1).trim();
-			}
+		const roleReferenceIndexEnd = content.indexOf('>', roleReferenceIndex);
+
+		if (roleReferenceIndexEnd !== -1) {
+			return content.slice(roleReferenceIndexEnd + 1).trim();
 		}
 
 		return content;
