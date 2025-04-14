@@ -210,7 +210,7 @@ export class Bot {
 			await this.postComment(
 				this.githubClient,
 				githubTarget,
-				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`,
+				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg, LinkBlockType.Raw)}`,
 			);
 
 			throw error;
@@ -242,7 +242,7 @@ export class Bot {
 			await this.postComment(
 				this.githubClient,
 				githubTarget,
-				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`,
+				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg, LinkBlockType.Raw)}`,
 			);
 
 			throw error;
@@ -262,7 +262,7 @@ export class Bot {
 			await this.postComment(
 				this.githubClient,
 				githubTarget,
-				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg)}`,
+				`Failed to process command \`${cmdText}\`.\n${formatAPIError(errorMsg, LinkBlockType.Raw)}`,
 			);
 
 			throw error;
@@ -311,8 +311,7 @@ export class Bot {
 		/* eslint-disable no-await-in-loop */
 		for (const result of resultsForDisplay) {
 			const tag = getTag(result.probe.tags);
-			const text = `${
-				responseHeader(result, tag, githubBoldSeparator)
+			const text = `${responseHeader(result, tag, githubBoldSeparator)
 				+ responseText(result, flags, githubTruncationLimit)
 			}\n`;
 			fullText += text;

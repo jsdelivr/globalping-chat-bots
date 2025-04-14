@@ -141,6 +141,7 @@ ${expectedResponse.results[0].result.rawOutput}
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -233,6 +234,7 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -332,6 +334,7 @@ ${expectedResponse.results[0].result.rawOutput}
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -422,6 +425,7 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -512,6 +516,7 @@ ${expectedResponse.results[0].result.rawOutput}
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -602,6 +607,7 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -665,6 +671,7 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 				},
 			];
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1057,6 +1064,7 @@ Avg: 0.419 ms
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1147,6 +1155,7 @@ Total: 7 ms
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1249,6 +1258,7 @@ TCP: 31 ms
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1358,6 +1368,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: payload.channel_id,
 				thread_ts: undefined,
@@ -1392,6 +1403,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.general,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1432,6 +1444,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.general,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1472,6 +1485,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.ping,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1512,6 +1526,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.dns,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1552,6 +1567,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.mtr,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1592,6 +1608,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.http,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1632,6 +1649,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.traceroute,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1672,6 +1690,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.auth,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1712,6 +1731,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			});
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: expectedHelpTexts.limits,
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -1761,12 +1781,13 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawBody?.trim().slice(
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
 
 			expect(respondMock).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: `Failed to process command \`xyz\`.
 \`\`\`
 Invalid argument "xyz" for "command"!
 Expected "ping, traceroute, dns, mtr, http, auth, limits".
 \`\`\`
-Documentation and Support: https://github.com/jsdelivr/globalping`,
+Documentation and Support: <https://github.com/jsdelivr/globalping>`,
 			});
 		});
 
@@ -1804,12 +1825,13 @@ Documentation and Support: https://github.com/jsdelivr/globalping`,
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
 
 			expect(respondMock).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: `Failed to process command \`ping google.com --xyz\`.
 \`\`\`
 Invalid option "xyz" for "ping"!
 Expected "packets, latency, target, from, limit, share".
 \`\`\`
-Documentation and Support: https://github.com/jsdelivr/globalping`,
+Documentation and Support: <https://github.com/jsdelivr/globalping>`,
 			});
 		});
 
@@ -1847,12 +1869,13 @@ Documentation and Support: https://github.com/jsdelivr/globalping`,
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
 
 			expect(respondMock).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: `Failed to process command \`dns google.com --xyz\`.
 \`\`\`
 Invalid option "xyz" for "dns"!
 Expected "query, protocol, port, resolver, trace, latency, target, from, limit, share".
 \`\`\`
-Documentation and Support: https://github.com/jsdelivr/globalping`,
+Documentation and Support: <https://github.com/jsdelivr/globalping>`,
 			});
 		});
 
@@ -1890,12 +1913,13 @@ Documentation and Support: https://github.com/jsdelivr/globalping`,
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
 
 			expect(respondMock).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: `Failed to process command \`mtr google.com --xyz\`.
 \`\`\`
 Invalid option "xyz" for "mtr"!
 Expected "protocol, port, packets, target, from, limit, share".
 \`\`\`
-Documentation and Support: https://github.com/jsdelivr/globalping`,
+Documentation and Support: <https://github.com/jsdelivr/globalping>`,
 			});
 		});
 
@@ -1933,12 +1957,13 @@ Documentation and Support: https://github.com/jsdelivr/globalping`,
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
 
 			expect(respondMock).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: `Failed to process command \`traceroute google.com --xyz\`.
 \`\`\`
 Invalid option "xyz" for "traceroute"!
 Expected "protocol, port, target, from, limit, share".
 \`\`\`
-Documentation and Support: https://github.com/jsdelivr/globalping`,
+Documentation and Support: <https://github.com/jsdelivr/globalping>`,
 			});
 		});
 
@@ -1976,12 +2001,13 @@ Documentation and Support: https://github.com/jsdelivr/globalping`,
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledTimes(0);
 
 			expect(respondMock).toHaveBeenCalledWith({
+				unfurl_links: false,
 				text: `Failed to process command \`http google.com --xyz\`.
 \`\`\`
 Invalid option "xyz" for "http"!
 Expected "protocol, port, resolver, method, path, query, host, header, latency, full, target, from, limit, share".
 \`\`\`
-Documentation and Support: https://github.com/jsdelivr/globalping`,
+Documentation and Support: <https://github.com/jsdelivr/globalping>`,
 			});
 		});
 	});
@@ -2088,6 +2114,7 @@ ${expectedResponse.results[0].result.rawOutput}
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: event.channel,
 				thread_ts: event.thread_ts,
@@ -2194,6 +2221,7 @@ ${expectedResponse.results[0].result.rawOutput}
 				},
 			];
 			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
 				blocks: expectedBlocks,
 				channel: event.channel,
 				thread_ts: event.thread_ts,
