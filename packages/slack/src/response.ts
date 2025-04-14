@@ -56,7 +56,7 @@ export const formatMeasurementResponse = (
 				text: fullResultsFooter(
 					res.id,
 					slackBoldSeparator,
-					LinkBlockType.Slack,
+					LinkBlockType.AngleBrackets,
 				),
 				verbatim: true,
 			},
@@ -69,7 +69,7 @@ export const formatMeasurementResponse = (
 				text: shareMessageFooter(
 					res.id,
 					slackBoldSeparator,
-					LinkBlockType.Slack,
+					LinkBlockType.AngleBrackets,
 				),
 				verbatim: true,
 			},

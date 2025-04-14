@@ -213,7 +213,7 @@ export class Bot {
 			});
 
 			const errorMsg = `${userMention(user.id)}, there was an error processing your request for ${inlineCode(cmdText ?? 'help')}
-${formatAPIError(error)}`;
+${formatAPIError(error, LinkBlockType.AngleBrackets)}`;
 
 			if (interaction.deferred) {
 				await interaction.editReply(errorMsg);
@@ -300,7 +300,7 @@ ${formatAPIError(error)}`;
 			});
 
 			const errorMsg = `${userMention(message.author.id)}, there was an error processing your request for ${inlineCode(cmdText ?? 'help')}
-${formatAPIError(error)}`;
+${formatAPIError(error, LinkBlockType.AngleBrackets)}`;
 			await message.reply(errorMsg);
 		}
 	}

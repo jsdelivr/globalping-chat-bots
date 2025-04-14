@@ -1,5 +1,5 @@
 import { Response } from 'got';
-import { codeBlock } from './response.js';
+import { codeBlock, linkBlock, LinkBlockType } from './response.js';
 
 interface APIError {
 	error: {
@@ -58,7 +58,7 @@ export function getAPIErrorMessage (error: unknown): string {
 	return `${error}`;
 }
 
-export function formatAPIError (error: unknown): string {
+export function formatAPIError (error: unknown, linkType: LinkBlockType): string {
 	return `${codeBlock(getAPIErrorMessage(error))}
-Documentation and Support: https://github.com/jsdelivr/globalping`;
+Documentation and Support: ${linkBlock('https://github.com/jsdelivr/globalping', linkType)}`;
 }

@@ -18,7 +18,7 @@ describe('Response', () => {
 	describe('shareMessageFooter', () => {
 		it('ok', () => {
 			const id = 'abc123';
-			const text = shareMessageFooter(id, boldSeparator, LinkBlockType.Slack);
+			const text = shareMessageFooter(id, boldSeparator, LinkBlockType.AngleBrackets);
 			expect(text).to.equal('> *View the results online: <https://globalping.io?measurement=abc123>*\n');
 		});
 	});
@@ -26,7 +26,7 @@ describe('Response', () => {
 	describe('fullResultsFooter', () => {
 		it('ok', () => {
 			const id = 'abc123';
-			const text = fullResultsFooter(id, boldSeparator, LinkBlockType.Slack);
+			const text = fullResultsFooter(id, boldSeparator, LinkBlockType.AngleBrackets);
 			expect(text).to.equal('> *Full results available here: <https://globalping.io?measurement=abc123>*\n');
 		});
 	});

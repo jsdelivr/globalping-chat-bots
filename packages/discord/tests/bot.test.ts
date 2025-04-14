@@ -1373,7 +1373,7 @@ Credits:
 Invalid argument "test" for "command"!
 Expected "ping, traceroute, dns, mtr, http, auth, limits".
 \`\`\`
-Documentation and Support: https://github.com/jsdelivr/globalping`);
+Documentation and Support: <https://github.com/jsdelivr/globalping>`);
 		});
 
 		it('should ignore mention - bot is not mentioned', async () => {

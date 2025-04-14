@@ -33,6 +33,7 @@ import {
 	getTooManyRequestsError,
 	getLimitsOutput,
 	parseCallbackURL,
+	LinkBlockType,
 } from '@globalping/bot-utils';
 import type {
 	Block,
@@ -196,7 +197,8 @@ export class Bot {
 			this.logger.info('HandleCommand: ack failed', err, logData);
 
 			await respond({
-				text: `Unable to acknowledge the request.\n${formatAPIError(err.message)}`,
+				unfurl_links: false,
+				text: `Unable to acknowledge the request.\n${formatAPIError(err.message, LinkBlockType.AngleBrackets)}`,
 			});
 		}
 
@@ -306,7 +308,8 @@ export class Bot {
 			});
 
 			await respond({
-				text: `Failed to process command \`${text}\`.\n${formatAPIError(errorMsg)}`,
+				unfurl_links: false,
+				text: `Failed to process command \`${text}\`.\n${formatAPIError(errorMsg, LinkBlockType.AngleBrackets)}`,
 			});
 		}
 	}
@@ -543,9 +546,10 @@ export class Bot {
 			this.logger.error('@globalping failed', error, { errorMsg, ...logData });
 
 			await client.chat.postMessage({
+				unfurl_links: false,
 				channel: channelId,
 				thread_ts: threadTs,
-				text: `Failed to process command \`${fullText}\`.\n${formatAPIError(errorMsg)}`,
+				text: `Failed to process command \`${fullText}\`.\n${formatAPIError(errorMsg, LinkBlockType.AngleBrackets)}`,
 			});
 		}
 	}
@@ -559,6 +563,7 @@ export class Bot {
 
 		if (!flags.cmd || flags.help) {
 			await client.chat.postEphemeral({
+				unfurl_links: false,
 				text: getHelpForCommand(flags.cmd, flags.target, this.help),
 				user: payload.user_id,
 				channel: payload.channel_id,
@@ -581,6 +586,7 @@ export class Bot {
 					return;
 				default:
 					await client.chat.postEphemeral({
+						unfurl_links: false,
 						text: getHelpForCommand(flags.cmd, flags.target, this.help),
 						user: payload.user_id,
 						channel: payload.channel_id,
@@ -661,6 +667,7 @@ export class Bot {
 		);
 
 		await client.chat.postMessage({
+			unfurl_links: false,
 			blocks,
 			channel: payload.channel_id,
 			thread_ts: payload.thread_ts,
@@ -678,6 +685,7 @@ export class Bot {
 			threadTs: payload.thread_ts,
 		});
 		await client.chat.postEphemeral({
+			unfurl_links: false,
 			blocks: [
 				{
 					type: 'section',
