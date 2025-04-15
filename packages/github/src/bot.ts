@@ -20,6 +20,7 @@ import {
 	postMeasurement,
 	responseHeader,
 	responseText,
+	truncationText,
 	shareMessageFooter,
 } from '@globalping/bot-utils';
 
@@ -43,6 +44,8 @@ export const initBot = (config: Config, logger: Logger) => {
 export class Bot {
 	private maxDisplayedResults = 4;
 	private help: HelpTexts;
+	messageSizeLimit = 60_000;
+
 
 	constructor (
 		private config: Config,
@@ -302,8 +305,8 @@ export class Bot {
 		const resultsForDisplay = res.results.slice(0, this.maxDisplayedResults);
 
 		const githubBoldSeparator = '**';
-		const githubTruncationLimit = 60_000;
 
+		let resultsTruncated = resultsForDisplay.length !== res.results.length;
 		let fullText = '';
 
 		fullText += `Here are the results for \`${cmdText}\`\n`;
@@ -312,12 +315,16 @@ export class Bot {
 		for (const result of resultsForDisplay) {
 			const tag = getTag(result.probe.tags);
 			const text = `${responseHeader(result, tag, githubBoldSeparator)
-				+ responseText(result, flags, githubTruncationLimit)
+				+ responseText(result, flags, Number.MAX_SAFE_INTEGER).text
 			}\n`;
 			fullText += text;
+
+			if (fullText.length > this.messageSizeLimit) {
+				resultsTruncated = true;
+				break;
+			}
 		}
 
-		const resultsTruncated = resultsForDisplay.length !== res.results.length;
 
 		let footerText;
 
@@ -336,7 +343,13 @@ export class Bot {
 		}
 
 		if (footerText !== undefined) {
-			fullText += footerText;
+			if (fullText.length + footerText.length > this.messageSizeLimit) {
+				const codeBlockEnd = '\n```'; // close code block
+				fullText = fullText.slice(0, this.messageSizeLimit - truncationText.length - codeBlockEnd.length - footerText.length);
+				fullText += truncationText + codeBlockEnd + footerText;
+			} else {
+				fullText += footerText;
+			}
 		}
 
 		await this.postComment(githubClient, githubTarget, fullText);

@@ -478,6 +478,89 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 			});
 		});
 
+		it('should output truncation text and full results link', async () => {
+			const bot = new Bot(
+				configMock,
+				loggerMock,
+				githubClientMock,
+				postMeasurementMock,
+				getMeasurementMock,
+			);
+			bot.messageSizeLimit = 1000;
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultHttpResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'http',
+					target: 'jsdelivr.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						port: 443,
+						protocol: 'HTTPS',
+						request: {
+							headers: {},
+							host: 'www.jsdelivr.com',
+							path: '/package/npm/test',
+							query: 'nav=stats',
+						},
+					},
+				},
+				'globalping_token',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: `Here are the results for \`http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"\`
+> **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**
+\`\`\`
+${expectedResponse.results[0].result.rawOutput.trim().slice(0, 637)}
+... (truncated)
+\`\`\`> **Full results available here: [https://globalping.io?measurement=m345ur3m3nt](https://globalping.io?measurement=m345ur3m3nt)**
+`,
+			});
+		});
+
 		it('should return help text - empty command', async () => {
 			const githubRequest: GithubNotificationRequest = {
 				subject: '',
