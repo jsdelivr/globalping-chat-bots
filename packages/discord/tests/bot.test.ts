@@ -1405,6 +1405,18 @@ Documentation and Support: <https://github.com/jsdelivr/globalping>`);
 
 			expect(messageMock.reply).toHaveBeenCalledTimes(0);
 		});
+
+		it('should ignore mention - bot is the author of the message', async () => {
+			const messageMock = mockDiscordMessage();
+			messageMock.author.id = messageMock.client.user.id;
+			messageMock.content = 'message';
+
+			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
+
+			await bot.HandleMessage(messageMock);
+
+			expect(messageMock.reply).toHaveBeenCalledTimes(0);
+		});
 	});
 
 	describe('OnAuthCallback', () => {

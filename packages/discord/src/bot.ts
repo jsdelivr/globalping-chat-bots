@@ -228,6 +228,11 @@ ${formatAPIError(error, LinkBlockType.AngleBrackets)}`;
 			return;
 		}
 
+		// Ignore messages from the bot itself
+		if (message.author.id === message.client.user.id) {
+			return;
+		}
+
 		const cmdText = this.parseMentionContent(
 			message.content,
 			message.client.user,
