@@ -759,15 +759,19 @@ ${formatAPIError(error, LinkBlockType.AngleBrackets)}`;
 		);
 
 		const fields: APIEmbedField[] = [];
+		let resultsTruncated = resultsForDisplay.length !== response.results.length;
 
 		for (const result of resultsForDisplay) {
+			const rt = responseText(result, flags, 1024);
+			resultsTruncated = resultsTruncated || rt.truncated;
+
 			fields.push({
 				name: responseHeader(result, getTag(result.probe.tags), boldSeparator),
-				value: responseText(result, flags, 1024),
+				value: rt.text,
 			});
 		}
 
-		if (resultsForDisplay.length !== response.results.length) {
+		if (resultsTruncated) {
 			fields.push({
 				name: '',
 				value: fullResultsFooter(response.id, boldSeparator, LinkBlockType.Raw),

@@ -122,17 +122,28 @@ const latencyText = (result: ProbeMeasurement, flags: Flags): string => {
 	throw new Error(`unknown command: ${flags.cmd}`);
 };
 
+export const truncationText = '\n... (truncated)';
+
 export const responseText = (
 	result: ProbeMeasurement,
 	flags: Flags,
 	truncationLimit: number,
-): string => {
+): {
+	text: string;
+	truncated: boolean;
+} => {
 	if (truncationLimit <= 0) {
-		return '';
+		return {
+			text: '',
+			truncated: false,
+		};
 	}
 
 	if (flags.latency) {
-		return codeBlock(latencyText(result, flags));
+		return {
+			text: codeBlock(latencyText(result, flags)),
+			truncated: false,
+		};
 	}
 
 	let responseText: string;
@@ -161,17 +172,19 @@ export const responseText = (
 		responseText = result.result.rawOutput.trim();
 	}
 
-	return codeBlock(truncate(responseText, truncationLimit - codeBlockLength));
-};
+	truncationLimit -= codeBlockLength;
 
-const truncationText = '\n... (truncated)';
-
-export const truncate = (text: string, limit: number): string => {
-	if (text.length <= limit) {
-		return text;
+	if (responseText.length <= truncationLimit) {
+		return {
+			text: codeBlock(responseText),
+			truncated: false,
+		};
 	}
 
-	return text.slice(0, limit - truncationText.length) + truncationText;
+	return {
+		text: codeBlock(responseText.slice(0, truncationLimit - truncationText.length) + truncationText),
+		truncated: true,
+	};
 };
 
 export function getLimitsOutput (

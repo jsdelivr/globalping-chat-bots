@@ -265,6 +265,10 @@ describe('Bot', () => {
 								name: '> **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**\n',
 								value: codeBlock(expectedText),
 							},
+							{
+								name: '',
+								value: '> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
+							},
 						],
 					},
 				],
@@ -346,6 +350,10 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 								name: '> **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**\n',
 								value: codeBlock(expectedText),
 							},
+							{
+								name: '',
+								value: '> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
+							},
 						],
 					},
 				],
@@ -412,6 +420,10 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 							{
 								name: '> **Beauharnois, CA, NA, OVH SAS (AS16276)**\n',
 								value: codeBlock(expectedText),
+							},
+							{
+								name: '',
+								value: '> **Full results available here: https://globalping.io?measurement=HgDbh56ZVZKqpBZh**\n',
 							},
 						],
 					},
@@ -1087,6 +1099,10 @@ Creating measurements:
 								name: '> **Chisinau, MD, EU, STARK INDUSTRIES SOLUTIONS LTD (AS44477)**\n',
 								value: codeBlock(expectedText),
 							},
+							{
+								name: '',
+								value: '> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
+							},
 						],
 					},
 				],
@@ -1142,6 +1158,10 @@ Creating measurements:
 							{
 								name: '> **Beauharnois, CA, NA, OVH SAS (AS16276)**\n',
 								value: codeBlock(expectedText),
+							},
+							{
+								name: '',
+								value: '> **Full results available here: https://globalping.io?measurement=HgDbh56ZVZKqpBZh**\n',
 							},
 						],
 					},
