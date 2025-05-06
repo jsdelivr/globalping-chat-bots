@@ -116,7 +116,7 @@ export class Bot {
 		private oauth: OAuthClient,
 		private discord: Client,
 	) {
-		this.help = generateHelp('**', '/globalping', undefined, 4, 1);
+		this.help = generateHelp('**', '/globalping', undefined, 4, 1, true);
 	}
 
 	async HandleInteraction (interaction: Interaction<CacheType>) {
