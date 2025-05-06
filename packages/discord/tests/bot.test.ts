@@ -43,7 +43,7 @@ describe('Bot', () => {
 	const interactionMock = mockDiscordInteraction();
 	const messageMock = mockDiscordMessage();
 
-	const expectedHelpTexts = generateHelp('**', '/globalping', undefined, 4, 1);
+	const expectedHelpTexts = generateHelp('**', '/globalping', undefined, 4, 1, true);
 	const configMock = {
 		serverHost: 'http://localhost',
 		dashboardUrl: 'http://dash.localhost',
