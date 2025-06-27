@@ -95,7 +95,8 @@ export const dnsHelpTexts = {
 		{
 			name: 'port',
 			type: 'int',
-			shortDescription: 'Send the query to a non-standard port on the server (default 53)',
+			shortDescription:
+				'Send the query to a non-standard port on the server (default 53)',
 			description:
 				'Send the query to a non-standard port on the server (default 53)',
 		},
@@ -246,8 +247,7 @@ export const httpHelpTexts = {
 		{
 			name: 'query',
 			type: 'string',
-			shortDescription:
-				'A URL query string (default empty)',
+			shortDescription: 'A URL query string (default empty)',
 			description: 'A query-string',
 		},
 		{
@@ -535,7 +535,15 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
 	],
 };
 
-function generateFlagsText (flags: HelpFlag[]): string {
+function generateFlagsText (title: string, flags: HelpFlag[], hideHelp: boolean): string {
+	if (hideHelp) {
+		flags = flags.filter(flag => flag.name !== 'help');
+	}
+
+	if (flags.length === 0) {
+		return '';
+	}
+
 	const leftCol = [];
 	let shortMax = 0;
 	let nameAndTypeMax = 0;
@@ -574,10 +582,13 @@ function generateFlagsText (flags: HelpFlag[]): string {
 			+ (i < leftCol.length - 1 ? '\n' : '');
 	}
 
-	return text;
+	return `
+${title}:
+${codeBlock(text)}`;
 }
 
 function generateExamplesText (
+	rootCommand: string,
 	examples: { description: string; command: string }[],
 	limit: number = 0,
 ) {
@@ -588,7 +599,7 @@ function generateExamplesText (
 			break;
 		}
 
-		text += `${examples[i].description}\n${codeBlock(examples[i].command)}\n`;
+		text += `${examples[i].description}\n${codeBlock(rootCommand + ' ' + examples[i].command)}\n`;
 	}
 
 	return text.trimEnd();
@@ -600,6 +611,7 @@ export function generateHelp (
 	ignoreCmds?: Set<string>,
 	dnsExampleLimit: number = 0,
 	httpExampleLimit: number = 0,
+	hideHelpFlag: boolean = false,
 ) {
 	let maxCmdLength = generalHelpTexts.commands.reduce(
 		(max, cmd) => Math.max(max, cmd.name.length),
@@ -651,78 +663,55 @@ ${codeBlock(generalHelpTexts.additionalCommands.reduce((s, cmd, i) => {
 				+ (i < generalHelpTexts.additionalCommands.length - 1 ? '\n' : '')
 		);
 	}, ''))}
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, generalHelpTexts.flags, hideHelpFlag)}
 
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(generalHelpTexts.flags))}
-
-Use \`globalping [command] --help\` for more information about a command.
+Use \`${rootCommand} help [command]\` for more information about a command.
 `,
 		dns: `${dnsHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
-${generateExamplesText(dnsHelpTexts.examples, dnsExampleLimit)}
+${generateExamplesText(rootCommand, dnsHelpTexts.examples, dnsExampleLimit)}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(dnsHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(dnsHelpTexts.flags))}
-
-${boldSeparator}Global Flags${boldSeparator}:
-${codeBlock(generateFlagsText(globalFlags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, dnsHelpTexts.flags, hideHelpFlag)}
+${generateFlagsText(`${boldSeparator}Global Flags${boldSeparator}`, globalFlags, hideHelpFlag)}`,
 		http: `${httpHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
-${generateExamplesText(httpHelpTexts.examples, httpExampleLimit)}
+${generateExamplesText(rootCommand, httpHelpTexts.examples, httpExampleLimit)}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(httpHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(httpHelpTexts.flags))}
-
-${boldSeparator}Global Flags${boldSeparator}:
-${codeBlock(generateFlagsText(globalFlags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, httpHelpTexts.flags, hideHelpFlag)}
+${generateFlagsText(`${boldSeparator}Global Flags${boldSeparator}`, globalFlags, hideHelpFlag)}`,
 		mtr: `${mtrHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
-${generateExamplesText(mtrHelpTexts.examples)}
+${generateExamplesText(rootCommand, mtrHelpTexts.examples)}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(mtrHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(mtrHelpTexts.flags))}
-
-${boldSeparator}Global Flags${boldSeparator}:
-${codeBlock(generateFlagsText(globalFlags))}`,
-
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, mtrHelpTexts.flags, hideHelpFlag)}
+${generateFlagsText(`${boldSeparator}Global Flags${boldSeparator}`, globalFlags, hideHelpFlag)}`,
 		ping: `${pingHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
-${generateExamplesText(pingHelpTexts.examples)}
+${generateExamplesText(rootCommand, pingHelpTexts.examples)}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(pingHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(pingHelpTexts.flags))}
-
-${boldSeparator}Global Flags${boldSeparator}:
-${codeBlock(generateFlagsText(globalFlags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, pingHelpTexts.flags, hideHelpFlag)}
+${generateFlagsText(`${boldSeparator}Global Flags${boldSeparator}`, globalFlags, hideHelpFlag)}`,
 		traceroute: `${tracerouteHelpTexts.preamble}
 
 ${boldSeparator}Examples:${boldSeparator}
-${generateExamplesText(tracerouteHelpTexts.examples)}
+${generateExamplesText(rootCommand, tracerouteHelpTexts.examples)}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(tracerouteHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(tracerouteHelpTexts.flags))}
-
-${boldSeparator}Global Flags${boldSeparator}:
-${codeBlock(generateFlagsText(globalFlags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, tracerouteHelpTexts.flags, hideHelpFlag)}
+${generateFlagsText(`${boldSeparator}Global Flags${boldSeparator}`, globalFlags, hideHelpFlag)}`,
 		auth: `${authHelpTexts.preamble}
 
 ${boldSeparator}Available Commands${boldSeparator}:
@@ -737,37 +726,27 @@ ${codeBlock(authHelpTexts.commands.reduce((s, cmd, i) => {
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(authHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(authHelpTexts.flags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, authHelpTexts.flags, hideHelpFlag)}`,
 		auth_login: `${authLoginHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(authLoginHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(authLoginHelpTexts.flags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, authLoginHelpTexts.flags, hideHelpFlag)}`,
 		auth_status: `${authStatusHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(authStatusHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(authStatusHelpTexts.flags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, authStatusHelpTexts.flags, hideHelpFlag)}`,
 		auth_logout: `${authLogoutHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(authLogoutHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(authLogoutHelpTexts.flags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, authLogoutHelpTexts.flags, hideHelpFlag)}`,
 		limits: `${limitsHelpTexts.preamble}
 
 ${boldSeparator}Usage:${boldSeparator}
 ${codeBlock(limitsHelpTexts.usage(rootCommand))}
-
-${boldSeparator}Flags${boldSeparator}:
-${codeBlock(generateFlagsText(limitsHelpTexts.flags))}`,
+${generateFlagsText(`${boldSeparator}Flags${boldSeparator}`, limitsHelpTexts.flags, hideHelpFlag)}`,
 		unknownCommand: `Unknown command! Please call \`${rootCommand} help\` for a list of commands.`,
 	};
 }
