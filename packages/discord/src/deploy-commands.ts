@@ -1,5 +1,6 @@
 import { REST } from '@discordjs/rest';
 import {
+	ALLOWED_PING_PROTOCOLS,
 	ALLOWED_DNS_PROTOCOLS,
 	ALLOWED_DNS_TYPES,
 	ALLOWED_HTTP_METHODS,
@@ -66,6 +67,15 @@ export const deployCommands = (config: DeployCommandsConfig) => {
 				.addBooleanOption(option => option
 					.setName((globalFlagsMap.get('latency') as HelpFlag).name)
 					.setDescription((globalFlagsMap.get('latency') as HelpFlag).shortDescription)
+					.setRequired(false))
+				.addStringOption(option => option
+					.setName((pingFlagsMap.get('protocol') as HelpFlag).name)
+					.setDescription((pingFlagsMap.get('protocol') as HelpFlag).shortDescription)
+					.setRequired(false)
+					.addChoices(...choiceMap([ ...ALLOWED_PING_PROTOCOLS ])))
+				.addNumberOption(option => option
+					.setName((pingFlagsMap.get('port') as HelpFlag).name)
+					.setDescription((pingFlagsMap.get('port') as HelpFlag).shortDescription)
 					.setRequired(false)))
 			// Traceroute
 			.addSubcommand(subcommand => subcommand
@@ -85,7 +95,8 @@ export const deployCommands = (config: DeployCommandsConfig) => {
 					.setRequired(false))
 				.addStringOption(option => option
 					.setName((tracerouteFlagsMap.get('protocol') as HelpFlag).name)
-					.setDescription((tracerouteFlagsMap.get('protocol') as HelpFlag).shortDescription)
+					.setDescription((tracerouteFlagsMap.get('protocol') as HelpFlag)
+						.shortDescription)
 					.setRequired(false)
 					.addChoices(...choiceMap([ ...ALLOWED_TRACE_PROTOCOLS ])))
 				.addNumberOption(option => option

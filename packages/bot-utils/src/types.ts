@@ -32,6 +32,10 @@ export const ALLOWED_LOCATION_TYPES = [
 export type LocationType = (typeof ALLOWED_LOCATION_TYPES)[number];
 export const isLocationType = (type: string): type is LocationType => ALLOWED_LOCATION_TYPES.includes(type as LocationType);
 
+export const ALLOWED_PING_PROTOCOLS = [ 'ICMP', 'TCP' ] as const;
+export type PingProtocol = (typeof ALLOWED_PING_PROTOCOLS)[number];
+export const isPingProtocol = (type: string): type is PingProtocol => ALLOWED_PING_PROTOCOLS.includes(type as PingProtocol);
+
 // traceroute
 export const ALLOWED_TRACE_PROTOCOLS = [ 'TCP', 'UDP', 'ICMP' ] as const;
 export type TraceProtocol = (typeof ALLOWED_TRACE_PROTOCOLS)[number];

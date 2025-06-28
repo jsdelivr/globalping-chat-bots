@@ -123,6 +123,74 @@ ${expectedResponse.results[0].result.rawOutput}
 			});
 		});
 
+		it('should succesfully handle the command - ping with protocol', async () => {
+			const githubRequest: GithubNotificationRequest = {
+				subject: '',
+				bodyPlain: `@globalping ping google.com --protocol tcp --port 81
+
+--
+Reply to this email directly or view it on GitHub:
+https://github.com/myuser/myrepo/issues/1
+You are receiving this because you were mentioned.
+
+Message ID: <myuser/myrepo/issues/1@github.com>`,
+			};
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			const req = mockIncomingMessage(
+				{
+					headers: {
+						'api-key': configMock.githubBotApiKey,
+					},
+				},
+				Buffer.from(JSON.stringify(githubRequest)),
+			);
+
+			const res = {
+				writeHead: vi.fn(),
+				write: vi.fn(),
+				end: vi.fn(),
+			} as any;
+
+			await bot.HandleRequest(req, res);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						protocol: 'TCP',
+						port: 81,
+					},
+				},
+				'globalping_token',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			expect(githubClientMock.rest.issues.createComment).toHaveBeenCalledWith({
+				owner: 'myuser',
+				repo: 'myrepo',
+				issue_number: 1,
+				body: `Here are the results for \`ping google.com --protocol tcp --port 81\`
+> **Amsterdam, NL, EU, Gigahost AS (AS56655)**
+\`\`\`
+${expectedResponse.results[0].result.rawOutput}
+\`\`\`
+`,
+			});
+		});
+
 		it('should succesfully handle the command - dns', async () => {
 			const githubRequest: GithubNotificationRequest = {
 				subject: '',

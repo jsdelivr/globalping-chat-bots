@@ -523,6 +523,100 @@ ${expectedResponse.results[0].result.rawOutput}
 			});
 		});
 
+		it('should handle the command - /ping with protocol', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/ping',
+				text: 'google.com from New York --limit 2 --protocol tcp --port 81',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith(context.teamId);
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 2,
+					locations: [{ magic: 'New York' }],
+					measurementOptions: {
+						protocol: 'TCP',
+						port: 81,
+					},
+				},
+				'tok3n',
+			);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: '```Processing the request...```',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedBlocks = [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `<@${payload.user_id}>, here are the results for \`ping ${payload.text}\``,
+						verbatim: true,
+					},
+				},
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `> *Amsterdam, NL, EU, Gigahost AS (AS56655)*
+\`\`\`
+${expectedResponse.results[0].result.rawOutput}
+\`\`\``,
+						verbatim: true,
+					},
+				},
+			];
+			expect(slackClientMock.chat.postMessage).toHaveBeenCalledWith({
+				unfurl_links: false,
+				blocks: expectedBlocks,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
 		it('should handle the command - /traceroute', async () => {
 			const payload = {
 				channel_id: 'C07QAK46BGU',
@@ -1838,7 +1932,7 @@ Documentation and Support: <https://github.com/jsdelivr/globalping>`,
 				text: `Failed to process command \`ping google.com --xyz\`.
 \`\`\`
 Invalid option "xyz" for "ping"!
-Expected "packets, latency, target, from, limit, share".
+Expected "packets, latency, protocol, port, target, from, limit, share".
 \`\`\`
 Documentation and Support: <https://github.com/jsdelivr/globalping>`,
 			});
