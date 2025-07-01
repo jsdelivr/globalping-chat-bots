@@ -364,6 +364,21 @@ export const pingHelpTexts = {
 			description:
 				'Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)',
 		},
+		{
+			name: 'port',
+			type: 'int',
+			shortDescription:
+				'Specify the port to use; only applicable for the TCP protocol (default 80)',
+			description:
+				'Specify the port to use; only applicable for the TCP protocol (default 80)',
+		},
+		{
+			name: 'protocol',
+			type: 'string',
+			shortDescription:
+				'Specifies the protocol to use: ICMP or TCP (default ICMP)',
+			description: 'Specifies the protocol to use: ICMP or TCP (default ICMP)',
+		},
 	],
 };
 export const pingFlagsMap = new Map<string, HelpFlag>(pingHelpTexts.flags.map(flag => [ flag.name, flag ]));
@@ -535,7 +550,11 @@ The Globalping bot allows you to interact with the API in a simple and human-fri
 	],
 };
 
-function generateFlagsText (title: string, flags: HelpFlag[], hideHelp: boolean): string {
+function generateFlagsText (
+	title: string,
+	flags: HelpFlag[],
+	hideHelp: boolean,
+): string {
 	if (hideHelp) {
 		flags = flags.filter(flag => flag.name !== 'help');
 	}

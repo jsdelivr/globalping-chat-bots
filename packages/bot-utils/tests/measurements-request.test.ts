@@ -36,8 +36,8 @@ describe('Utils', () => {
 
 			it('should throw if incorrect ping flag', () => {
 				const args
-					= 'ping google.com from New York --limit 2 --packets 3 --protocol icmp';
-				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "protocol" for "ping"!\nExpected "packets, latency, target, from, limit, share".');
+					= 'ping google.com from New York --limit 2 --packets 3 --flag invalid';
+				expect(() => buildPostMeasurements(argsToFlags(args))).toThrow('Invalid option "flag" for "ping"!\nExpected "packets, latency, protocol, port, target, from, limit, share".');
 			});
 		});
 

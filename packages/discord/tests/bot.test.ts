@@ -43,7 +43,14 @@ describe('Bot', () => {
 	const interactionMock = mockDiscordInteraction();
 	const messageMock = mockDiscordMessage();
 
-	const expectedHelpTexts = generateHelp('**', '/globalping', undefined, 4, 1, true);
+	const expectedHelpTexts = generateHelp(
+		'**',
+		'/globalping',
+		undefined,
+		4,
+		1,
+		true,
+	);
 	const configMock = {
 		serverHost: 'http://localhost',
 		dashboardUrl: 'http://dash.localhost',
@@ -109,6 +116,75 @@ describe('Bot', () => {
 
 			const expectedReply = {
 				content: '<@123>, here are the results for `ping google.com`',
+				embeds: [
+					{
+						fields: [
+							{
+								name: '> **Amsterdam, NL, EU, Gigahost AS (AS56655)**\n',
+								value: codeBlock(expectedResponse.results[0].result.rawOutput),
+							},
+						],
+					},
+				],
+			};
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith(expectedReply);
+		});
+
+		it('should handle the command - /globalping ping with protocol', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			const options: Record<string, string | number | boolean> = {
+				target: 'google.com',
+				protocol: 'TCP',
+				port: 81,
+			};
+			interactionMock.options = {
+				getSubcommand: () => 'ping',
+				getSubcommandGroup: () => undefined,
+				getString: (key: string) => options[key] as string,
+				getNumber: (key: string) => options[key] as number,
+				getBoolean: (key: string) => options[key] as boolean,
+			} as any;
+
+			vi.spyOn(oauthClientMock, 'GetToken').mockResolvedValue({
+				access_token: 'tok3n',
+			} as AuthToken);
+
+			postMeasurementMock.mockResolvedValue({
+				id: 'm345ur3m3nt',
+				probesCount: 1,
+			});
+
+			const expectedResponse = getDefaultPingResponse();
+			getMeasurementMock.mockResolvedValue(expectedResponse);
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(oauthClientMock.GetToken).toHaveBeenCalledWith('G654');
+
+			expect(postMeasurementMock).toHaveBeenCalledWith(
+				{
+					type: 'ping',
+					target: 'google.com',
+					inProgressUpdates: false,
+					limit: 1,
+					locations: [{ magic: 'world' }],
+					measurementOptions: {
+						protocol: 'TCP',
+						port: 81,
+					},
+				},
+				'tok3n',
+			);
+
+			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
+
+			const expectedReply = {
+				content:
+					'<@123>, here are the results for `ping google.com --protocol TCP --port 81`',
 				embeds: [
 					{
 						fields: [
@@ -267,7 +343,8 @@ describe('Bot', () => {
 							},
 							{
 								name: '',
-								value: '> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
+								value:
+									'> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
 							},
 						],
 					},
@@ -352,7 +429,8 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 							},
 							{
 								name: '',
-								value: '> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
+								value:
+									'> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
 							},
 						],
 					},
@@ -423,7 +501,8 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 							},
 							{
 								name: '',
-								value: '> **Full results available here: https://globalping.io?measurement=HgDbh56ZVZKqpBZh**\n',
+								value:
+									'> **Full results available here: https://globalping.io?measurement=HgDbh56ZVZKqpBZh**\n',
 							},
 						],
 					},
@@ -1003,7 +1082,8 @@ Creating measurements:
 
 			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
 
-			messageMock.content = 'text <@111> dns google.com from Berlin --resolver 1.1.1.1';
+			messageMock.content
+				= 'text <@111> dns google.com from Berlin --resolver 1.1.1.1';
 
 			await bot.HandleMessage(messageMock);
 
@@ -1026,7 +1106,8 @@ Creating measurements:
 			expect(getMeasurementMock).toHaveBeenCalledWith('m345ur3m3nt');
 
 			const expectedReply = {
-				content: '<@123>, here are the results for `dns google.com from Berlin --resolver 1.1.1.1`',
+				content:
+					'<@123>, here are the results for `dns google.com from Berlin --resolver 1.1.1.1`',
 				embeds: [
 					{
 						fields: [
@@ -1057,7 +1138,8 @@ Creating measurements:
 
 			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
 
-			messageMock.content = '<@111> http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"';
+			messageMock.content
+				= '<@111> http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"';
 
 			await bot.HandleMessage(messageMock);
 
@@ -1091,7 +1173,8 @@ Creating measurements:
 				+ '\n... (truncated)';
 
 			const expectedReply = {
-				content: '<@123>, here are the results for `http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"`',
+				content:
+					'<@123>, here are the results for `http jsdelivr.com --host www.jsdelivr.com --protocol https --port 443 --path "/package/npm/test" --query "nav=stats"`',
 				embeds: [
 					{
 						fields: [
@@ -1101,7 +1184,8 @@ Creating measurements:
 							},
 							{
 								name: '',
-								value: '> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
+								value:
+									'> **Full results available here: https://globalping.io?measurement=3KrXt3M4b85vHbhk**\n',
 							},
 						],
 					},
@@ -1161,7 +1245,8 @@ Creating measurements:
 							},
 							{
 								name: '',
-								value: '> **Full results available here: https://globalping.io?measurement=HgDbh56ZVZKqpBZh**\n',
+								value:
+									'> **Full results available here: https://globalping.io?measurement=HgDbh56ZVZKqpBZh**\n',
 							},
 						],
 					},
@@ -1225,7 +1310,11 @@ Creating measurements:
 
 		it('should handle the mention - auth login', async () => {
 			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
-			vi.spyOn((messageMock.member as GuildMember).permissions, 'has').mockReturnValue(true);
+
+			vi.spyOn(
+				(messageMock.member as GuildMember).permissions,
+				'has',
+			).mockReturnValue(true);
 
 			messageMock.content = '<@111> auth login';
 
@@ -1238,14 +1327,17 @@ Creating measurements:
 
 		it('should handle the mention - auth logout', async () => {
 			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
-			vi.spyOn((messageMock.member as GuildMember).permissions, 'has').mockReturnValue(true);
+
+			vi.spyOn(
+				(messageMock.member as GuildMember).permissions,
+				'has',
+			).mockReturnValue(true);
 
 			vi.spyOn(oauthClientMock, 'Logout').mockResolvedValue(null);
 
 			messageMock.content = '<@111> auth logout';
 
 			await bot.HandleMessage(messageMock);
-
 
 			expect(messageMock.reply).toHaveBeenCalledWith({
 				content: 'You are now logged out.',
@@ -1254,8 +1346,11 @@ Creating measurements:
 
 		it('should handle the mention - auth status', async () => {
 			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
-			vi.spyOn((messageMock.member as GuildMember).permissions, 'has').mockReturnValue(true);
 
+			vi.spyOn(
+				(messageMock.member as GuildMember).permissions,
+				'has',
+			).mockReturnValue(true);
 
 			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
 				{
@@ -1271,7 +1366,6 @@ Creating measurements:
 
 			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
 
-
 			expect(messageMock.reply).toHaveBeenCalledWith({
 				content: 'Logged in as john.',
 			});
@@ -1279,7 +1373,11 @@ Creating measurements:
 
 		it('should handle the mention - limits', async () => {
 			vi.spyOn(messageMock.mentions, 'has').mockReturnValue(true);
-			vi.spyOn((messageMock.member as GuildMember).permissions, 'has').mockReturnValue(true);
+
+			vi.spyOn(
+				(messageMock.member as GuildMember).permissions,
+				'has',
+			).mockReturnValue(true);
 
 			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
 				{
@@ -1388,7 +1486,8 @@ Credits:
 
 			await bot.HandleMessage(messageMock);
 
-			expect(messageMock.reply).toHaveBeenCalledWith(`<@123>, there was an error processing your request for \`test test\`
+			expect(messageMock.reply)
+				.toHaveBeenCalledWith(`<@123>, there was an error processing your request for \`test test\`
 \`\`\`
 Invalid argument "test" for "command"!
 Expected "ping, traceroute, dns, mtr, http, auth, limits".

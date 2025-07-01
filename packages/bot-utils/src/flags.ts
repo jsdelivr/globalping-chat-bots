@@ -19,6 +19,8 @@ const ALLOWED_BASE_FLAGS = [ 'target', 'from', 'limit', 'share' ] as const;
 const ALLOWED_PING_FLAGS = [
 	'packets',
 	'latency',
+	'protocol',
+	'port',
 	...ALLOWED_BASE_FLAGS,
 ] as const;
 

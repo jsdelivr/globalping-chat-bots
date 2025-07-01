@@ -283,8 +283,10 @@ Ping jsdelivr.com from a probe that is from the AWS network and is located in Mo
 
 *Flags*:
 \`\`\`
-  -h, --help           Help for ping
-      --packets int    Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)
+  -h, --help               Help for ping
+      --packets int        Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)
+      --port int           Specify the port to use; only applicable for the TCP protocol (default 80)
+      --protocol string    Specifies the protocol to use: ICMP or TCP (default ICMP)
 \`\`\`
 
 *Global Flags*:
@@ -344,7 +346,14 @@ Traceroute jsdelivr.com from a probe that is located in Paris to port 453
 		});
 
 		it('should return help texts - hide help flag', async () => {
-			const helpTexts = generateHelp('*', '/globalping', undefined, undefined, undefined, true);
+			const helpTexts = generateHelp(
+				'*',
+				'/globalping',
+				undefined,
+				undefined,
+				undefined,
+				true,
+			);
 
 			const expectedHelpTexts = {
 				auth: `Authenticate with the Globalping API for higher measurements limits.
@@ -599,7 +608,9 @@ Ping jsdelivr.com from a probe that is from the AWS network and is located in Mo
 
 *Flags*:
 \`\`\`
---packets int    Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)
+--packets int        Specifies the desired amount of ECHO_REQUEST packets to be sent (default 3)
+--port int           Specify the port to use; only applicable for the TCP protocol (default 80)
+--protocol string    Specifies the protocol to use: ICMP or TCP (default ICMP)
 \`\`\`
 
 *Global Flags*:
@@ -659,23 +670,38 @@ Traceroute jsdelivr.com from a probe that is located in Paris to port 453
 
 		it('should check that short descriptions are less than or equal to 100 chars', async () => {
 			for (const cmd of generalHelpTexts.commands) {
-				expect((cmd.shortDescription || '').length <= 100, `${cmd.name}: ${cmd.shortDescription}`).toBe(true);
+				expect(
+					(cmd.shortDescription || '').length <= 100,
+					`${cmd.name}: ${cmd.shortDescription}`,
+				).toBe(true);
 
 				for (const flag of cmd.flags) {
-					expect((flag.shortDescription || '').length <= 100, `${cmd.name}: ${flag.name}: ${flag.shortDescription}`).toBe(true);
+					expect(
+						(flag.shortDescription || '').length <= 100,
+						`${cmd.name}: ${flag.name}: ${flag.shortDescription}`,
+					).toBe(true);
 				}
 			}
 
 			for (const cmd of generalHelpTexts.additionalCommands) {
-				expect((cmd.shortDescription || '').length <= 100, `${cmd.name}: ${cmd.shortDescription}`).toBe(true);
+				expect(
+					(cmd.shortDescription || '').length <= 100,
+					`${cmd.name}: ${cmd.shortDescription}`,
+				).toBe(true);
 
 				for (const flag of cmd.flags) {
-					expect((flag.shortDescription || '').length <= 100, `${cmd.name}: ${flag.name}: ${flag.shortDescription}`).toBe(true);
+					expect(
+						(flag.shortDescription || '').length <= 100,
+						`${cmd.name}: ${flag.name}: ${flag.shortDescription}`,
+					).toBe(true);
 				}
 			}
 
 			for (const flag of generalHelpTexts.flags) {
-				expect((flag.shortDescription || '').length <= 100, `general: ${flag.name}: ${flag.shortDescription}`).toBe(true);
+				expect(
+					(flag.shortDescription || '').length <= 100,
+					`general: ${flag.name}: ${flag.shortDescription}`,
+				).toBe(true);
 			}
 		});
 	});

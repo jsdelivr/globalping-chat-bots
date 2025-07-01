@@ -5,6 +5,7 @@ import {
 	ALLOWED_HTTP_METHODS,
 	ALLOWED_HTTP_PROTOCOLS,
 	ALLOWED_MTR_PROTOCOLS,
+	ALLOWED_PING_PROTOCOLS,
 	ALLOWED_QUERY_TYPES,
 	ALLOWED_TRACE_PROTOCOLS,
 	isDnsProtocol,
@@ -12,6 +13,7 @@ import {
 	isHttpMethod,
 	isHttpProtocol,
 	isMtrProtocol,
+	isPingProtocol,
 	isTraceProtocol,
 	Location,
 	MeasurementCreate,
@@ -62,6 +64,16 @@ export const buildPostMeasurements = (args: Flags): MeasurementCreate => {
 				locations,
 				measurementOptions: {
 					...packets && { packets },
+					...protocol && {
+						protocol: isPingProtocol(protocol)
+							? protocol
+							: throwArgError(
+								protocol,
+								'protocol',
+								[ ...ALLOWED_PING_PROTOCOLS ].join(', '),
+							),
+					},
+					...port && { port },
 				},
 			};
 		case 'traceroute':
