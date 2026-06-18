@@ -1,4 +1,4 @@
-FROM node:20-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ COPY packages ./packages
 RUN pnpm -r build \
 	&& pnpm --filter main deploy --prod /prod/main
 
-FROM node:20-slim
+FROM node:24-slim
 
 WORKDIR /app
 
