@@ -13,7 +13,7 @@
 	},
 	"author": "Ayuhito <hello@ayuhito.com>",
 	"engines": {
-		"node": "^20.18.0"
+		"node": "22 || 24"
 	},
 	"license": "MIT",
 	"devDependencies": {
