@@ -66,7 +66,6 @@ export const initBot = (
 			GatewayIntentBits.Guilds,
 			GatewayIntentBits.GuildMessages,
 			GatewayIntentBits.DirectMessages,
-			GatewayIntentBits.MessageContent,
 		],
 	});
 
