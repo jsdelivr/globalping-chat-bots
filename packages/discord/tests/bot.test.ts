@@ -696,6 +696,40 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 			});
 		});
 
+		it('should handle the command - auth status of an org token', async () => {
+			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
+
+			interactionMock.options = {
+				getSubcommand: () => 'status',
+				getSubcommandGroup: () => 'auth',
+			} as any;
+
+			interactionMock.member = {
+				permissions: {
+					has: vi.fn().mockReturnValue(true),
+				},
+			} as any;
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+					organization: 'john-org',
+				},
+				null,
+			]);
+
+			await bot.HandleInteraction(interactionMock);
+
+			expect(interactionMock.deferReply).toHaveBeenCalled();
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
+
+			expect(interactionMock.editReply).toHaveBeenCalledWith({
+				content: 'Logged in as john-org (via john).',
+			});
+		});
+
 		it('should handle the command - auth status anonymous', async () => {
 			vi.spyOn(interactionMock, 'isChatInputCommand').mockReturnValue(true);
 
@@ -1548,6 +1582,8 @@ Documentation and Support: <https://github.com/jsdelivr/globalping>`);
 				session: authorizeSession,
 			});
 
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([ { active: true, username: 'john', organization: 'john-org' }, null ]);
+
 			const req = {
 				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${id}`,
 			} as IncomingMessage;
@@ -1577,7 +1613,7 @@ Documentation and Support: <https://github.com/jsdelivr/globalping>`);
 				Routes.webhook(applicationId, messageToken),
 				{
 					body: {
-						content: `Success! You are now authenticated.`,
+						content: `Success! You are now authenticated as john-org (via john).`,
 						flags: MessageFlags.Ephemeral,
 					},
 				},

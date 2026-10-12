@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
 	fullResultsFooter,
+	getAccountName,
 	getMoreCreditsRequiredAuthError,
 	getMoreCreditsRequiredNoAuthError,
 	getNoCreditsAuthError,
@@ -81,6 +82,16 @@ describe('Response', () => {
 			};
 			const text = responseHeader(pingResult, 'tag-1', boldSeparator);
 			expect(text).to.equal('> *Atlanta (GA), US, NA, My Network (AS12345), (tag-1)*\n');
+		});
+	});
+
+	describe('getAccountName', () => {
+		it('names the user of a personal token', () => {
+			expect(getAccountName({ active: true, username: 'john', organization: null })).toBe('john');
+		});
+
+		it('names the org of an org token, and the user it acts through', () => {
+			expect(getAccountName({ active: true, username: 'john', organization: 'john-org' })).toBe('john-org (via john)');
 		});
 	});
 

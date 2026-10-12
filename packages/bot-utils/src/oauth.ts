@@ -43,6 +43,7 @@ export interface IntrospectionResponse {
 	scope?: string;
 	client_id?: string;
 	username?: string;
+	organization?: string | null;
 	token_type?: string;
 	exp?: number;
 	iat?: number;

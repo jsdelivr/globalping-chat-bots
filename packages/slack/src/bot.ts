@@ -31,6 +31,7 @@ import {
 	AuthorizeErrorType,
 	OAuthClient,
 	getTooManyRequestsError,
+	getAccountName,
 	getLimitsOutput,
 	parseCallbackURL,
 	LinkBlockType,
@@ -494,7 +495,10 @@ export class Bot {
 			this.logger.error('/oauth/callback failed', exchangeError);
 			message = `Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`;
 		} else {
-			message = 'Success! You are now authenticated.';
+			const [ introspection ] = await this.oauth.Introspect(url.id).catch(() => [ null ]);
+			message = introspection?.active && introspection.username
+				? `Success! You are now authenticated as ${getAccountName(introspection)}.`
+				: 'Success! You are now authenticated.';
 		}
 
 		try {
@@ -718,7 +722,7 @@ export class Bot {
 
 		text
 			= introspection && introspection.active && introspection.username
-				? `Logged in as ${introspection?.username}.`
+				? `Logged in as ${getAccountName(introspection)}.`
 				: 'Not logged in.';
 
 		await client.chat.postEphemeral({
