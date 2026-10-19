@@ -87,7 +87,7 @@ describe('Response', () => {
 
 	describe('getAccountName', () => {
 		it('names the user of a personal token', () => {
-			expect(getAccountName({ active: true, username: 'john', organization: null })).toBe('john');
+			expect(getAccountName({ active: true, username: 'john' })).toBe('john');
 		});
 
 		it('names the org of an org token, and the user it acts through', () => {
