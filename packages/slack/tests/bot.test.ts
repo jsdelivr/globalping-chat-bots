@@ -2466,7 +2466,7 @@ ${expectedResponse.results[0].result.rawOutput}
 				installation,
 			});
 
-			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([ { active: true, username: 'john', organization: 'john-org' }, null ]);
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([{ active: true, username: 'john', organization: 'john-org' }, null ]);
 
 			const req = {
 				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${installationId}`,

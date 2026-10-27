@@ -1582,7 +1582,7 @@ Documentation and Support: <https://github.com/jsdelivr/globalping>`);
 				session: authorizeSession,
 			});
 
-			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([ { active: true, username: 'john', organization: 'john-org' }, null ]);
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([{ active: true, username: 'john', organization: 'john-org' }, null ]);
 
 			const req = {
 				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${id}`,
