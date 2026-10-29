@@ -1043,7 +1043,7 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 
 			expect(oauthClientMock.Introspect).toHaveBeenCalledWith(context.teamId);
 
-			const expectedText = `Authentication: token (john)
+			const expectedText = `Authentication: token, john
 
 Creating measurements:
  - 500 tests per hour

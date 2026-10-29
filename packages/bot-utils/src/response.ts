@@ -198,8 +198,7 @@ export function getLimitsOutput (
 	let text = '';
 
 	if (limits.rateLimit.measurements.create.type === CreateLimitType.User) {
-		const account = introspection?.organization ? `${introspection.organization} via ${introspection.username}` : introspection?.username;
-		text = `Authentication: token (${account || ''})\n\n`;
+		text = `Authentication: token, ${getAccountName(introspection)}\n\n`;
 	} else {
 		text = 'Authentication: workspace\n\n';
 	}

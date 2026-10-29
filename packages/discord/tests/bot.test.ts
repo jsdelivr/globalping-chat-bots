@@ -803,7 +803,7 @@ ${(expectedResponse.results[0].result as HttpProbeResult).rawHeaders.slice(0, 62
 
 			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
 
-			const expectedText = `Authentication: token (john)
+			const expectedText = `Authentication: token, john
 
 Creating measurements:
  - 500 tests per hour
@@ -1446,7 +1446,7 @@ Creating measurements:
 
 			expect(oauthClientMock.Introspect).toHaveBeenCalledWith('G654');
 
-			const expectedText = `Authentication: token (john)
+			const expectedText = `Authentication: token, john
 
 Creating measurements:
  - 500 tests per hour
