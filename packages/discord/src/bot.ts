@@ -29,6 +29,7 @@ import {
 	CustomRoute,
 	parseCallbackURL,
 	argsToFlags,
+	getAccountName,
 } from '@globalping/bot-utils';
 import {
 	APIEmbed,
@@ -436,7 +437,10 @@ ${formatAPIError(error, LinkBlockType.AngleBrackets)}`;
 			this.logger.error('/oauth/callback failed', exchangeError);
 			message = `Authentication failed: ${exchangeError.error}: ${exchangeError.error_description}`;
 		} else {
-			message = 'Success! You are now authenticated.';
+			const [ introspection ] = await this.oauth.Introspect(url.id).catch(() => [ null ]);
+			message = introspection?.active && introspection.username
+				? `Success! You are now authenticated as ${getAccountName(introspection)}.`
+				: 'Success! You are now authenticated.';
 		}
 
 		try {
@@ -547,7 +551,7 @@ ${formatAPIError(error, LinkBlockType.AngleBrackets)}`;
 
 		text
 			= introspection && introspection.active && introspection.username
-				? `Logged in as ${introspection?.username}.`
+				? `Logged in as ${getAccountName(introspection)}.`
 				: 'Not logged in.';
 
 		return {

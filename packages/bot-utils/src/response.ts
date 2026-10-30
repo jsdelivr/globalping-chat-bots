@@ -187,6 +187,10 @@ export const responseText = (
 	};
 };
 
+export const getAccountName = (introspection: IntrospectionResponse) => introspection.organization
+	? `${introspection.organization} (via ${introspection.username})`
+	: introspection.username;
+
 export function getLimitsOutput (
 	limits: LimitsResponse,
 	introspection: IntrospectionResponse,
@@ -194,7 +198,7 @@ export function getLimitsOutput (
 	let text = '';
 
 	if (limits.rateLimit.measurements.create.type === CreateLimitType.User) {
-		text = `Authentication: token (${introspection?.username || ''})\n\n`;
+		text = `Authentication: token, ${getAccountName(introspection)}\n\n`;
 	} else {
 		text = 'Authentication: workspace\n\n';
 	}
