@@ -877,6 +877,62 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 			});
 		});
 
+		it('should handle the command - auth status of an org token', async () => {
+			const payload = {
+				channel_id: 'C07QAK46BGU',
+				user_id: 'U07QAK46BGU',
+				command: '/globalping',
+				text: 'auth status',
+			} as SlashCommand;
+			const context = {
+				teamId: 'T07QAK46BGU',
+			} as Context & StringIndexed;
+
+			vi.spyOn(slackClientMock.conversations, 'info').mockResolvedValue({} as any);
+
+			vi.spyOn(slackClientMock.users, 'info').mockResolvedValue({
+				user: {
+					is_owner: true,
+				},
+			} as any);
+
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([
+				{
+					active: true,
+					username: 'john',
+					organization: 'john-org',
+				},
+				null,
+			]);
+
+			await bot.HandleCommand({
+				ack: ackMock,
+				respond: respondMock,
+				client: slackClientMock,
+				payload,
+				context,
+			} as any);
+
+			expect(ackMock).toHaveBeenCalledTimes(1);
+
+			expect(slackClientMock.conversations.info).toHaveBeenCalledWith({
+				channel: payload.channel_id,
+			});
+
+			expect(slackClientMock.users.info).toHaveBeenCalledWith({
+				user: payload.user_id,
+			});
+
+			expect(oauthClientMock.Introspect).toHaveBeenCalledWith(context.teamId);
+
+			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
+				text: 'Logged in as john-org (via john).',
+				user: payload.user_id,
+				channel: payload.channel_id,
+				thread_ts: undefined,
+			});
+		});
+
 		it('should handle the command - auth status anonymous', async () => {
 			const payload = {
 				channel_id: 'C07QAK46BGU',
@@ -987,7 +1043,7 @@ ${expectedResponse.results[0].result.rawOutput.trim()}
 
 			expect(oauthClientMock.Introspect).toHaveBeenCalledWith(context.teamId);
 
-			const expectedText = `Authentication: token (john)
+			const expectedText = `Authentication: token, john
 
 Creating measurements:
  - 500 tests per hour
@@ -2410,6 +2466,8 @@ ${expectedResponse.results[0].result.rawOutput}
 				installation,
 			});
 
+			vi.spyOn(oauthClientMock, 'Introspect').mockResolvedValue([{ active: true, username: 'john', organization: 'john-org' }, null ]);
+
 			const req = {
 				url: `/oauth/callback?code=${code}&state=${authorizeSession.callbackVerifier}:${installationId}`,
 			} as ParamsIncomingMessage;
@@ -2437,7 +2495,7 @@ ${expectedResponse.results[0].result.rawOutput}
 
 			expect(slackClientMock.chat.postEphemeral).toHaveBeenCalledWith({
 				token: installation?.bot?.token,
-				text: 'Success! You are now authenticated.',
+				text: 'Success! You are now authenticated as john-org (via john).',
 				user: userId,
 				channel: channelId,
 				thread_ts: threadTs,
